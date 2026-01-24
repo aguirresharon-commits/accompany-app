@@ -1,11 +1,13 @@
-import { useState } from 'react'
+import { AppProvider } from './context/AppContext'
 
 function App() {
   return (
-    <div className="app">
-      <h1>Acompañar</h1>
-      <p>Setup inicial completado</p>
-    </div>
+    <AppProvider>
+      <div className="app">
+        <h1>Acompañar</h1>
+        <p>Sistema de estado y persistencia configurado</p>
+      </div>
+    </AppProvider>
   )
 }
 
