@@ -1,0 +1,92 @@
+/* Menú de filtros y controles - Monochrome */
+.tasks-menu {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.tasks-menu__filters {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex: 1;
+}
+
+.tasks-menu__filter-btn,
+.tasks-menu__reset-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xs);
+  min-width: 36px;
+  min-height: 36px;
+  background: transparent;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--border-radius-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  font-family: inherit;
+}
+
+.tasks-menu__filter-btn:hover,
+.tasks-menu__reset-btn:hover {
+  color: var(--color-text-primary);
+  border-color: var(--color-text-primary);
+  background: var(--color-gray-111);
+}
+
+.tasks-menu__filter-btn--active {
+  color: var(--color-text-primary);
+  border-color: var(--color-text-primary);
+  background: var(--color-gray-111);
+}
+
+.tasks-menu__reset-btn {
+  color: var(--color-text-secondary);
+  border-color: var(--color-gray-444);
+}
+
+.tasks-menu__reset-btn:hover {
+  color: var(--color-text-primary);
+  border-color: var(--color-text-primary);
+  background: var(--color-gray-111);
+}
+
+.tasks-menu__icon {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  flex-shrink: 0;
+}
+
+/* Responsive para móvil */
+@media (max-width: 768px) {
+  .tasks-menu {
+    padding: var(--spacing-sm) var(--spacing-md);
+    flex-wrap: wrap;
+  }
+
+  .tasks-menu__filters {
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+  }
+
+  .tasks-menu__filter-btn,
+  .tasks-menu__reset-btn {
+    padding: 8px;
+    min-width: 32px;
+    min-height: 32px;
+  }
+
+  .tasks-menu__icon {
+    width: 16px;
+    height: 16px;
+  }
+}

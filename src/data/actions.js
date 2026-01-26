@@ -1,261 +1,89 @@
-// Datos de acciones mínimas organizadas por nivel de energía
-// Basado en "Hábitos Atómicos" - Enfoque empático y sin culpa
+// Niveles de energía: Baja, Media, Alta
+// Tareas por nivel según objetivo de cada uno
 
-// Constantes para niveles de energía
 export const ENERGY_LEVELS = {
-  veryLow: {
-    key: 'veryLow',
-    label: 'Muy baja',
+  baja: {
+    key: 'baja',
+    label: 'Baja',
     emoji: '🔴',
-    description: 'Bloqueo / pozo'
+    description: 'Cansancio, bloqueo, cabeza quemada',
+    objective: 'Activar sin exigir',
+    messages: ['Solo esto.', 'Nada más.']
   },
-  low: {
-    key: 'low',
-    label: 'Baja-media',
-    emoji: '🟡',
-    description: 'Un poco más de margen'
-  },
-  medium: {
-    key: 'medium',
+  media: {
+    key: 'media',
     label: 'Media',
-    emoji: '🟢',
-    description: 'Ya estás en movimiento'
+    emoji: '🟡',
+    description: 'Funcional, pero sin épica',
+    objective: 'Progreso real, corto',
+    messages: ['Un paso alcanza.', 'No todo. Esto.', 'Hacelo simple.']
   },
-  good: {
-    key: 'good',
-    label: 'Buena',
-    emoji: '🔵',
-    description: 'Tienes energía'
+  alta: {
+    key: 'alta',
+    label: 'Alta',
+    emoji: '🟢',
+    description: 'Ganas, foco, impulso',
+    objective: 'Canalizar sin quemar',
+    messages: ['Aprovechá el impulso.', 'Ahora es buen momento.']
   }
 }
 
 export const ENERGY_LEVEL_KEYS = Object.keys(ENERGY_LEVELS)
 
-// Estructura de acciones por nivel de energía
 export const actionsByEnergyLevel = {
-  // 🔴 Energía muy baja - Para días donde cuesta todo
-  // Objetivo: mover el cuerpo apenas
-  veryLow: [
-    {
-      id: 'very-low-001',
-      text: 'Tomá un vaso de agua',
-      level: 'veryLow',
-      category: 'movimiento',
-      canReduce: false
-    },
-    {
-      id: 'very-low-002',
-      text: 'Abrí la ventana',
-      level: 'veryLow',
-      category: 'movimiento',
-      canReduce: false
-    },
-    {
-      id: 'very-low-003',
-      text: 'Cambiáte de ropa',
-      level: 'veryLow',
-      category: 'movimiento',
-      canReduce: false
-    },
-    {
-      id: 'very-low-004',
-      text: 'Laváte la cara',
-      level: 'veryLow',
-      category: 'higiene',
-      canReduce: false
-    },
-    {
-      id: 'very-low-005',
-      text: 'Ordená una sola cosa',
-      level: 'veryLow',
-      category: 'orden',
-      canReduce: true,
-      reducedText: 'Tocá un objeto y movelo un poco'
-    },
-    {
-      id: 'very-low-006',
-      text: 'Tirate agua en las manos',
-      level: 'veryLow',
-      category: 'movimiento',
-      canReduce: false
-    },
-    {
-      id: 'very-low-007',
-      text: 'Parate y sentate de nuevo',
-      level: 'veryLow',
-      category: 'movimiento',
-      canReduce: false
-    },
-    {
-      id: 'very-low-008',
-      text: 'Respirar profundo 3 veces',
-      level: 'veryLow',
-      category: 'bienestar',
-      canReduce: true,
-      reducedText: 'Respirar profundo 1 vez'
-    }
+  baja: [
+    { id: 'baja-001', text: 'Respirá profundo una vez', emoji: '🫁', level: 'baja', category: 'activar', canReduce: false },
+    { id: 'baja-002', text: 'Sentate derecho 10 segundos', emoji: '🪑', level: 'baja', category: 'activar', canReduce: false },
+    { id: 'baja-003', text: 'Tomá un vaso de agua', emoji: '💧', level: 'baja', category: 'activar', canReduce: false },
+    { id: 'baja-004', text: 'Abrí una ventana', emoji: '🪟', level: 'baja', category: 'activar', canReduce: false },
+    { id: 'baja-005', text: 'Mirá alrededor y nombrá 3 cosas', emoji: '👀', level: 'baja', category: 'activar', canReduce: false },
+    { id: 'baja-006', text: 'Ordená solo lo que tenés enfrente', emoji: '📦', level: 'baja', category: 'orden', canReduce: false },
+    { id: 'baja-007', text: 'Estirá brazos y cuello', emoji: '🙆', level: 'baja', category: 'activar', canReduce: false },
+    { id: 'baja-008', text: 'Borrá una notificación', emoji: '📱', level: 'baja', category: 'digital', canReduce: false },
+    { id: 'baja-009', text: 'Cerrá una app', emoji: '✖️', level: 'baja', category: 'digital', canReduce: false },
+    { id: 'baja-010', text: 'Cambiá de posición', emoji: '🔄', level: 'baja', category: 'activar', canReduce: false },
+    { id: 'baja-011', text: 'Prepará un café o una infusión', emoji: '☕', level: 'baja', category: 'activar', canReduce: false },
+    { id: 'baja-012', text: 'Poné una canción que te guste', emoji: '🎵', level: 'baja', category: 'activar', canReduce: false },
+    { id: 'baja-013', text: 'Lavate la cara', emoji: '🧼', level: 'baja', category: 'activar', canReduce: false },
+    { id: 'baja-014', text: 'Abrí la ventana y dejá entrar aire', emoji: '🪟', level: 'baja', category: 'activar', canReduce: false },
+    { id: 'baja-015', text: 'Tocá algo frío o caliente (una taza, agua, una mesa)', emoji: '🖐️', level: 'baja', category: 'activar', canReduce: false }
   ],
-
-  // 🟡 Energía baja-media - Para cuando hay un poco más de margen
-  // Objetivo: generar sensación de control
-  low: [
-    {
-      id: 'low-001',
-      text: 'Ordená la cama',
-      level: 'low',
-      category: 'orden',
-      canReduce: true,
-      reducedText: 'Acomodá solo la almohada'
-    },
-    {
-      id: 'low-002',
-      text: 'Juntá la ropa del piso',
-      level: 'low',
-      category: 'orden',
-      canReduce: true,
-      reducedText: 'Juntá solo una prenda'
-    },
-    {
-      id: 'low-003',
-      text: 'Laváte los dientes',
-      level: 'low',
-      category: 'higiene',
-      canReduce: false
-    },
-    {
-      id: 'low-004',
-      text: 'Ducha rápida',
-      level: 'low',
-      category: 'higiene',
-      canReduce: true,
-      reducedText: 'Laváte solo las manos y la cara'
-    },
-    {
-      id: 'low-005',
-      text: 'Sacá la basura',
-      level: 'low',
-      category: 'orden',
-      canReduce: true,
-      reducedText: 'Juntá solo un papel o envase'
-    },
-    {
-      id: 'low-006',
-      text: 'Caminá 2 minutos',
-      level: 'low',
-      category: 'movimiento',
-      canReduce: true,
-      reducedText: 'Parate y caminá hasta la puerta'
-    },
-    {
-      id: 'low-007',
-      text: 'Limpiá una superficie chica',
-      level: 'low',
-      category: 'orden',
-      canReduce: true,
-      reducedText: 'Pasá un trapo por un lugar pequeño'
-    },
-    {
-      id: 'low-008',
-      text: 'Prepará algo simple para comer',
-      level: 'low',
-      category: 'bienestar',
-      canReduce: true,
-      reducedText: 'Tomá un vaso de agua o una fruta'
-    }
+  media: [
+    { id: 'media-001', text: 'Ordená una parte del cuarto', emoji: '🧹', level: 'media', category: 'orden', canReduce: false },
+    { id: 'media-002', text: 'Respondé un mensaje pendiente', emoji: '💬', level: 'media', category: 'comunicación', canReduce: false },
+    { id: 'media-003', text: 'Escribí una sola frase', emoji: '✏️', level: 'media', category: 'escritura', canReduce: false },
+    { id: 'media-004', text: 'Lavá una taza', emoji: '☕', level: 'media', category: 'higiene', canReduce: false },
+    { id: 'media-005', text: 'Armá una lista de 3 cosas', emoji: '📋', level: 'media', category: 'organizar', canReduce: false },
+    { id: 'media-006', text: 'Caminá 2 minutos', emoji: '🚶', level: 'media', category: 'movimiento', canReduce: false },
+    { id: 'media-007', text: 'Leé una página', emoji: '📖', level: 'media', category: 'lectura', canReduce: false },
+    { id: 'media-008', text: 'Abrí ese archivo (solo abrirlo)', emoji: '📂', level: 'media', category: 'digital', canReduce: false },
+    { id: 'media-009', text: 'Guardá algo fuera de lugar', emoji: '📦', level: 'media', category: 'orden', canReduce: false },
+    { id: 'media-010', text: 'Prepará lo que vas a usar después', emoji: '🎯', level: 'media', category: 'organizar', canReduce: false },
+    { id: 'media-011', text: 'Eliminá 5 fotos', emoji: '🖼️', level: 'media', category: 'digital', canReduce: false },
+    { id: 'media-012', text: 'Organizá una carpeta', emoji: '📁', level: 'media', category: 'orden', canReduce: false },
+    { id: 'media-013', text: 'Tomá una ducha corta', emoji: '🚿', level: 'media', category: 'higiene', canReduce: false },
+    { id: 'media-014', text: 'Sacá la basura', emoji: '🗑️', level: 'media', category: 'orden', canReduce: false },
+    { id: 'media-015', text: 'Abrí una nota y escribí cómo estás', emoji: '📝', level: 'media', category: 'escritura', canReduce: false },
+    { id: 'media-016', text: 'Dejá algo listo para más tarde', emoji: '⏰', level: 'media', category: 'organizar', canReduce: false }
   ],
-
-  // 🟢 Energía media - Cuando la persona ya está en movimiento
-  // Objetivo: sostener el ritmo, no exigir
-  medium: [
-    {
-      id: 'medium-001',
-      text: 'Ordená una parte del cuarto',
-      level: 'medium',
-      category: 'orden',
-      canReduce: true,
-      reducedText: 'Ordená solo el escritorio o la cama'
-    },
-    {
-      id: 'medium-002',
-      text: 'Salí a caminar 5 minutos',
-      level: 'medium',
-      category: 'movimiento',
-      canReduce: true,
-      reducedText: 'Salí a caminar 2 minutos'
-    },
-    {
-      id: 'medium-003',
-      text: 'Dejá lista la ropa de mañana',
-      level: 'medium',
-      category: 'organización',
-      canReduce: true,
-      reducedText: 'Pensá qué ropa usarás mañana'
-    },
-    {
-      id: 'medium-004',
-      text: 'Lavá algunos platos',
-      level: 'medium',
-      category: 'orden',
-      canReduce: true,
-      reducedText: 'Lavá solo un plato o vaso'
-    },
-    {
-      id: 'medium-005',
-      text: 'Organizá una mochila o bolso',
-      level: 'medium',
-      category: 'organización',
-      canReduce: true,
-      reducedText: 'Revisá qué hay en tu mochila'
-    },
-    {
-      id: 'medium-006',
-      text: 'Escribí una lista corta de pendientes',
-      level: 'medium',
-      category: 'organización',
-      canReduce: true,
-      reducedText: 'Pensá en una cosa que tenés que hacer'
-    }
-  ],
-
-  // 🔵 Energía buena - No es el foco principal, pero existe
-  // La app nunca asume que este nivel es constante
-  good: [
-    {
-      id: 'good-001',
-      text: 'Ordená el cuarto',
-      level: 'good',
-      category: 'orden',
-      canReduce: true,
-      reducedText: 'Ordená una parte del cuarto'
-    },
-    {
-      id: 'good-002',
-      text: 'Salí a caminar 10-15 minutos',
-      level: 'good',
-      category: 'movimiento',
-      canReduce: true,
-      reducedText: 'Salí a caminar 5 minutos'
-    },
-    {
-      id: 'good-003',
-      text: 'Avanzá 10 minutos en una tarea pendiente',
-      level: 'good',
-      category: 'productividad',
-      canReduce: true,
-      reducedText: 'Avanzá 5 minutos en una tarea'
-    },
-    {
-      id: 'good-004',
-      text: 'Organizá el día siguiente',
-      level: 'good',
-      category: 'organización',
-      canReduce: true,
-      reducedText: 'Pensá en 2-3 cosas para mañana'
-    }
+  alta: [
+    { id: 'alta-001', text: 'Terminá una tarea pendiente', emoji: '✅', level: 'alta', category: 'avanzar', canReduce: false },
+    { id: 'alta-002', text: 'Ordená un espacio completo', emoji: '🧹', level: 'alta', category: 'orden', canReduce: false },
+    { id: 'alta-003', text: 'Avanzá 20 minutos', emoji: '⏱️', level: 'alta', category: 'avanzar', canReduce: false },
+    { id: 'alta-004', text: 'Escribí sin parar 5 min', emoji: '✏️', level: 'alta', category: 'escritura', canReduce: false },
+    { id: 'alta-005', text: 'Entrená / movete fuerte', emoji: '💪', level: 'alta', category: 'movimiento', canReduce: false },
+    { id: 'alta-006', text: 'Limpiá algo que evitabas', emoji: '🧽', level: 'alta', category: 'orden', canReduce: false },
+    { id: 'alta-007', text: 'Planificá mañana', emoji: '📅', level: 'alta', category: 'organizar', canReduce: false },
+    { id: 'alta-008', text: 'Tomá una decisión pendiente', emoji: '⚖️', level: 'alta', category: 'avanzar', canReduce: false },
+    { id: 'alta-009', text: 'Cerrá un tema abierto', emoji: '🔒', level: 'alta', category: 'avanzar', canReduce: false },
+    { id: 'alta-010', text: 'Empezá eso que venís postergando', emoji: '🚀', level: 'alta', category: 'avanzar', canReduce: false },
+    { id: 'alta-011', text: 'Creá algo (texto, idea, boceto)', emoji: '💡', level: 'alta', category: 'crear', canReduce: false },
+    { id: 'alta-012', text: 'Ayudá a alguien', emoji: '🤝', level: 'alta', category: 'social', canReduce: false },
+    { id: 'alta-013', text: 'Dejá algo listo para tu yo de mañana', emoji: '🌅', level: 'alta', category: 'organizar', canReduce: false },
+    { id: 'alta-014', text: 'Revisá y cerrá pendientes', emoji: '✅', level: 'alta', category: 'avanzar', canReduce: false }
   ]
 }
 
-// Función para obtener todas las acciones de un nivel específico
 export const getActionsByLevel = (level) => {
   if (!ENERGY_LEVEL_KEYS.includes(level)) {
     console.warn(`Nivel de energía inválido: ${level}`)
@@ -264,81 +92,66 @@ export const getActionsByLevel = (level) => {
   return actionsByEnergyLevel[level] || []
 }
 
-// Función para obtener una acción aleatoria de un nivel
-export const getRandomAction = (level) => {
+export const getRandomAction = (level, excludeCompletedIds = []) => {
   const actions = getActionsByLevel(level)
-  if (actions.length === 0) {
-    return null
-  }
-  const randomIndex = Math.floor(Math.random() * actions.length)
-  return actions[randomIndex]
+  const availableActions = actions.filter(
+    (action) => !excludeCompletedIds.includes(action.id)
+  )
+  if (availableActions.length === 0) return null
+  const i = Math.floor(Math.random() * availableActions.length)
+  return availableActions[i]
 }
 
-// Función para obtener la versión reducida de una acción
+export const getRandomMessageForLevel = (level) => {
+  const info = ENERGY_LEVELS[level]
+  if (!info || !info.messages || info.messages.length === 0) return 'Dale.'
+  const i = Math.floor(Math.random() * info.messages.length)
+  return info.messages[i]
+}
+
 export const getReducedAction = (action) => {
   if (!action) return null
-  
   if (action.canReduce && action.reducedText) {
     return {
       ...action,
       text: action.reducedText,
-      isReduced: true
+      isReduced: true,
+      emoji: action.emoji,
+      parentId: action.id,
+      originalId: action.originalId || action.id
     }
   }
-  
-  // Si no tiene versión reducida, buscar una acción del nivel anterior
-  const currentLevelIndex = ENERGY_LEVEL_KEYS.indexOf(action.level)
-  if (currentLevelIndex > 0) {
-    const lowerLevel = ENERGY_LEVEL_KEYS[currentLevelIndex - 1]
-    const lowerLevelActions = getActionsByLevel(lowerLevel)
-    if (lowerLevelActions.length > 0) {
-      return getRandomAction(lowerLevel)
-    }
+  const idx = ENERGY_LEVEL_KEYS.indexOf(action.level)
+  if (idx > 0) {
+    const lower = ENERGY_LEVEL_KEYS[idx - 1]
+    const lowerActions = getActionsByLevel(lower)
+    if (lowerActions.length > 0) return getRandomAction(lower)
   }
-  
-  // Si no hay nivel anterior, retornar la misma acción
   return action
 }
 
-// Función para obtener una acción similar (misma categoría o nivel cercano)
-export const getSimilarAction = (currentAction, level = null) => {
+export const getSimilarAction = (currentAction, level = null, excludeCompletedIds = []) => {
   if (!currentAction) return null
-  
   const targetLevel = level || currentAction.level
   const actions = getActionsByLevel(targetLevel)
-  
-  // Intentar encontrar una acción de la misma categoría
-  const sameCategory = actions.find(
-    action => action.category === currentAction.category && action.id !== currentAction.id
+  const available = actions.filter((a) => !excludeCompletedIds.includes(a.id))
+  const sameCategory = available.find(
+    (a) => a.category === currentAction.category && a.id !== currentAction.id
   )
-  
-  if (sameCategory) {
-    return sameCategory
-  }
-  
-  // Si no hay de la misma categoría, retornar una aleatoria del mismo nivel
-  return getRandomAction(targetLevel)
+  if (sameCategory) return sameCategory
+  return getRandomAction(targetLevel, excludeCompletedIds)
 }
 
-// Función para obtener el siguiente nivel de energía (para escalado progresivo)
 export const getNextEnergyLevel = (currentLevel) => {
-  const currentIndex = ENERGY_LEVEL_KEYS.indexOf(currentLevel)
-  if (currentIndex < ENERGY_LEVEL_KEYS.length - 1) {
-    return ENERGY_LEVEL_KEYS[currentIndex + 1]
-  }
-  return currentLevel // Ya está en el nivel más alto
+  const i = ENERGY_LEVEL_KEYS.indexOf(currentLevel)
+  if (i < ENERGY_LEVEL_KEYS.length - 1) return ENERGY_LEVEL_KEYS[i + 1]
+  return currentLevel
 }
 
-// Función para obtener el nivel anterior de energía
 export const getPreviousEnergyLevel = (currentLevel) => {
-  const currentIndex = ENERGY_LEVEL_KEYS.indexOf(currentLevel)
-  if (currentIndex > 0) {
-    return ENERGY_LEVEL_KEYS[currentIndex - 1]
-  }
-  return currentLevel // Ya está en el nivel más bajo
+  const i = ENERGY_LEVEL_KEYS.indexOf(currentLevel)
+  if (i > 0) return ENERGY_LEVEL_KEYS[i - 1]
+  return currentLevel
 }
 
-// Función para obtener información completa de un nivel
-export const getEnergyLevelInfo = (level) => {
-  return ENERGY_LEVELS[level] || null
-}
+export const getEnergyLevelInfo = (level) => ENERGY_LEVELS[level] || null

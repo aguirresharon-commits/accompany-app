@@ -1,4 +1,4 @@
-/* Estilos para el selector de nivel de energía */
+/* Estilos para el selector de nivel de energía - Monochrome */
 .energy-selector {
   width: 100%;
   max-width: 600px;
@@ -13,16 +13,17 @@
 
 .energy-selector__header {
   text-align: center;
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: var(--spacing-2xl);
   width: 100%;
 }
 
 .energy-selector__title {
   font-size: var(--font-size-2xl);
-  font-weight: 600;
+  font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
   line-height: 1.3;
+  letter-spacing: -0.02em;
 }
 
 .energy-selector__subtitle {
@@ -31,6 +32,7 @@
   line-height: 1.6;
   max-width: 500px;
   margin: 0 auto;
+  font-weight: var(--font-weight-regular);
 }
 
 .energy-selector__levels {
@@ -44,12 +46,12 @@
 .energy-selector__level-button {
   width: 100%;
   padding: var(--spacing-lg);
-  background: rgba(139, 92, 246, 0.1);
-  border: 2px solid rgba(139, 92, 246, 0.3);
-  border-radius: var(--border-radius-lg);
+  background: transparent;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--border-radius-sm);
   color: var(--color-text-primary);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: border-color var(--transition-base), opacity var(--transition-base);
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
@@ -58,26 +60,25 @@
 }
 
 .energy-selector__level-button:hover {
-  background: rgba(139, 92, 246, 0.2);
-  border-color: var(--color-purple-medium);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+  border-color: var(--color-white);
+  opacity: 1;
 }
 
 .energy-selector__level-button:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 6px rgba(139, 92, 246, 0.15);
+  opacity: 0.9;
 }
 
 .energy-selector__level-button:focus {
-  outline: 2px solid var(--color-purple-medium);
+  outline: 1px solid var(--color-white);
   outline-offset: 2px;
 }
 
 .energy-selector__emoji {
-  font-size: 2.5rem;
+  font-size: 2rem;
   line-height: 1;
   flex-shrink: 0;
+  filter: grayscale(100%);
+  opacity: 0.9;
 }
 
 .energy-selector__level-info {
@@ -89,14 +90,14 @@
 
 .energy-selector__level-label {
   font-size: var(--font-size-lg);
-  font-weight: 600;
+  font-weight: var(--font-weight-medium);
   color: var(--color-text-primary);
 }
 
 .energy-selector__level-description {
   font-size: var(--font-size-base);
   color: var(--color-text-secondary);
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
 }
 
 /* Responsive para móvil */
@@ -108,12 +109,16 @@
     padding-bottom: var(--spacing-xl);
   }
 
+  .energy-selector__header {
+    margin-bottom: var(--spacing-xl);
+  }
+
   .energy-selector__title {
     font-size: var(--font-size-xl);
   }
 
   .energy-selector__subtitle {
-    font-size: 0.9375rem;
+    font-size: var(--font-size-base);
   }
 
   .energy-selector__levels {
@@ -122,10 +127,11 @@
 
   .energy-selector__level-button {
     padding: var(--spacing-md);
+    min-height: 44px;
   }
 
   .energy-selector__emoji {
-    font-size: 2rem;
+    font-size: 1.75rem;
   }
 
   .energy-selector__level-label {
@@ -133,14 +139,14 @@
   }
 
   .energy-selector__level-description {
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
   }
 }
 
 /* Estados de hover en móvil (solo si no es touch) */
 @media (hover: none) {
   .energy-selector__level-button:hover {
-    transform: none;
-    box-shadow: none;
+    border-color: var(--color-border);
+    opacity: 1;
   }
 }

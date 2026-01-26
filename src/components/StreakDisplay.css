@@ -1,0 +1,75 @@
+/* Estilos para el display de racha - Monochrome discreto */
+.streak-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  opacity: 0.7;
+  transition: opacity var(--transition-base);
+}
+
+.streak-display:hover {
+  opacity: 1;
+}
+
+.streak-display__message {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  margin: 0;
+  text-align: center;
+  line-height: 1.4;
+  font-weight: var(--font-weight-regular);
+}
+
+.streak-display__pause-button {
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: var(--border-radius-sm);
+  transition: opacity var(--transition-base);
+  opacity: 0.6;
+  font-family: inherit;
+  line-height: 1;
+  min-width: 1.5rem;
+  min-height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.streak-display__pause-button:hover {
+  opacity: 1;
+  color: var(--color-text-primary);
+}
+
+.streak-display__pause-button:focus {
+  outline: 1px solid var(--color-white);
+  outline-offset: 2px;
+}
+
+.streak-display__pause-button:active {
+  transform: scale(0.95);
+}
+
+/* Responsive para móvil */
+@media (max-width: 768px) {
+  .streak-display {
+    padding: var(--spacing-xs);
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .streak-display__message {
+    font-size: 0.8125rem;
+  }
+
+  .streak-display__pause-button {
+    font-size: 0.6875rem;
+    min-width: 1.25rem;
+    min-height: 1.25rem;
+  }
+}

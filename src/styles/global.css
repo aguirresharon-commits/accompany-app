@@ -1,49 +1,51 @@
-/* Variables CSS - Colores morados oscuros */
+/* Variables CSS - Paleta monochrome estricta */
 :root {
-  /* Colores principales */
-  --color-bg-primary: #1a0a2e;
-  --color-bg-secondary: #16213e;
-  --color-bg-gradient-start: #1a0a2e;
-  --color-bg-gradient-end: #16213e;
+  /* Colores - Solo negro, blanco y grises sutiles */
+  --color-black: #000000;
+  --color-white: #FFFFFF;
+  --color-gray-111: #111111;
+  --color-gray-222: #222222;
+  --color-gray-444: #444444;
+  --color-gray-888: #888888;
   
-  /* Colores de acento morado */
-  --color-purple-dark: #6B46C1;
-  --color-purple-medium: #8B5CF6;
-  --color-purple-light: #A78BFA;
-  --color-purple-soft: #7C3AED;
+  /* Aplicación de colores */
+  --color-bg-primary: var(--color-black);
+  --color-bg-secondary: var(--color-gray-111);
+  --color-text-primary: var(--color-white);
+  --color-text-secondary: var(--color-gray-888);
+  --color-text-muted: var(--color-gray-444);
+  --color-border: var(--color-gray-222);
   
-  /* Textos */
-  --color-text-primary: #ffffff;
-  --color-text-secondary: #e5e7eb;
-  --color-text-muted: #9ca3af;
-  
-  /* Estados de energía (colores de referencia) */
-  --color-energy-very-low: #ef4444;    /* 🔴 Rojo */
-  --color-energy-low: #f59e0b;         /* 🟡 Amarillo */
-  --color-energy-medium: #10b981;      /* 🟢 Verde */
-  --color-energy-good: #3b82f6;        /* 🔵 Azul */
-  
-  /* Espaciado */
+  /* Espaciado generoso */
   --spacing-xs: 0.5rem;
   --spacing-sm: 1rem;
-  --spacing-md: 1.5rem;
-  --spacing-lg: 2rem;
-  --spacing-xl: 3rem;
+  --spacing-md: 2rem;
+  --spacing-lg: 3rem;
+  --spacing-xl: 4rem;
+  --spacing-2xl: 6rem;
   
   /* Bordes */
-  --border-radius-sm: 0.5rem;
-  --border-radius-md: 1rem;
-  --border-radius-lg: 1.5rem;
+  --border-radius-sm: 8px;
+  --border-radius-md: 12px;
+  --border-radius-lg: 0px; /* Recto para cards principales */
+  --border-width: 1px;
   
-  /* Tipografía */
-  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  --font-size-base: 1rem;
-  --font-size-lg: 1.25rem;
-  --font-size-xl: 1.5rem;
-  --font-size-2xl: 2rem;
-  --font-size-3xl: 2.5rem;
+  /* Tipografía - Inter/system-ui */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', 'Roboto', sans-serif;
+  --font-size-base: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 24px;
+  --font-size-2xl: 32px;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 600;
+  
+  /* Sombras muy sutiles */
+  --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.12);
+  
+  /* Transiciones */
+  --transition-fast: 100ms ease;
+  --transition-base: 200ms ease;
 }
 
 /* Reset y estilos base */
@@ -61,17 +63,19 @@ html, body {
 body {
   font-family: var(--font-family);
   font-size: var(--font-size-base);
+  font-weight: var(--font-weight-regular);
   color: var(--color-text-primary);
-  background: linear-gradient(135deg, var(--color-bg-gradient-start) 0%, var(--color-bg-gradient-end) 100%);
-  background-attachment: fixed;
+  background: var(--color-bg-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  line-height: 1.5;
 }
 
 #root {
   min-height: 100vh;
   width: 100%;
+  background: var(--color-bg-primary);
 }
 
 /* Estilos base para la app */
@@ -87,44 +91,76 @@ body {
 
 /* Utilidades para texto */
 h1, h2, h3, h4, h5, h6 {
-  font-weight: 600;
+  font-weight: var(--font-weight-bold);
   line-height: 1.2;
   color: var(--color-text-primary);
+  letter-spacing: -0.02em;
+}
+
+h1 {
+  font-size: var(--font-size-2xl);
+}
+
+h2 {
+  font-size: var(--font-size-xl);
 }
 
 p {
   line-height: 1.6;
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-regular);
 }
 
-/* Botones base (se personalizarán en componentes) */
+/* Botones base */
 button {
   font-family: inherit;
   font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
   border: none;
   cursor: pointer;
-  transition: all 0.2s ease;
-  border-radius: var(--border-radius-md);
+  transition: opacity var(--transition-base), transform var(--transition-fast);
+  background: transparent;
+  color: var(--color-text-primary);
 }
 
 button:focus {
-  outline: 2px solid var(--color-purple-medium);
+  outline: 1px solid var(--color-white);
   outline-offset: 2px;
 }
 
 button:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
+}
+
+button:hover:not(:disabled) {
+  opacity: 0.8;
+}
+
+button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* Transición entrada: pantalla principal tras bienvenida */
+.app-main {
+  animation: app-main-enter 0.45s ease forwards;
+}
+
+@keyframes app-main-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 /* Responsive */
 @media (max-width: 768px) {
   :root {
-    --font-size-base: 0.9375rem;
-    --font-size-lg: 1.125rem;
-    --font-size-xl: 1.25rem;
-    --font-size-2xl: 1.75rem;
-    --font-size-3xl: 2rem;
+    --font-size-base: 16px;
+    --font-size-lg: 18px;
+    --font-size-xl: 24px;
+    --font-size-2xl: 28px;
+    --spacing-md: 1.5rem;
+    --spacing-lg: 2rem;
+    --spacing-xl: 3rem;
   }
   
   .app {

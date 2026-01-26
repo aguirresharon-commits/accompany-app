@@ -1,10 +1,10 @@
-# Acompañar
+# Control
 
 Una compañera empática para construir hábitos sin culpa.
 
 ## Descripción
 
-Acompañar es una web app basada en "Hábitos Atómicos" de James Clear, diseñada para ser una compañera empática para personas con bloqueos mentales, ansiedad o culpa al mantener hábitos.
+Control es una web app basada en "Hábitos Atómicos" de James Clear, diseñada para ser una compañera empática para personas con bloqueos mentales, ansiedad o culpa al mantener hábitos.
 
 ## Características
 
@@ -12,7 +12,8 @@ Acompañar es una web app basada en "Hábitos Atómicos" de James Clear, diseña
 - Acciones mínimas adaptadas a tu nivel de energía
 - Diseño minimalista en tonos morados oscuros
 - Persistencia local con localStorage
-- Responsive y PWA-ready
+- Responsive y PWA-ready (instalable en móvil)
+- Rachas humanas que no se rompen
 
 ## Desarrollo
 
@@ -55,4 +56,121 @@ src/
   utils/        # Funciones auxiliares
   data/         # Datos estáticos
   styles/       # Estilos globales
+public/
+  manifest.json  # Configuración PWA
+  icon-*.svg     # Iconos de la app
 ```
+
+## PWA (Progressive Web App)
+
+La app está configurada como PWA y puede instalarse en dispositivos móviles:
+
+- **En Android/Chrome**: Abre el menú y selecciona "Agregar a pantalla de inicio"
+- **En iOS/Safari**: Toca el botón de compartir y selecciona "Agregar a pantalla de inicio"
+
+Una vez instalada, la app funcionará como una app nativa con:
+- Icono en la pantalla de inicio
+- Modo standalone (sin barra del navegador)
+- Persistencia de datos local
+
+## Deploy
+
+### Vercel (Recomendado)
+
+1. **Instalar Vercel CLI** (opcional):
+   ```bash
+   npm i -g vercel
+   ```
+
+2. **Deploy desde la terminal**:
+   ```bash
+   vercel
+   ```
+   O simplemente conecta tu repositorio en [vercel.com](https://vercel.com)
+
+3. **Configuración automática**:
+   - Vercel detecta automáticamente Vite
+   - Build Command: `npm run build`
+   - Output Directory: `dist`
+   - Install Command: `npm install`
+
+### Netlify
+
+1. **Instalar Netlify CLI** (opcional):
+   ```bash
+   npm i -g netlify-cli
+   ```
+
+2. **Deploy desde la terminal**:
+   ```bash
+   netlify deploy --prod
+   ```
+
+3. **O desde la web**:
+   - Conecta tu repositorio en [netlify.com](https://netlify.com)
+   - Build command: `npm run build`
+   - Publish directory: `dist`
+
+### Variables de entorno
+
+No se requieren variables de entorno para esta app (todo funciona en el cliente).
+
+## Pruebas
+
+### Flujo completo de la app
+
+1. **Selección de nivel de energía**:
+   - Abrir la app
+   - Ver selector con 4 niveles
+   - Seleccionar un nivel
+   - Verificar que se guarde en localStorage
+
+2. **Pantalla de acción**:
+   - Ver acción aleatoria del nivel seleccionado
+   - Ver botones "Hacerlo más chico" y "Listo"
+   - Ver racha (si existe)
+
+3. **Reducir acción**:
+   - Click en "Hacerlo más chico"
+   - Verificar que la acción se reduzca o cambie a nivel anterior
+
+4. **Completar acción**:
+   - Click en "Listo"
+   - Ver mensaje "Hecho" y pregunta "¿Seguimos o alcanza por hoy?"
+
+5. **Flujo "una más"**:
+   - Click en "Una más"
+   - Ver nueva acción similar
+   - Completar varias acciones
+   - Verificar que todas se guarden
+
+6. **Terminar por hoy**:
+   - Después de completar una acción, click en "Terminar por hoy"
+   - Ver mensaje "Con esto alcanza. Mañana seguimos."
+
+7. **Rachas**:
+   - Completar acciones en días consecutivos
+   - Verificar que la racha se incremente
+   - Probar pausar/reanudar racha
+   - Verificar que la racha no se rompe fácilmente
+
+8. **Persistencia**:
+   - Completar acciones
+   - Recargar la página
+   - Verificar que el estado se mantenga
+   - Verificar en DevTools → Application → Local Storage
+
+### Pruebas en diferentes dispositivos
+
+- **Desktop**: Chrome, Firefox, Safari, Edge
+- **Móvil**: Chrome (Android), Safari (iOS)
+- **Tablet**: Verificar responsive en diferentes tamaños
+
+### Verificación PWA
+
+1. Build de producción: `npm run build`
+2. Preview: `npm run preview`
+3. En Chrome DevTools:
+   - Application → Manifest (verificar configuración)
+   - Lighthouse → PWA (auditoría)
+4. En móvil: Instalar como PWA y verificar funcionamiento

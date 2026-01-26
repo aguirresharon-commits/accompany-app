@@ -1,0 +1,80 @@
+.task-list-view {
+  padding: var(--spacing-md);
+  padding-bottom: 100px;
+}
+
+.task-list-view__title {
+  font-size: var(--font-size-base);
+  color: var(--color-text-muted);
+  margin-bottom: var(--spacing-md);
+  font-weight: var(--font-weight-regular);
+}
+
+.task-list-view__empty {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-base);
+  text-align: center;
+  padding: var(--spacing-xl);
+}
+
+.task-list-view__list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.task-list-view__item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  border: 1px solid var(--color-gray-222);
+  border-radius: var(--border-radius-sm);
+  overflow: hidden;
+}
+
+.task-list-view__item-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: transparent;
+  border: none;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--transition-base);
+}
+
+.task-list-view__item-btn:hover {
+  background: var(--color-gray-111);
+}
+
+.task-list-view__emoji {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.task-list-view__reduce-btn {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-left: 1px solid var(--color-gray-222);
+  color: var(--color-text-muted);
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.task-list-view__reduce-btn:hover {
+  color: var(--color-white);
+  background: var(--color-gray-111);
+}

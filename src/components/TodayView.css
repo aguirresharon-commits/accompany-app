@@ -1,0 +1,78 @@
+/* Vista Hoy - tareas completadas hoy, minimalista oscuro */
+.today-view {
+  width: 100%;
+  padding: var(--spacing-md) 0;
+  padding-bottom: 100px;
+}
+
+.today-view__title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  margin: 0 0 var(--spacing-lg);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.today-view__empty {
+  font-size: var(--font-size-base);
+  color: var(--color-text-muted);
+  text-align: center;
+  padding: var(--spacing-xl);
+}
+
+.today-view__list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.today-view__item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) 0;
+  border-bottom: 1px solid var(--color-gray-222);
+}
+
+.today-view__item:last-child {
+  border-bottom: none;
+}
+
+.today-view__check {
+  flex-shrink: 0;
+  color: var(--color-gray-444);
+  font-size: 0.9rem;
+}
+
+.today-view__emoji {
+  flex-shrink: 0;
+  font-size: 1.1rem;
+  opacity: 0.7;
+}
+
+.today-view__content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.today-view__text {
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+}
+
+.today-view__time {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.today-view__note {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  margin: 6px 0 0;
+  font-style: italic;
+}

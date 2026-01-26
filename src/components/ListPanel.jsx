@@ -1,0 +1,58 @@
+// Panel slide-up desde abajo: Elegí algo posible. + lista de tareas
+import { useEffect } from 'react'
+import TaskListView from './TaskListView'
+import './ListPanel.css'
+
+const ListPanel = ({
+  isOpen,
+  onClose,
+  currentEnergyLevel,
+  completedActions,
+  allActions,
+  onSelectTask,
+}) => {
+  useEffect(() => {
+    if (!isOpen) return
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', handleEscape)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      window.removeEventListener('keydown', handleEscape)
+      document.body.style.overflow = ''
+    }
+  }, [isOpen, onClose])
+
+  if (!isOpen) return null
+
+  const handleSelect = (action) => {
+    onSelectTask(action)
+    onClose()
+  }
+
+  return (
+    <div className="list-panel" role="dialog" aria-label="Elegir tarea">
+      <button
+        type="button"
+        className="list-panel__backdrop"
+        onClick={onClose}
+        aria-label="Cerrar"
+      />
+      <div className="list-panel__drawer">
+        <div className="list-panel__handle" aria-hidden="true" />
+        <p className="list-panel__title">Elegí algo posible.</p>
+        <div className="list-panel__content">
+          <TaskListView
+            currentEnergyLevel={currentEnergyLevel}
+            completedActions={completedActions}
+            allActions={allActions}
+            onSelectTask={handleSelect}
+          />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default ListPanel

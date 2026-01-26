@@ -1,0 +1,183 @@
+/* Modal elegir minutos - minimalista, oscuro */
+.time-select {
+  position: fixed;
+  inset: 0;
+  z-index: 350;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.time-select__backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  border: none;
+  cursor: pointer;
+  pointer-events: auto;
+  animation: time-select-backdrop 0.25s ease forwards;
+}
+
+@keyframes time-select-backdrop {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.time-select__sheet {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  background: var(--color-gray-111);
+  border-radius: 20px 20px 0 0;
+  padding: var(--spacing-md);
+  padding-bottom: max(env(safe-area-inset-bottom), var(--spacing-lg));
+  pointer-events: auto;
+  animation: time-select-slide 0.3s ease forwards;
+  border-top: 1px solid var(--color-gray-222);
+}
+
+@keyframes time-select-slide {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.time-select__title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  margin: 0 0 var(--spacing-sm);
+  text-align: center;
+}
+
+.time-select__emoji {
+  display: block;
+  text-align: center;
+  font-size: 1.25rem;
+  opacity: 0.7;
+  margin-bottom: var(--spacing-xs);
+}
+
+.time-select__task {
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+  text-align: center;
+  margin: 0 0 var(--spacing-lg);
+  line-height: 1.4;
+}
+
+.time-select__presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  justify-content: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.time-select__btn {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  font-family: inherit;
+  border-radius: 16px;
+  cursor: pointer;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.time-select__btn:hover {
+  color: rgba(255, 255, 255, 0.9);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.time-select__btn--active {
+  color: var(--color-white);
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.time-select__custom {
+  margin-bottom: var(--spacing-md);
+}
+
+.time-select__label {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  margin-bottom: var(--spacing-xs);
+}
+
+.time-select__input {
+  width: 100%;
+  max-width: 120px;
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--font-size-base);
+  font-family: inherit;
+  color: var(--color-white);
+  background: var(--color-black);
+  border: 1px solid var(--color-gray-222);
+  border-radius: var(--border-radius-sm);
+}
+
+.time-select__input:focus {
+  outline: none;
+  border-color: var(--color-gray-444);
+}
+
+.time-select__actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  justify-content: flex-end;
+  margin-top: var(--spacing-md);
+}
+
+.time-select__secondary,
+.time-select__primary {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  font-family: inherit;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.time-select__secondary {
+  background: transparent;
+  border: 1px solid var(--color-gray-444);
+  color: var(--color-text-secondary);
+}
+
+.time-select__secondary:hover {
+  color: var(--color-white);
+  border-color: var(--color-gray-888);
+}
+
+.time-select__primary {
+  background: var(--color-white);
+  border: 1px solid var(--color-white);
+  color: var(--color-black);
+}
+
+.time-select__primary:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.time-select__primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.time-select__primary:active:not(:disabled) {
+  transform: scale(0.98);
+}

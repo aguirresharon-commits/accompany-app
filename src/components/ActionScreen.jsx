@@ -1,0 +1,354 @@
+// Pantalla principal: Control, Empezar (TimeSelect → Timer → TimerEnd), Completadas hoy, menú inferior
+import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useAppState } from '../hooks/useAppState'
+import { getRandomAction, getReducedAction } from '../data/actions'
+import { getTodayDate, formatTime } from '../utils/storage'
+import { playCompleteSound, playStartSound } from '../utils/sounds'
+import Loader from './Loader'
+import BottomMenu from './BottomMenu'
+import ListPanel from './ListPanel'
+import SettingsView from './SettingsView'
+import CalendarView from './CalendarView'
+import NotePrompt from './NotePrompt'
+import TimeSelectModal from './TimeSelectModal'
+import TimerView from './TimerView'
+import TimerEndModal from './TimerEndModal'
+import AddNoteModal from './AddNoteModal'
+import './ActionScreen.css'
+
+const ActionScreen = () => {
+  const {
+    currentEnergyLevel,
+    setCurrentAction,
+    completeAction,
+    setEnergyLevel,
+    resetAllActions,
+    completedActions,
+    allActions,
+    addSessionNote,
+    sounds,
+    setSoundsEnabled,
+  } = useAppState()
+
+  const [displayedAction, setDisplayedAction] = useState(null)
+  const [activeTab, setActiveTab] = useState('progress')
+  const [listPanelOpen, setListPanelOpen] = useState(false)
+  const [notePromptAction, setNotePromptAction] = useState(null)
+  const [completionOverlay, setCompletionOverlay] = useState(null)
+  const [noteSavedOverlay, setNoteSavedOverlay] = useState(null)
+
+  // Flujo Empezar: timeSelect → timer → timerEnd
+  const [empezarFlow, setEmpezarFlow] = useState(null)
+  const [empezarAction, setEmpezarAction] = useState(null)
+  const [empezarMinutes, setEmpezarMinutes] = useState(10)
+  const [addNoteOpen, setAddNoteOpen] = useState(false)
+
+  const selectNewAction = useCallback(() => {
+    if (!currentEnergyLevel) return
+    const today = getTodayDate()
+    const completedIds = [
+      ...completedActions.filter((ca) => ca.date === today).map((ca) => ca.actionId),
+      ...(allActions || []).filter((a) => a.date === today && a.completed).map((a) => a.actionId),
+    ]
+    const uniqueCompletedIds = [...new Set(completedIds)]
+    const action = getRandomAction(currentEnergyLevel, uniqueCompletedIds) || getRandomAction(currentEnergyLevel)
+    if (action) {
+      setDisplayedAction(action)
+      setCurrentAction(action)
+    }
+  }, [currentEnergyLevel, completedActions, allActions, setCurrentAction])
+
+  useEffect(() => {
+    if (currentEnergyLevel && !displayedAction) {
+      selectNewAction()
+    }
+  }, [currentEnergyLevel, displayedAction, selectNewAction])
+
+  const completedActionsToday = useMemo(() => {
+    const today = getTodayDate()
+    return [...completedActions]
+      .filter((c) => c.date === today)
+      .sort((a, b) => (b.completedAt || '').localeCompare(a.completedAt || ''))
+  }, [completedActions])
+
+  const handleEmpezar = () => {
+    if (!displayedAction) return
+    const soundsConfig = sounds || { enabled: true, volume: 0.3 }
+    playStartSound(soundsConfig.enabled, soundsConfig.volume)
+    setListPanelOpen(false)
+    setEmpezarAction(displayedAction)
+    setEmpezarFlow('timeSelect')
+  }
+
+  const handleTimeSelect = (minutes) => {
+    setEmpezarMinutes(minutes)
+    setEmpezarFlow('timer')
+  }
+
+  const handleTimeSelectClose = () => {
+    setEmpezarFlow(null)
+    setEmpezarAction(null)
+  }
+
+  const handleTimerEnd = () => {
+    setEmpezarFlow('timerEnd')
+  }
+
+  const handleTimerStop = () => {
+    setEmpezarFlow('timerEnd')
+  }
+
+  const handleTimerEndMarkComplete = () => {
+    if (!empezarAction) return
+    setNotePromptAction(empezarAction)
+    setEmpezarFlow(null)
+    setEmpezarAction(null)
+  }
+
+  const handleTimerEndContinue = () => {
+    setEmpezarMinutes((m) => m + 5)
+    setEmpezarFlow('timer')
+  }
+
+  const handleTimerEndAddNote = () => {
+    setAddNoteOpen(true)
+  }
+
+  const handleTimerEndClose = () => {
+    setEmpezarFlow(null)
+    setEmpezarAction(null)
+  }
+
+  const handleAddNoteConfirm = (note) => {
+    if (empezarAction && note && String(note).trim()) {
+      addSessionNote(empezarAction, note)
+      setNoteSavedOverlay('Anotado.')
+      setTimeout(() => setNoteSavedOverlay(null), 1000)
+    }
+    setAddNoteOpen(false)
+  }
+
+  const handleAddNoteSkip = () => {
+    setAddNoteOpen(false)
+  }
+
+  const handleReduce = () => {
+    if (!displayedAction) return
+    const reduced = getReducedAction(displayedAction)
+    if (reduced && reduced.text !== displayedAction.text) {
+      setDisplayedAction(reduced)
+      setCurrentAction(reduced)
+    }
+  }
+
+  const handleMarkComplete = () => {
+    if (!displayedAction) return
+    setNotePromptAction(displayedAction)
+  }
+
+  const handleNoteConfirm = (note) => {
+    if (!notePromptAction) return
+    completeAction(notePromptAction, note)
+    const soundsConfig = sounds || { enabled: true, volume: 0.3 }
+    playCompleteSound(soundsConfig.enabled, soundsConfig.volume)
+    setNotePromptAction(null)
+    setCompletionOverlay('Listo.')
+    setTimeout(() => {
+      setCompletionOverlay(null)
+      selectNewAction()
+    }, 1000)
+  }
+
+  const handleNoteSkip = () => {
+    if (!notePromptAction) return
+    completeAction(notePromptAction)
+    const soundsConfig = sounds || { enabled: true, volume: 0.3 }
+    playCompleteSound(soundsConfig.enabled, soundsConfig.volume)
+    setNotePromptAction(null)
+    setCompletionOverlay('Listo.')
+    setTimeout(() => {
+      setCompletionOverlay(null)
+      selectNewAction()
+    }, 1000)
+  }
+
+  const handleSelectTask = (action) => {
+    setDisplayedAction(action)
+    setCurrentAction(action)
+    setListPanelOpen(false)
+    setActiveTab('progress')
+  }
+
+  const handleListPanelToggle = () => {
+    setListPanelOpen((v) => !v)
+  }
+
+  const handleRestartDay = () => {
+    if (window.confirm('¿Reiniciar el día? Todas las tareas se marcarán como no completadas.')) {
+      resetAllActions()
+      selectNewAction()
+      setListPanelOpen(false)
+      setActiveTab('progress')
+    }
+  }
+
+  if (!currentEnergyLevel) return null
+  if (activeTab === 'progress' && !displayedAction) return <Loader isLoading={true} />
+
+  const soundsConfig = sounds || { enabled: true, volume: 0.3 }
+
+  return (
+    <div className="action-screen">
+      <header className="action-screen__header">
+        <h1 className="action-screen__brand">CONTROL</h1>
+      </header>
+
+      <main className="action-screen__main">
+        {activeTab === 'progress' && (
+          <div className="action-screen__progress">
+            <div className="action-screen__card">
+              <div className="action-screen__task">
+                {displayedAction?.emoji && (
+                  <span className="action-screen__emoji">{displayedAction.emoji}</span>
+                )}
+                <p className="action-screen__action-text">{displayedAction?.text}</p>
+              </div>
+              <div className="action-screen__buttons">
+                <button
+                  className="action-screen__button action-screen__button--secondary"
+                  onClick={handleReduce}
+                  aria-label="Hacerlo más chico"
+                >
+                  Hacerlo más chico
+                </button>
+                <button
+                  className="action-screen__button action-screen__button--primary"
+                  onClick={handleEmpezar}
+                  aria-label="Empezar"
+                >
+                  Empezar
+                </button>
+              </div>
+            </div>
+            {completedActionsToday.length > 0 && (
+              <section className="action-screen__today" aria-label="Completadas hoy">
+                <h2 className="action-screen__today-title">Completadas hoy</h2>
+                <ul className="action-screen__today-list">
+                  {completedActionsToday.map((c) => (
+                    <li key={`${c.actionId}-${c.completedAt}`} className="action-screen__today-item">
+                      <span className="action-screen__today-check" aria-hidden="true">✓</span>
+                      {c.emoji && <span className="action-screen__today-emoji">{c.emoji}</span>}
+                      <div className="action-screen__today-content">
+                        <span className="action-screen__today-text">{c.actionText}</span>
+                        <span className="action-screen__today-time">{formatTime(c.completedAt)}</span>
+                        {c.note && (
+                          <p className="action-screen__today-note">{c.note}</p>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'today' && (
+          <CalendarView />
+        )}
+
+        {activeTab === 'settings' && (
+          <SettingsView
+            currentEnergyLevel={currentEnergyLevel}
+            onEnergyLevelChange={setEnergyLevel}
+            onRestartDay={handleRestartDay}
+            soundsEnabled={soundsConfig.enabled}
+            onSoundsEnabledChange={setSoundsEnabled}
+          />
+        )}
+      </main>
+
+      <ListPanel
+        isOpen={listPanelOpen}
+        onClose={() => setListPanelOpen(false)}
+        currentEnergyLevel={currentEnergyLevel}
+        completedActions={completedActions}
+        allActions={allActions}
+        onSelectTask={handleSelectTask}
+      />
+
+      {empezarFlow === 'timeSelect' && (
+        <TimeSelectModal
+          action={empezarAction}
+          onSelect={handleTimeSelect}
+          onClose={handleTimeSelectClose}
+        />
+      )}
+
+      {empezarFlow === 'timer' && (
+        <TimerView
+          action={empezarAction}
+          minutes={empezarMinutes}
+          onEnd={handleTimerEnd}
+          onStop={handleTimerStop}
+          soundsEnabled={soundsConfig.enabled}
+          soundsVolume={soundsConfig.volume}
+        />
+      )}
+
+      {empezarFlow === 'timerEnd' && (
+        <TimerEndModal
+          action={empezarAction}
+          onMarkComplete={handleTimerEndMarkComplete}
+          onContinueMore={handleTimerEndContinue}
+          onAddNote={handleTimerEndAddNote}
+          onClose={handleTimerEndClose}
+        />
+      )}
+
+      {addNoteOpen && (
+        <AddNoteModal
+          action={empezarAction}
+          onConfirm={handleAddNoteConfirm}
+          onSkip={handleAddNoteSkip}
+        />
+      )}
+
+      {completionOverlay && (
+        <div className="action-screen__overlay action-screen__overlay--completion" role="status" aria-live="polite">
+          <span className="action-screen__overlay-check" aria-hidden="true">✓</span>
+        <p className="action-screen__overlay-text">{completionOverlay}</p>
+        </div>
+      )}
+
+      {noteSavedOverlay && (
+        <div className="action-screen__overlay action-screen__overlay--note-saved" role="status" aria-live="polite">
+          <p className="action-screen__overlay-text">{noteSavedOverlay}</p>
+        </div>
+      )}
+
+      {notePromptAction && (
+        <NotePrompt
+          action={notePromptAction}
+          onConfirm={handleNoteConfirm}
+          onSkip={handleNoteSkip}
+        />
+      )}
+
+      {!empezarFlow && (
+        <BottomMenu
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          onMarkComplete={activeTab === 'progress' ? handleMarkComplete : undefined}
+          listPanelOpen={listPanelOpen}
+          onListPanelToggle={handleListPanelToggle}
+          onCloseListPanel={() => setListPanelOpen(false)}
+          soundsEnabled={soundsConfig.enabled}
+          soundsVolume={soundsConfig.volume}
+        />
+      )}
+    </div>
+  )
+}
+
+export default ActionScreen

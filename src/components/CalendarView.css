@@ -1,0 +1,186 @@
+/* Vista Calendario: mensual, minimalista, oscuro */
+.calendar-view {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: var(--spacing-md);
+  padding-bottom: 120px;
+}
+
+.calendar-view__header {
+  text-align: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+.calendar-view__title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-white);
+  margin: 0 0 var(--spacing-sm);
+  text-transform: capitalize;
+}
+
+.calendar-view__presence {
+  font-size: var(--font-size-base);
+  color: var(--color-text-muted);
+  margin: 0;
+  font-weight: var(--font-weight-regular);
+}
+
+.calendar-view__controls {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-md);
+}
+
+.calendar-view__nav {
+  padding: var(--spacing-xs) var(--spacing-md);
+  font-size: var(--font-size-lg);
+  color: rgba(255, 255, 255, 0.6);
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.calendar-view__nav:hover {
+  color: rgba(255, 255, 255, 0.9);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.calendar-view__calendar {
+  width: 100%;
+}
+
+.calendar-view__weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-xs);
+}
+
+.calendar-view__weekday {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-medium);
+  padding: var(--spacing-xs) 0;
+}
+
+.calendar-view__days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: var(--spacing-xs);
+}
+
+.calendar-view__day {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  position: relative;
+  padding: 0;
+  font-family: inherit;
+}
+
+.calendar-view__day:hover {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.calendar-view__day:active {
+  transform: scale(0.95);
+}
+
+.calendar-view__day--empty {
+  cursor: default;
+  border: none;
+}
+
+.calendar-view__day--empty:hover {
+  background: transparent;
+  border: none;
+}
+
+.calendar-view__day--completed {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.calendar-view__day--completed:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Días pasados: estado visual sutil */
+.calendar-view__day--past {
+  opacity: 0.4;
+}
+
+.calendar-view__day--past:hover {
+  opacity: 0.5;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.calendar-view__day-number {
+  font-size: var(--font-size-base);
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: var(--font-weight-regular);
+  position: relative;
+  z-index: 1;
+}
+
+.calendar-view__day--completed .calendar-view__day-number {
+  color: var(--color-white);
+}
+
+/* Días pasados: número en gris más apagado */
+.calendar-view__day--past .calendar-view__day-number {
+  color: var(--color-gray-444);
+}
+
+.calendar-view__day--past.calendar-view__day--completed .calendar-view__day-number {
+  color: var(--color-gray-888);
+}
+
+.calendar-view__day-mark {
+  position: absolute;
+  bottom: 4px;
+  width: 4px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+}
+
+/* Marca en días pasados: más apagada */
+.calendar-view__day--past .calendar-view__day-mark {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .calendar-view {
+    padding: var(--spacing-sm);
+    padding-bottom: 110px;
+  }
+
+  .calendar-view__title {
+    font-size: var(--font-size-lg);
+  }
+
+  .calendar-view__day-number {
+    font-size: 0.9rem;
+  }
+
+  .calendar-view__day-mark {
+    width: 3px;
+    height: 3px;
+    bottom: 3px;
+  }
+}

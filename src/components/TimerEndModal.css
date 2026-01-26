@@ -1,0 +1,115 @@
+/* Modal fin de tiempo: mensaje humano + opciones, sin culpa */
+.timer-end {
+  position: fixed;
+  inset: 0;
+  z-index: 360;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.timer-end__backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  border: none;
+  cursor: pointer;
+  pointer-events: auto;
+  animation: timer-end-backdrop 0.25s ease forwards;
+}
+
+@keyframes timer-end-backdrop {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.timer-end__sheet {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  background: var(--color-gray-111);
+  border-radius: 20px 20px 0 0;
+  padding: var(--spacing-lg);
+  padding-bottom: max(env(safe-area-inset-bottom), var(--spacing-xl));
+  pointer-events: auto;
+  animation: timer-end-slide 0.3s ease forwards;
+  border-top: 1px solid var(--color-gray-222);
+}
+
+@keyframes timer-end-slide {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.timer-end__message {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-white);
+  text-align: center;
+  margin: 0 0 var(--spacing-lg);
+}
+
+.timer-end__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.timer-end__btn {
+  width: 100%;
+  padding: var(--spacing-md) var(--spacing-lg);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  font-family: inherit;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.timer-end__btn:active {
+  transform: scale(0.99);
+}
+
+.timer-end__btn--primary {
+  background: var(--color-white);
+  color: var(--color-black);
+  border-color: var(--color-white);
+}
+
+.timer-end__btn--primary:hover {
+  opacity: 0.95;
+}
+
+.timer-end__btn--secondary {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.85);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.timer-end__btn--secondary:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--color-white);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.timer-end__btn--ghost {
+  background: transparent;
+  color: var(--color-text-muted);
+  border-color: var(--color-gray-222);
+  margin-top: var(--spacing-xs);
+}
+
+.timer-end__btn--ghost:hover {
+  color: var(--color-text-secondary);
+  border-color: var(--color-gray-444);
+}

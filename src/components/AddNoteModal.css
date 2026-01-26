@@ -1,0 +1,123 @@
+/* Modal agregar nota (sesión) - minimalista, oscuro */
+.add-note-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 370;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.add-note-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  border: none;
+  cursor: pointer;
+  pointer-events: auto;
+  animation: add-note-backdrop 0.25s ease forwards;
+}
+
+@keyframes add-note-backdrop {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.add-note-modal__sheet {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  background: var(--color-gray-111);
+  border-radius: 16px 16px 0 0;
+  padding: var(--spacing-md);
+  padding-bottom: max(env(safe-area-inset-bottom), var(--spacing-lg));
+  pointer-events: auto;
+  animation: add-note-slide 0.3s ease forwards;
+  border-top: 1px solid var(--color-gray-222);
+}
+
+@keyframes add-note-slide {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.add-note-modal__title {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--spacing-sm);
+  font-weight: var(--font-weight-regular);
+}
+
+.add-note-modal__input {
+  width: 100%;
+  min-height: 64px;
+  padding: var(--spacing-sm) var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  font-size: var(--font-size-base);
+  font-family: inherit;
+  color: var(--color-white);
+  background: var(--color-black);
+  border: 1px solid var(--color-gray-222);
+  border-radius: var(--border-radius-sm);
+  resize: vertical;
+  transition: border-color var(--transition-base);
+}
+
+.add-note-modal__input::placeholder {
+  color: var(--color-gray-444);
+}
+
+.add-note-modal__input:focus {
+  outline: none;
+  border-color: var(--color-gray-444);
+}
+
+.add-note-modal__actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  justify-content: flex-end;
+}
+
+.add-note-modal__btn {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  font-family: inherit;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: opacity var(--transition-base), transform var(--transition-fast);
+}
+
+.add-note-modal__btn:active {
+  transform: scale(0.98);
+}
+
+.add-note-modal__btn--skip {
+  background: transparent;
+  border: 1px solid var(--color-gray-444);
+  color: var(--color-text-secondary);
+}
+
+.add-note-modal__btn--skip:hover {
+  color: var(--color-white);
+  border-color: var(--color-gray-888);
+}
+
+.add-note-modal__btn--confirm {
+  background: var(--color-white);
+  border: 1px solid var(--color-white);
+  color: var(--color-black);
+}
+
+.add-note-modal__btn--confirm:hover {
+  opacity: 0.9;
+}

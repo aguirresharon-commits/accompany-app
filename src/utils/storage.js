@@ -1,7 +1,7 @@
 // Utilidades para localStorage
 // Manejo seguro de persistencia local
 
-const STORAGE_KEY = 'acompanar-app-state'
+const STORAGE_KEY = 'control-app-state'
 
 // Verificar si localStorage está disponible
 const isStorageAvailable = () => {
@@ -92,10 +92,13 @@ export const loadKey = (key) => {
   return state[key] || null
 }
 
-// Obtener fecha actual en formato YYYY-MM-DD
+// Obtener fecha actual en formato YYYY-MM-DD (usando fecha local, no UTC)
 export const getTodayDate = () => {
   const now = new Date()
-  return now.toISOString().split('T')[0]
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
 }
 
 // Verificar si una fecha es hoy
@@ -109,5 +112,19 @@ export const isYesterday = (dateString) => {
   if (!dateString) return false
   const yesterday = new Date()
   yesterday.setDate(yesterday.getDate() - 1)
-  return dateString === yesterday.toISOString().split('T')[0]
+  const year = yesterday.getFullYear()
+  const month = String(yesterday.getMonth() + 1).padStart(2, '0')
+  const day = String(yesterday.getDate()).padStart(2, '0')
+  return dateString === `${year}-${month}-${day}`
+}
+
+// Formatear hora HH:mm desde ISO
+export const formatTime = (isoString) => {
+  if (!isoString) return ''
+  try {
+    const d = new Date(isoString)
+    return d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })
+  } catch {
+    return ''
+  }
 }

@@ -1,0 +1,73 @@
+/* Pantalla durante la tarea: temporizador minimalista, no intrusivo */
+.timer-view {
+  position: fixed;
+  inset: 0;
+  z-index: 340;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-black);
+  padding: var(--spacing-md);
+  padding-bottom: 120px;
+}
+
+.timer-view__inner {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-lg);
+  text-align: center;
+}
+
+.timer-view__emoji {
+  font-size: 1.5rem;
+  opacity: 0.6;
+  filter: grayscale(100%);
+}
+
+.timer-view__task {
+  font-size: var(--font-size-base);
+  color: var(--color-text-muted);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.timer-view__countdown {
+  font-size: 3rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-white);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.05em;
+}
+
+.timer-view__hint {
+  font-size: 0.95rem;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.timer-view__stop {
+  padding: var(--spacing-sm) var(--spacing-xl);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  font-family: inherit;
+  border-radius: 20px;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.7);
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  margin-top: var(--spacing-sm);
+}
+
+.timer-view__stop:hover {
+  color: rgba(255, 255, 255, 0.95);
+  border-color: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.timer-view__stop:active {
+  transform: scale(0.98);
+}
