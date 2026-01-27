@@ -61,12 +61,10 @@ export const AppProvider = ({ children }) => {
         }))
       }
       
-      // Reinicio diario: resetear acciones del día anterior
-      // Filtrar acciones completadas solo del día de hoy
-      const completedActionsToday = (savedState.completedActions || []).filter(
-        action => action.date === today
-      )
-      
+      // Mantener todas las acciones completadas (todas las fechas) para el calendario.
+      // La vista de inicio / "Completadas hoy" filtra por date === today; en un día nuevo queda vacía.
+      const completedActions = savedState.completedActions || []
+
       // Resetear acciones de días anteriores en allActions (marcar como no completadas)
       const resetAllActions = (allActions || []).map(action => {
         if (action.date !== today) {
@@ -97,7 +95,7 @@ export const AppProvider = ({ children }) => {
         ...getInitialState(),
         ...savedState,
         currentEnergyLevel: effectiveEnergy,
-        completedActions: completedActionsToday,
+        completedActions,
         allActions: resetAllActions,
         history: cleanedHistory,
         streak: savedState.streak || getInitialState().streak,
@@ -124,12 +122,10 @@ export const AppProvider = ({ children }) => {
     const today = getTodayDate()
     const lastResetDate = state.lastResetDate || today
 
-    // Si cambió el día, resetear acciones y aplicar ajuste silencioso de exigencia si lo hay
+    // Si cambió el día: no borrar el historial de completadas (queda en el calendario).
+    // La lista "Completadas hoy" se filtra por date === today, así que en un día nuevo ya estará vacía.
     if (lastResetDate !== today) {
       setState(prev => {
-        const completedActionsToday = prev.completedActions.filter(
-          action => action.date === today
-        )
         const resetAllActions = prev.allActions.map(action => {
           if (action.date !== today) {
             return { ...action, completed: false, completedAt: undefined }
@@ -144,7 +140,6 @@ export const AppProvider = ({ children }) => {
 
         return {
           ...prev,
-          completedActions: completedActionsToday,
           allActions: resetAllActions,
           lastResetDate: today,
           currentEnergyLevel: nextEnergy,

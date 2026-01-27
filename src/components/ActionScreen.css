@@ -63,6 +63,15 @@
   gap: var(--spacing-sm);
 }
 
+.action-screen__task-meta {
+  font-size: 0.75rem;
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0;
+}
+
 .action-screen__icon {
   display: inline-flex;
   align-items: center;
@@ -439,6 +448,13 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+}
+
+.action-screen__today-meta {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .action-screen__today-text {

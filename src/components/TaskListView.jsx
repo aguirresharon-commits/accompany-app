@@ -40,7 +40,6 @@ const TaskListView = ({
 
   return (
     <div className="task-list-view">
-      <p className="task-list-view__title">Elegí una acción</p>
       <ul className="task-list-view__list">
         {actions.slice(0, 12).map((action) => {
           const canReduce = showReduce(action)

@@ -132,6 +132,13 @@
   gap: 2px;
 }
 
+.day-detail__meta {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
 .day-detail__text {
   font-size: var(--font-size-base);
   color: var(--color-text-primary);

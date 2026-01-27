@@ -2,6 +2,7 @@
 import { useMemo } from 'react'
 import { useAppState } from '../hooks/useAppState'
 import { getTodayDate, formatTime } from '../utils/storage'
+import { getSectionLabel, getEnergyLevelInfo } from '../data/actions'
 import { getTaskIcon } from '../data/iconMap'
 import TaskIcon from './TaskIcon'
 import './TodayView.css'
@@ -36,6 +37,11 @@ const TodayView = () => {
               <TaskIcon iconName={getTaskIcon(c.actionId)} className="today-view__icon" size={20} />
             )}
             <div className="today-view__content">
+              {(c.actionId || c.level) && (
+                <span className="today-view__meta">
+                  {[getSectionLabel((c.actionId || '').split('-')[0]), getEnergyLevelInfo(c.level)?.label].filter(Boolean).join(' · ')}
+                </span>
+              )}
               <span className="today-view__text">{c.actionText}</span>
               <span className="today-view__time">{formatTime(c.completedAt)}</span>
               {c.note && <p className="today-view__note">{c.note}</p>}

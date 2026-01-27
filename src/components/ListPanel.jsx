@@ -1,5 +1,6 @@
-// Panel slide-up desde abajo: Elegí algo posible. + lista de tareas
+// Panel slide-up: aviso del nivel de las tareas + lista filtrada por energía del usuario
 import { useEffect } from 'react'
+import { getEnergyLevelInfo } from '../data/actions'
 import TaskListView from './TaskListView'
 import './ListPanel.css'
 
@@ -31,6 +32,8 @@ const ListPanel = ({
     onClose()
   }
 
+  const levelLabel = getEnergyLevelInfo(currentEnergyLevel)?.label || currentEnergyLevel
+
   return (
     <div className="list-panel" role="dialog" aria-label="Elegir tarea">
       <button
@@ -41,7 +44,7 @@ const ListPanel = ({
       />
       <div className="list-panel__drawer">
         <div className="list-panel__handle" aria-hidden="true" />
-        <p className="list-panel__title">Elegí algo posible.</p>
+        <p className="list-panel__title">Nivel {levelLabel}</p>
         <div className="list-panel__content">
           <TaskListView
             currentEnergyLevel={currentEnergyLevel}

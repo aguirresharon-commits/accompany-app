@@ -2,6 +2,7 @@
 import { useMemo } from 'react'
 import { useAppState } from '../hooks/useAppState'
 import { formatTime } from '../utils/storage'
+import { getSectionLabel, getEnergyLevelInfo } from '../data/actions'
 import { getTaskIcon } from '../data/iconMap'
 import TaskIcon from './TaskIcon'
 import './DayDetailModal.css'
@@ -56,6 +57,11 @@ const DayDetailModal = ({ date, onClose }) => {
                     <TaskIcon iconName={getTaskIcon(task.actionId)} className="day-detail__icon" size={20} />
                   )}
                   <div className="day-detail__content-item">
+                    {(task.actionId || task.level) && (
+                      <span className="day-detail__meta">
+                        {[getSectionLabel((task.actionId || '').split('-')[0]), getEnergyLevelInfo(task.level)?.label].filter(Boolean).join(' · ')}
+                      </span>
+                    )}
                     <span className="day-detail__text">{task.actionText}</span>
                     <span className="day-detail__time">{formatTime(task.completedAt)}</span>
                     {task.note && (

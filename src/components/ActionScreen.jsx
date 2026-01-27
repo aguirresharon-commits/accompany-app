@@ -1,7 +1,7 @@
 // Pantalla principal: Control, Empezar (TimeSelect → Timer → TimerEnd), Completadas hoy, menú inferior
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useAppState } from '../hooks/useAppState'
-import { getRandomAction, getReducedAction, isInstantTask } from '../data/actions'
+import { getRandomAction, getReducedAction, isInstantTask, getSectionLabel, getEnergyLevelInfo } from '../data/actions'
 import { getTodayDate, formatTime } from '../utils/storage'
 import { playStartSound, initAudioContext } from '../utils/sounds'
 import { getTaskIcon } from '../data/iconMap'
@@ -25,6 +25,10 @@ const getRandomCompletionMessage = () =>
 
 const FEELING_OPTIONS = ['Bien', 'Regular', 'Me cuesta hoy']
 
+const CONFIRM_MESSAGES = ['Eso es todo por hoy.', 'Listo.', 'Listo por ahora.']
+const getRandomConfirmMessage = () =>
+  CONFIRM_MESSAGES[Math.floor(Math.random() * CONFIRM_MESSAGES.length)]
+
 const ActionScreen = () => {
   const {
     currentEnergyLevel,
@@ -47,6 +51,7 @@ const ActionScreen = () => {
   const [completionOverlay, setCompletionOverlay] = useState(null) // { message: string, showQuestion?: boolean } | null
   const [completionFeelingWriting, setCompletionFeelingWriting] = useState(false)
   const [completionFeelingText, setCompletionFeelingText] = useState('')
+  const [completionConfirmMessage, setCompletionConfirmMessage] = useState(null) // "Eso es todo por hoy." etc. después de elegir cómo se sintió
   const [noteSavedOverlay, setNoteSavedOverlay] = useState(null)
 
   // Flujo Empezar: timeSelect → timer → timerEnd
@@ -111,8 +116,18 @@ const ActionScreen = () => {
     setCompletionOverlay(null)
     setCompletionFeelingWriting(false)
     setCompletionFeelingText('')
+    setCompletionConfirmMessage(null)
     selectNewAction()
   }, [selectNewAction])
+
+  const showConfirmAndClose = useCallback(
+    (feelingOption = null) => {
+      if (feelingOption) scheduleEnergyForNextDay(feelingOption)
+      setCompletionConfirmMessage(getRandomConfirmMessage())
+      setTimeout(() => closeCompletionAndNext(), 1500)
+    },
+    [scheduleEnergyForNextDay, closeCompletionAndNext]
+  )
 
   const handleEmpezar = async () => {
     if (!displayedAction) return
@@ -262,6 +277,11 @@ const ActionScreen = () => {
           <div className="action-screen__progress">
             <div className="action-screen__card">
               <div className="action-screen__task">
+                {(displayedAction?.section || displayedAction?.level) && (
+                  <p className="action-screen__task-meta" aria-label="Sección y nivel">
+                    {[getSectionLabel(displayedAction.section), getEnergyLevelInfo(displayedAction.level)?.label].filter(Boolean).join(' · ')}
+                  </p>
+                )}
                 {displayedAction?.id && getTaskIcon(displayedAction.id) && (
                   <TaskIcon iconName={getTaskIcon(displayedAction.id)} className="action-screen__icon" size={32} />
                 )}
@@ -319,6 +339,11 @@ const ActionScreen = () => {
                         <TaskIcon iconName={getTaskIcon(c.actionId)} className="action-screen__today-icon" size={20} />
                       )}
                       <div className="action-screen__today-content">
+                        {(c.actionId || c.level) && (
+                          <span className="action-screen__today-meta">
+                            {[getSectionLabel((c.actionId || '').split('-')[0]), getEnergyLevelInfo(c.level)?.label].filter(Boolean).join(' · ')}
+                          </span>
+                        )}
                         <span className="action-screen__today-text">{c.actionText}</span>
                         <span className="action-screen__today-time">{formatTime(c.completedAt)}</span>
                         {c.note && (
@@ -398,63 +423,68 @@ const ActionScreen = () => {
         <div
           className="action-screen__overlay action-screen__overlay--completion"
           role="dialog"
-          aria-labelledby="completion-feeling-title"
+          aria-labelledby={completionConfirmMessage ? undefined : 'completion-feeling-title'}
           aria-live="polite"
         >
           <div className="action-screen__completion-inner">
-            <p className="action-screen__overlay-text action-screen__overlay-text--completion">
-              {completionOverlay.message}
-            </p>
-            {completionOverlay.showQuestion !== false && (
+            {completionConfirmMessage ? (
+              <p className="action-screen__overlay-text action-screen__overlay-text--completion">
+                {completionConfirmMessage}
+              </p>
+            ) : (
               <>
-                <p id="completion-feeling-title" className="action-screen__completion-feeling-label">
-                  ¿Cómo te sentís?
+                <p className="action-screen__overlay-text action-screen__overlay-text--completion">
+                  {completionOverlay.message}
                 </p>
-                {!completionFeelingWriting ? (
-                  <div className="action-screen__completion-feelings">
-                    {FEELING_OPTIONS.map((opt) => (
-                      <button
-                        key={opt}
-                        type="button"
-                        className="action-screen__completion-feeling-btn"
-                        onClick={() => {
-                          scheduleEnergyForNextDay(opt)
-                          closeCompletionAndNext()
-                        }}
-                        aria-label={`Me siento ${opt}`}
-                      >
-                        {opt}
-                      </button>
-                    ))}
-                    <button
-                      type="button"
-                      className="action-screen__completion-question"
-                      onClick={() => setCompletionFeelingWriting(true)}
-                      aria-label="Escribir cómo me siento"
-                    >
-                      Escribir cómo me siento
-                    </button>
-                  </div>
-                ) : (
-                  <div className="action-screen__completion-write">
-                    <textarea
-                      className="action-screen__completion-textarea"
-                      value={completionFeelingText}
-                      onChange={(e) => setCompletionFeelingText(e.target.value)}
-                      placeholder="Ej: tranquilo, con energía, agotado..."
-                      rows={3}
-                      aria-label="Escribir cómo te sentís"
-                      autoFocus
-                    />
-                    <button
-                      type="button"
-                      className="action-screen__completion-done-btn"
-                      onClick={closeCompletionAndNext}
-                      aria-label="Listo"
-                    >
-                      Listo
-                    </button>
-                  </div>
+                {completionOverlay.showQuestion !== false && (
+                  <>
+                    <p id="completion-feeling-title" className="action-screen__completion-feeling-label">
+                      ¿Cómo te sentís?
+                    </p>
+                    {!completionFeelingWriting ? (
+                      <div className="action-screen__completion-feelings">
+                        {FEELING_OPTIONS.map((opt) => (
+                          <button
+                            key={opt}
+                            type="button"
+                            className="action-screen__completion-feeling-btn"
+                            onClick={() => showConfirmAndClose(opt)}
+                            aria-label={`Me siento ${opt}`}
+                          >
+                            {opt}
+                          </button>
+                        ))}
+                        <button
+                          type="button"
+                          className="action-screen__completion-question"
+                          onClick={() => setCompletionFeelingWriting(true)}
+                          aria-label="Escribir cómo me siento"
+                        >
+                          Escribir cómo me siento
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="action-screen__completion-write">
+                        <textarea
+                          className="action-screen__completion-textarea"
+                          value={completionFeelingText}
+                          onChange={(e) => setCompletionFeelingText(e.target.value)}
+                          placeholder="Ej: tranquilo, con energía, agotado..."
+                          rows={3}
+                          aria-label="Escribir cómo te sentís"
+                          autoFocus
+                        />
+                        <button
+                          type="button"
+                          className="action-screen__completion-done-btn"
+                          onClick={() => showConfirmAndClose()}
+                          aria-label="Listo"
+                        >
+                          Listo
+                        </button>
+                      </div>
+                    )}
+                  </>
                 )}
               </>
             )}

@@ -52,7 +52,18 @@ export const taskIconMap = {
   'alta-014': 'check',        // Revisá y cerrá pendientes
 }
 
-// Función helper para obtener el icono de una tarea
+// Icono por defecto según sección (ids tipo "mente-baja-1", "cuerpo-media-2", etc.)
+const SECTION_ICON = {
+  mente: 'book',
+  cuerpo: 'stretch',
+  bienestar: 'coffee',
+  productividad: 'clipboard',
+  social: 'message',
+  otros: 'target'
+}
+
 export const getTaskIcon = (actionId) => {
-  return taskIconMap[actionId] || null
+  if (taskIconMap[actionId]) return taskIconMap[actionId]
+  const section = (actionId || '').split('-')[0]
+  return SECTION_ICON[section] || null
 }

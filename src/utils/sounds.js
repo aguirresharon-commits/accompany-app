@@ -111,31 +111,34 @@ export const playStartSound = async (enabled = true, volume = 0.25) => {
   }
 }
 
-// Sonido de finalización de tiempo: calmado, no alarma
+// Sonido de finalización de tiempo: suave aviso tipo “campanita”, no molesto
 export const playTimerEndSound = async (enabled = true, volume = 0.3) => {
   if (!enabled) return
-  
+
   try {
     const ctx = await getAudioContext()
     if (!ctx) return
-    const oscillator = ctx.createOscillator()
-    const gainNode = ctx.createGain()
-    
-    oscillator.connect(gainNode)
-    gainNode.connect(ctx.destination)
-    
-    // Frecuencia media, descendente suave
-    oscillator.frequency.setValueAtTime(500, ctx.currentTime)
-    oscillator.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.2)
-    
-    // Volumen bajo con fade suave
-    gainNode.gain.setValueAtTime(0, ctx.currentTime)
-    gainNode.gain.linearRampToValueAtTime(volume * 0.5, ctx.currentTime + 0.05)
-    gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25)
-    
-    oscillator.type = 'sine'
-    oscillator.start(ctx.currentTime)
-    oscillator.stop(ctx.currentTime + 0.25)
+
+    const vol = Math.min(1, Math.max(0, volume)) * 0.45
+    const t0 = ctx.currentTime
+
+    // Dos notas suaves (ding-dong) para avisar que terminó el tiempo
+    const playNote = (freq, start, duration) => {
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+      osc.frequency.setValueAtTime(freq, start)
+      osc.type = 'sine'
+      gain.gain.setValueAtTime(0, start)
+      gain.gain.linearRampToValueAtTime(vol, start + 0.02)
+      gain.gain.exponentialRampToValueAtTime(0.001, start + duration)
+      osc.start(start)
+      osc.stop(start + duration)
+    }
+
+    playNote(523, t0, 0.2)           // Do agudo, breve
+    playNote(392, t0 + 0.18, 0.35)   // Sol, un poco más largo
   } catch (e) {
     // Silenciar errores de audio
   }

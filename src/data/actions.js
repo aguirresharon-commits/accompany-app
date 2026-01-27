@@ -1,5 +1,6 @@
 // Niveles de energía: Baja, Media, Alta
-// Tareas por nivel según objetivo de cada uno
+// Tareas por sección (Mente, Cuerpo, Bienestar, Productividad, Social, Otros) y por nivel
+// Cada tarea pertenece a una sola sección y un solo nivel
 
 export const ENERGY_LEVELS = {
   baja: {
@@ -30,97 +31,109 @@ export const ENERGY_LEVELS = {
 
 export const ENERGY_LEVEL_KEYS = Object.keys(ENERGY_LEVELS)
 
-export const actionsByEnergyLevel = {
-  baja: [
-    { id: 'baja-001', text: 'Respirá profundo una vez', emoji: '🫁', level: 'baja', category: 'activar', canReduce: false, duration: 0.5 },
-    { id: 'baja-002', text: 'Sentate derecho 10 segundos', emoji: '🪑', level: 'baja', category: 'activar', canReduce: false, duration: 0.5 },
-    { id: 'baja-003', text: 'Tomá un vaso de agua', emoji: '💧', level: 'baja', category: 'activar', canReduce: false, duration: 1 },
-    { id: 'baja-004', text: 'Abrí una ventana', emoji: '🪟', level: 'baja', category: 'activar', canReduce: false, duration: 0.5 },
-    { id: 'baja-005', text: 'Mirá alrededor y nombrá 3 cosas', emoji: '👀', level: 'baja', category: 'activar', canReduce: false, duration: 1 },
-    { id: 'baja-006', text: 'Ordená solo lo que tenés enfrente', emoji: '📦', level: 'baja', category: 'orden', canReduce: false, duration: 5 },
-    { id: 'baja-007', text: 'Estirá brazos y cuello', emoji: '🙆', level: 'baja', category: 'activar', canReduce: false, duration: 1 },
-    { id: 'baja-008', text: 'Borrá una notificación', emoji: '📱', level: 'baja', category: 'digital', canReduce: false, duration: 0.5 },
-    { id: 'baja-009', text: 'Cerrá una app', emoji: '✖️', level: 'baja', category: 'digital', canReduce: false, duration: 0.5 },
-    { id: 'baja-010', text: 'Cambiá de posición', emoji: '🔄', level: 'baja', category: 'activar', canReduce: false, duration: 0.5 },
-    { id: 'baja-011', text: 'Prepará un café o una infusión', emoji: '☕', level: 'baja', category: 'activar', canReduce: false, duration: 5 },
-    { id: 'baja-012', text: 'Poné una canción que te guste', emoji: '🎵', level: 'baja', category: 'activar', canReduce: false, duration: 1 },
-    { id: 'baja-013', text: 'Lavate la cara', emoji: '🧼', level: 'baja', category: 'activar', canReduce: false, duration: 2 },
-    { id: 'baja-014', text: 'Abrí la ventana y dejá entrar aire', emoji: '🪟', level: 'baja', category: 'activar', canReduce: false, duration: 0.5 },
-    { id: 'baja-015', text: 'Tocá algo frío o caliente (una taza, agua, una mesa)', emoji: '🖐️', level: 'baja', category: 'activar', canReduce: false, duration: 0.5 }
-  ],
-  media: [
-    { id: 'media-001', text: 'Ordená una parte del cuarto', emoji: '🧹', level: 'media', category: 'orden', canReduce: false, duration: 10 },
-    { id: 'media-002', text: 'Respondé un mensaje pendiente', emoji: '💬', level: 'media', category: 'comunicación', canReduce: false, duration: 3 },
-    { id: 'media-003', text: 'Escribí una sola frase', emoji: '✏️', level: 'media', category: 'escritura', canReduce: false, duration: 2 },
-    { id: 'media-004', text: 'Lavá una taza', emoji: '☕', level: 'media', category: 'higiene', canReduce: false, duration: 2 },
-    { id: 'media-005', text: 'Armá una lista de 3 cosas', emoji: '📋', level: 'media', category: 'organizar', canReduce: false, duration: 2 },
-    { id: 'media-006', text: 'Caminá 2 minutos', emoji: '🚶', level: 'media', category: 'movimiento', canReduce: false, duration: 2 },
-    { id: 'media-007', text: 'Leé una página', emoji: '📖', level: 'media', category: 'lectura', canReduce: false, duration: 5 },
-    { id: 'media-008', text: 'Abrí ese archivo (solo abrirlo)', emoji: '📂', level: 'media', category: 'digital', canReduce: false, duration: 1 },
-    { id: 'media-009', text: 'Guardá algo fuera de lugar', emoji: '📦', level: 'media', category: 'orden', canReduce: false, duration: 2 },
-    { id: 'media-010', text: 'Prepará lo que vas a usar después', emoji: '🎯', level: 'media', category: 'organizar', canReduce: false, duration: 5 },
-    { id: 'media-011', text: 'Eliminá 5 fotos', emoji: '🖼️', level: 'media', category: 'digital', canReduce: false, duration: 2 },
-    { id: 'media-012', text: 'Organizá una carpeta', emoji: '📁', level: 'media', category: 'orden', canReduce: false, duration: 5 },
-    { id: 'media-013', text: 'Tomá una ducha corta', emoji: '🚿', level: 'media', category: 'higiene', canReduce: false, duration: 10 },
-    { id: 'media-014', text: 'Sacá la basura', emoji: '🗑️', level: 'media', category: 'orden', canReduce: false, duration: 3 },
-    { id: 'media-015', text: 'Abrí una nota y escribí cómo estás', emoji: '📝', level: 'media', category: 'escritura', canReduce: false, duration: 5 },
-    { id: 'media-016', text: 'Dejá algo listo para más tarde', emoji: '⏰', level: 'media', category: 'organizar', canReduce: false, duration: 5 }
-  ],
-  alta: [
-    { id: 'alta-001', text: 'Terminá una tarea pendiente', emoji: '✅', level: 'alta', category: 'avanzar', canReduce: false, duration: 15 },
-    { id: 'alta-002', text: 'Ordená un espacio completo', emoji: '🧹', level: 'alta', category: 'orden', canReduce: false, duration: 20 },
-    { id: 'alta-003', text: 'Avanzá 20 minutos', emoji: '⏱️', level: 'alta', category: 'avanzar', canReduce: false, duration: 20 },
-    { id: 'alta-004', text: 'Escribí sin parar 5 min', emoji: '✏️', level: 'alta', category: 'escritura', canReduce: false, duration: 5 },
-    { id: 'alta-005', text: 'Entrená / movete fuerte', emoji: '💪', level: 'alta', category: 'movimiento', canReduce: false, duration: 30 },
-    { id: 'alta-006', text: 'Limpiá algo que evitabas', emoji: '🧽', level: 'alta', category: 'orden', canReduce: false, duration: 15 },
-    { id: 'alta-007', text: 'Planificá mañana', emoji: '📅', level: 'alta', category: 'organizar', canReduce: false, duration: 10 },
-    { id: 'alta-008', text: 'Tomá una decisión pendiente', emoji: '⚖️', level: 'alta', category: 'avanzar', canReduce: false, duration: 10 },
-    { id: 'alta-009', text: 'Cerrá un tema abierto', emoji: '🔒', level: 'alta', category: 'avanzar', canReduce: false, duration: 15 },
-    { id: 'alta-010', text: 'Empezá eso que venís postergando', emoji: '🚀', level: 'alta', category: 'avanzar', canReduce: false, duration: 20 },
-    { id: 'alta-011', text: 'Creá algo (texto, idea, boceto)', emoji: '💡', level: 'alta', category: 'crear', canReduce: false, duration: 15 },
-    { id: 'alta-012', text: 'Ayudá a alguien', emoji: '🤝', level: 'alta', category: 'social', canReduce: false, duration: 10 },
-    { id: 'alta-013', text: 'Dejá algo listo para tu yo de mañana', emoji: '🌅', level: 'alta', category: 'organizar', canReduce: false, duration: 10 },
-    { id: 'alta-014', text: 'Revisá y cerrá pendientes', emoji: '✅', level: 'alta', category: 'avanzar', canReduce: false, duration: 15 }
-  ]
+export const SECTIONS = {
+  mente: { key: 'mente', label: 'Mente' },
+  cuerpo: { key: 'cuerpo', label: 'Cuerpo' },
+  bienestar: { key: 'bienestar', label: 'Bienestar' },
+  productividad: { key: 'productividad', label: 'Productividad' },
+  social: { key: 'social', label: 'Social' },
+  otros: { key: 'otros', label: 'Otros' }
 }
 
+export const getSectionLabel = (sectionKey) => {
+  return (SECTIONS[sectionKey] && SECTIONS[sectionKey].label) || ''
+}
+
+// Tareas por sección y nivel. Id único: section-level-n
+const taskList = [
+  // MENTE
+  { id: 'mente-baja-1', text: 'Respirar profundo 3 veces', level: 'baja', section: 'mente', duration: 0.5, canReduce: false },
+  { id: 'mente-baja-2', text: 'Cerrar los ojos 30 segundos', level: 'baja', section: 'mente', duration: 0.5, canReduce: false },
+  { id: 'mente-baja-3', text: 'Nombrar una sensación actual', level: 'baja', section: 'mente', duration: 0.5, canReduce: false },
+  { id: 'mente-media-1', text: 'Pensar una intención', level: 'media', section: 'mente', duration: 2, canReduce: false },
+  { id: 'mente-media-2', text: 'Escribir una frase corta', level: 'media', section: 'mente', duration: 3, canReduce: false },
+  { id: 'mente-media-3', text: 'Leer una página', level: 'media', section: 'mente', duration: 5, canReduce: false },
+  { id: 'mente-alta-1', text: 'Ordenar una idea pendiente', level: 'alta', section: 'mente', duration: 10, canReduce: false },
+  { id: 'mente-alta-2', text: 'Planear algo simple', level: 'alta', section: 'mente', duration: 10, canReduce: false },
+  { id: 'mente-alta-3', text: 'Escribir y soltar una preocupación', level: 'alta', section: 'mente', duration: 10, canReduce: false },
+  // CUERPO
+  { id: 'cuerpo-baja-1', text: 'Estirarse 30 segundos', level: 'baja', section: 'cuerpo', duration: 0.5, canReduce: false },
+  { id: 'cuerpo-baja-2', text: 'Abrir una ventana', level: 'baja', section: 'cuerpo', duration: 0.5, canReduce: false },
+  { id: 'cuerpo-baja-3', text: 'Tomar agua', level: 'baja', section: 'cuerpo', duration: 1, canReduce: false },
+  { id: 'cuerpo-media-1', text: 'Caminar 3 minutos', level: 'media', section: 'cuerpo', duration: 3, canReduce: false },
+  { id: 'cuerpo-media-2', text: 'Hacer 5 sentadillas', level: 'media', section: 'cuerpo', duration: 2, canReduce: false },
+  { id: 'cuerpo-media-3', text: 'Estirar cuello y espalda', level: 'media', section: 'cuerpo', duration: 3, canReduce: false },
+  { id: 'cuerpo-alta-1', text: 'Caminar 10 minutos', level: 'alta', section: 'cuerpo', duration: 10, canReduce: false },
+  { id: 'cuerpo-alta-2', text: 'Salta la soga o hacé cardio durante 5–10 min', level: 'alta', section: 'cuerpo', duration: 8, canReduce: false },
+  { id: 'cuerpo-alta-3', text: 'Ordenar algo físico', level: 'alta', section: 'cuerpo', duration: 10, canReduce: false },
+  // BIENESTAR
+  { id: 'bienestar-baja-1', text: 'Cambiar de posición', level: 'baja', section: 'bienestar', duration: 0.5, canReduce: false },
+  { id: 'bienestar-baja-2', text: 'Mirar algo que calme', level: 'baja', section: 'bienestar', duration: 1, canReduce: false },
+  { id: 'bienestar-baja-3', text: 'Encender luz natural', level: 'baja', section: 'bienestar', duration: 0.5, canReduce: false },
+  { id: 'bienestar-media-1', text: 'Preparar algo caliente', level: 'media', section: 'bienestar', duration: 5, canReduce: false },
+  { id: 'bienestar-media-2', text: 'Ducha corta', level: 'media', section: 'bienestar', duration: 10, canReduce: false },
+  { id: 'bienestar-media-3', text: 'Ordenar un espacio pequeño', level: 'media', section: 'bienestar', duration: 5, canReduce: false },
+  { id: 'bienestar-alta-1', text: 'Mejorar un espacio', level: 'alta', section: 'bienestar', duration: 15, canReduce: false },
+  { id: 'bienestar-alta-2', text: 'Preparar algo simple para mí', level: 'alta', section: 'bienestar', duration: 10, canReduce: false },
+  { id: 'bienestar-alta-3', text: 'Crear un ritual', level: 'alta', section: 'bienestar', duration: 10, canReduce: false },
+  // PRODUCTIVIDAD
+  { id: 'productividad-baja-1', text: 'Abrir una app o archivo', level: 'baja', section: 'productividad', duration: 0.5, canReduce: false },
+  { id: 'productividad-baja-2', text: 'Leer un mensaje pendiente', level: 'baja', section: 'productividad', duration: 1, canReduce: false },
+  { id: 'productividad-baja-3', text: 'Anotar una tarea', level: 'baja', section: 'productividad', duration: 1, canReduce: false },
+  { id: 'productividad-media-1', text: 'Responder un mensaje', level: 'media', section: 'productividad', duration: 3, canReduce: false },
+  { id: 'productividad-media-2', text: 'Completar una tarea corta', level: 'media', section: 'productividad', duration: 5, canReduce: false },
+  { id: 'productividad-media-3', text: 'Organizar una lista', level: 'media', section: 'productividad', duration: 5, canReduce: false },
+  { id: 'productividad-alta-1', text: 'Avanzar 15 minutos', level: 'alta', section: 'productividad', duration: 15, canReduce: false },
+  { id: 'productividad-alta-2', text: 'Resolver un pendiente', level: 'alta', section: 'productividad', duration: 15, canReduce: false },
+  { id: 'productividad-alta-3', text: 'Planificar el día siguiente', level: 'alta', section: 'productividad', duration: 10, canReduce: false },
+  // SOCIAL
+  { id: 'social-baja-1', text: 'Pensar en alguien', level: 'baja', section: 'social', duration: 0.5, canReduce: false },
+  { id: 'social-baja-2', text: 'Leer un mensaje sin responder', level: 'baja', section: 'social', duration: 1, canReduce: false },
+  { id: 'social-baja-3', text: 'Reaccionar a algo', level: 'baja', section: 'social', duration: 0.5, canReduce: false },
+  { id: 'social-media-1', text: 'Mandar un "hola"', level: 'media', section: 'social', duration: 1, canReduce: false },
+  { id: 'social-media-2', text: 'Responder con calma', level: 'media', section: 'social', duration: 3, canReduce: false },
+  { id: 'social-media-3', text: 'Agradecer algo', level: 'media', section: 'social', duration: 1, canReduce: false },
+  { id: 'social-alta-1', text: 'Iniciar una charla', level: 'alta', section: 'social', duration: 10, canReduce: false },
+  { id: 'social-alta-2', text: 'Proponer un plan simple', level: 'alta', section: 'social', duration: 5, canReduce: false },
+  { id: 'social-alta-3', text: 'Llamar a alguien', level: 'alta', section: 'social', duration: 10, canReduce: false },
+  // OTROS
+  { id: 'otros-baja-1', text: 'Detenerse 10 segundos', level: 'baja', section: 'otros', duration: 0.25, canReduce: false },
+  { id: 'otros-baja-2', text: 'Observar alrededor', level: 'baja', section: 'otros', duration: 0.5, canReduce: false },
+  { id: 'otros-baja-3', text: 'No hacer nada un momento', level: 'baja', section: 'otros', duration: 0.5, canReduce: false },
+  { id: 'otros-media-1', text: 'Elegir una cosa y hacerla', level: 'media', section: 'otros', duration: 5, canReduce: false },
+  { id: 'otros-media-2', text: 'Terminar algo mínimo', level: 'media', section: 'otros', duration: 5, canReduce: false },
+  { id: 'otros-media-3', text: 'Preparar lo próximo', level: 'media', section: 'otros', duration: 5, canReduce: false },
+  { id: 'otros-alta-1', text: 'Resolver algo postergado', level: 'alta', section: 'otros', duration: 15, canReduce: false },
+  { id: 'otros-alta-2', text: 'Tomar una decisión chica', level: 'alta', section: 'otros', duration: 10, canReduce: false },
+  { id: 'otros-alta-3', text: 'Cerrar un ciclo', level: 'alta', section: 'otros', duration: 10, canReduce: false }
+]
+
+// Índice por nivel para la selección aleatoria
+export const actionsByEnergyLevel = ENERGY_LEVEL_KEYS.reduce((acc, level) => {
+  acc[level] = taskList.filter((t) => t.level === level)
+  return acc
+}, {})
+
 export const getActionsByLevel = (level) => {
-  if (!ENERGY_LEVEL_KEYS.includes(level)) {
-    console.warn(`Nivel de energía inválido: ${level}`)
-    return []
-  }
+  if (!ENERGY_LEVEL_KEYS.includes(level)) return []
   return actionsByEnergyLevel[level] || []
 }
 
 export const getRandomAction = (level, excludeCompletedIds = []) => {
   const actions = getActionsByLevel(level)
-  const availableActions = actions.filter(
-    (action) => !excludeCompletedIds.includes(action.id)
-  )
-  if (availableActions.length === 0) return null
-  const i = Math.floor(Math.random() * availableActions.length)
-  return availableActions[i]
+  const available = actions.filter((a) => !excludeCompletedIds.includes(a.id))
+  if (available.length === 0) return null
+  return available[Math.floor(Math.random() * available.length)]
 }
 
 export const getRandomMessageForLevel = (level) => {
   const info = ENERGY_LEVELS[level]
-  if (!info || !info.messages || info.messages.length === 0) return 'Dale.'
-  const i = Math.floor(Math.random() * info.messages.length)
-  return info.messages[i]
+  if (!info?.messages?.length) return 'Dale.'
+  return info.messages[Math.floor(Math.random() * info.messages.length)]
 }
 
 export const getReducedAction = (action) => {
   if (!action) return null
-  if (action.canReduce && action.reducedText) {
-    return {
-      ...action,
-      text: action.reducedText,
-      isReduced: true,
-      emoji: action.emoji,
-      parentId: action.id,
-      originalId: action.originalId || action.id
-    }
-  }
   const idx = ENERGY_LEVEL_KEYS.indexOf(action.level)
   if (idx > 0) {
     const lower = ENERGY_LEVEL_KEYS[idx - 1]
@@ -135,30 +148,25 @@ export const getSimilarAction = (currentAction, level = null, excludeCompletedId
   const targetLevel = level || currentAction.level
   const actions = getActionsByLevel(targetLevel)
   const available = actions.filter((a) => !excludeCompletedIds.includes(a.id))
-  const sameCategory = available.find(
-    (a) => a.category === currentAction.category && a.id !== currentAction.id
+  const sameSection = available.find(
+    (a) => a.section === currentAction.section && a.id !== currentAction.id
   )
-  if (sameCategory) return sameCategory
-  return getRandomAction(targetLevel, excludeCompletedIds)
+  return sameSection || getRandomAction(targetLevel, excludeCompletedIds)
 }
 
 export const getNextEnergyLevel = (currentLevel) => {
   const i = ENERGY_LEVEL_KEYS.indexOf(currentLevel)
-  if (i < ENERGY_LEVEL_KEYS.length - 1) return ENERGY_LEVEL_KEYS[i + 1]
-  return currentLevel
+  return i < ENERGY_LEVEL_KEYS.length - 1 ? ENERGY_LEVEL_KEYS[i + 1] : currentLevel
 }
 
 export const getPreviousEnergyLevel = (currentLevel) => {
   const i = ENERGY_LEVEL_KEYS.indexOf(currentLevel)
-  if (i > 0) return ENERGY_LEVEL_KEYS[i - 1]
-  return currentLevel
+  return i > 0 ? ENERGY_LEVEL_KEYS[i - 1] : currentLevel
 }
 
 export const getEnergyLevelInfo = (level) => ENERGY_LEVELS[level] || null
 
-// Helper para determinar si una tarea es instantánea (duración ≤ 1 minuto)
 export const isInstantTask = (action) => {
   if (!action) return false
-  const duration = action.duration || 10 // Default a 10 minutos si no tiene duración
-  return duration <= 1
+  return (action.duration ?? 10) <= 1
 }
