@@ -2,6 +2,8 @@
 import { useMemo } from 'react'
 import { useAppState } from '../hooks/useAppState'
 import { getTodayDate, formatTime } from '../utils/storage'
+import { getTaskIcon } from '../data/iconMap'
+import TaskIcon from './TaskIcon'
 import './TodayView.css'
 
 const TodayView = () => {
@@ -30,7 +32,9 @@ const TodayView = () => {
         {todayList.map((c) => (
           <li key={`${c.actionId}-${c.completedAt}`} className="today-view__item">
             <span className="today-view__check" aria-hidden="true">✓</span>
-            {c.emoji && <span className="today-view__emoji">{c.emoji}</span>}
+            {c.actionId && getTaskIcon(c.actionId) && (
+              <TaskIcon iconName={getTaskIcon(c.actionId)} className="today-view__icon" size={20} />
+            )}
             <div className="today-view__content">
               <span className="today-view__text">{c.actionText}</span>
               <span className="today-view__time">{formatTime(c.completedAt)}</span>

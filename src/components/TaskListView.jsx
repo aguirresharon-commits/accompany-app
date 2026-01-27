@@ -1,6 +1,8 @@
 // Lista corta de tareas disponibles - elegir y reducir
 import { getActionsByLevel, getReducedAction } from '../data/actions'
 import { getTodayDate } from '../utils/storage'
+import { getTaskIcon } from '../data/iconMap'
+import TaskIcon from './TaskIcon'
 import './TaskListView.css'
 
 const TaskListView = ({
@@ -49,7 +51,9 @@ const TaskListView = ({
                 onClick={() => onSelectTask(action)}
                 type="button"
               >
-                {action.emoji && <span className="task-list-view__emoji">{action.emoji}</span>}
+                {action.id && getTaskIcon(action.id) && (
+                  <TaskIcon iconName={getTaskIcon(action.id)} className="task-list-view__icon" size={20} />
+                )}
                 <span className="task-list-view__text">{action.text}</span>
               </button>
               {canReduce && (

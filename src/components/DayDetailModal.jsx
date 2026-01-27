@@ -2,6 +2,8 @@
 import { useMemo } from 'react'
 import { useAppState } from '../hooks/useAppState'
 import { formatTime } from '../utils/storage'
+import { getTaskIcon } from '../data/iconMap'
+import TaskIcon from './TaskIcon'
 import './DayDetailModal.css'
 
 const DayDetailModal = ({ date, onClose }) => {
@@ -50,7 +52,9 @@ const DayDetailModal = ({ date, onClose }) => {
               {dayTasks.map((task) => (
                 <li key={`${task.actionId}-${task.completedAt}`} className="day-detail__item">
                   <span className="day-detail__check" aria-hidden="true">✓</span>
-                  {task.emoji && <span className="day-detail__emoji">{task.emoji}</span>}
+                  {task.actionId && getTaskIcon(task.actionId) && (
+                    <TaskIcon iconName={getTaskIcon(task.actionId)} className="day-detail__icon" size={20} />
+                  )}
                   <div className="day-detail__content-item">
                     <span className="day-detail__text">{task.actionText}</span>
                     <span className="day-detail__time">{formatTime(task.completedAt)}</span>

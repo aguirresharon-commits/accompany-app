@@ -53,9 +53,18 @@
   background: var(--color-gray-111);
 }
 
-.task-list-view__emoji {
-  font-size: 1rem;
+.task-list-view__icon {
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-white);
+  opacity: 0.8;
+}
+
+.task-list-view__icon svg {
+  width: 100%;
+  height: 100%;
 }
 
 .task-list-view__reduce-btn {

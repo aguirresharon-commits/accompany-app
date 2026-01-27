@@ -1,5 +1,6 @@
 // Ajustes: ritmo, reiniciar día, sonidos, ayuda
 import { ENERGY_LEVELS, ENERGY_LEVEL_KEYS } from '../data/actions'
+import { EnergyLevelIcon } from './TaskIcon'
 import './SettingsView.css'
 
 const SettingsView = ({
@@ -25,7 +26,7 @@ const SettingsView = ({
                 onClick={() => onEnergyLevelChange(key)}
                 type="button"
               >
-                <span className="settings-view__level-emoji">{level.emoji}</span>
+                <EnergyLevelIcon level={key} className="settings-view__level-icon" size={24} />
                 <span className="settings-view__level-label">{level.label}</span>
               </button>
             )

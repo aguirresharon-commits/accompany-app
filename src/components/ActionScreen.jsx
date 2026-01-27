@@ -4,6 +4,8 @@ import { useAppState } from '../hooks/useAppState'
 import { getRandomAction, getReducedAction, isInstantTask } from '../data/actions'
 import { getTodayDate, formatTime } from '../utils/storage'
 import { playCompleteSound, playStartSound, initAudioContext } from '../utils/sounds'
+import { getTaskIcon } from '../data/iconMap'
+import TaskIcon from './TaskIcon'
 import Loader from './Loader'
 import BottomMenu from './BottomMenu'
 import ListPanel from './ListPanel'
@@ -105,11 +107,26 @@ const ActionScreen = () => {
     setEmpezarFlow('timerEnd')
   }
 
-  const handleTimerEndMarkComplete = () => {
+  const handleTimerEndMarkComplete = async () => {
     if (!empezarAction) return
-    setNotePromptAction(empezarAction)
+    // Guardar la acción antes de limpiar el estado
+    const actionToComplete = empezarAction
+    // Cerrar el TimerEndModal
     setEmpezarFlow(null)
     setEmpezarAction(null)
+    
+    // Completar la acción directamente (sin mostrar NotePrompt)
+    completeAction(actionToComplete)
+    const soundsConfig = sounds || { enabled: true, volume: 0.3 }
+    await initAudioContext()
+    playCompleteSound(soundsConfig.enabled, soundsConfig.volume)
+    
+    // Mostrar solo el mensaje de confirmación
+    setCompletionOverlay('Listo.')
+    setTimeout(() => {
+      setCompletionOverlay(null)
+      selectNewAction()
+    }, 1000)
   }
 
   const handleTimerEndContinue = () => {
@@ -155,12 +172,17 @@ const ActionScreen = () => {
 
   const handleNoteConfirm = async (note) => {
     if (!notePromptAction) return
-    completeAction(notePromptAction, note)
+    // Guardar la acción y limpiar el prompt inmediatamente para evitar que se muestre de nuevo
+    const actionToComplete = notePromptAction
+    setNotePromptAction(null)
+    setInstantTaskResponse(null)
+    
+    // Completar la acción
+    completeAction(actionToComplete, note)
     const soundsConfig = sounds || { enabled: true, volume: 0.3 }
     await initAudioContext()
     playCompleteSound(soundsConfig.enabled, soundsConfig.volume)
-    setNotePromptAction(null)
-    setInstantTaskResponse(null)
+    
     // Mensaje positivo pero sin euforia para tareas instantáneas
     const message = instantTaskResponse === 'yes' ? 'Bien.' : 'Listo.'
     setCompletionOverlay(message)
@@ -172,12 +194,17 @@ const ActionScreen = () => {
 
   const handleNoteSkip = async () => {
     if (!notePromptAction) return
-    completeAction(notePromptAction)
+    // Guardar la acción y limpiar el prompt inmediatamente para evitar que se muestre de nuevo
+    const actionToComplete = notePromptAction
+    setNotePromptAction(null)
+    setInstantTaskResponse(null)
+    
+    // Completar la acción
+    completeAction(actionToComplete)
     const soundsConfig = sounds || { enabled: true, volume: 0.3 }
     await initAudioContext()
     playCompleteSound(soundsConfig.enabled, soundsConfig.volume)
-    setNotePromptAction(null)
-    setInstantTaskResponse(null)
+    
     // Mensaje positivo pero sin euforia para tareas instantáneas
     const message = instantTaskResponse === 'yes' ? 'Bien.' : 'Listo.'
     setCompletionOverlay(message)
@@ -242,8 +269,8 @@ const ActionScreen = () => {
           <div className="action-screen__progress">
             <div className="action-screen__card">
               <div className="action-screen__task">
-                {displayedAction?.emoji && (
-                  <span className="action-screen__emoji">{displayedAction.emoji}</span>
+                {displayedAction?.id && getTaskIcon(displayedAction.id) && (
+                  <TaskIcon iconName={getTaskIcon(displayedAction.id)} className="action-screen__icon" size={32} />
                 )}
                 <p className="action-screen__action-text">{displayedAction?.text}</p>
               </div>
@@ -295,7 +322,9 @@ const ActionScreen = () => {
                   {completedActionsToday.map((c) => (
                     <li key={`${c.actionId}-${c.completedAt}`} className="action-screen__today-item">
                       <span className="action-screen__today-check" aria-hidden="true">✓</span>
-                      {c.emoji && <span className="action-screen__today-emoji">{c.emoji}</span>}
+                      {c.actionId && getTaskIcon(c.actionId) && (
+                        <TaskIcon iconName={getTaskIcon(c.actionId)} className="action-screen__today-icon" size={20} />
+                      )}
                       <div className="action-screen__today-content">
                         <span className="action-screen__today-text">{c.actionText}</span>
                         <span className="action-screen__today-time">{formatTime(c.completedAt)}</span>

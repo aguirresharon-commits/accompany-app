@@ -2,6 +2,7 @@
 // Pantalla inicial empática y minimalista
 import { useAppState } from '../hooks/useAppState'
 import { ENERGY_LEVELS, ENERGY_LEVEL_KEYS } from '../data/actions'
+import { EnergyLevelIcon } from './TaskIcon'
 import './EnergyLevelSelector.css'
 
 const EnergyLevelSelector = () => {
@@ -30,7 +31,7 @@ const EnergyLevelSelector = () => {
               onClick={() => handleSelectLevel(levelKey)}
               aria-label={`Seleccionar nivel: ${level.label}`}
             >
-              <span className="energy-selector__emoji">{level.emoji}</span>
+              <EnergyLevelIcon level={levelKey} className="energy-selector__icon" size={32} />
               <div className="energy-selector__level-info">
                 <span className="energy-selector__level-label">{level.label}</span>
                 <span className="energy-selector__level-description">{level.description}</span>

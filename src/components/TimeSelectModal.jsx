@@ -1,5 +1,7 @@
 // Modal: elegir cuántos minutos dedicar a la tarea (5, 10, 15, 20 u otro)
 import { useState, useRef, useEffect } from 'react'
+import { getTaskIcon } from '../data/iconMap'
+import TaskIcon from './TaskIcon'
 import './TimeSelectModal.css'
 
 const PRESETS = [5, 10, 15, 20] // En minutos
@@ -89,8 +91,8 @@ const TimeSelectModal = ({ action, onSelect, onClose }) => {
       />
       <div className="time-select__sheet">
         <p className="time-select__title">¿Cuánto tiempo?</p>
-        {action?.emoji && (
-          <span className="time-select__emoji" aria-hidden="true">{action.emoji}</span>
+        {action?.id && getTaskIcon(action.id) && (
+          <TaskIcon iconName={getTaskIcon(action.id)} className="time-select__icon" size={32} />
         )}
         <p className="time-select__task">{action?.text}</p>
         <div className="time-select__presets">

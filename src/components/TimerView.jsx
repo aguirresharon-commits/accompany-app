@@ -1,6 +1,8 @@
 // Pantalla durante la tarea: temporizador visible pero no intrusivo, sin distracciones
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { playTimerEndSound, initAudioContext } from '../utils/sounds'
+import { getTaskIcon } from '../data/iconMap'
+import TaskIcon from './TaskIcon'
 import './TimerView.css'
 
 const pad = (n) => String(n).padStart(2, '0')
@@ -57,8 +59,8 @@ const TimerView = ({ action, seconds, onEnd, onStop, soundsEnabled, soundsVolume
   return (
     <div className="timer-view" role="timer" aria-label={`Temporizador: ${display} restantes`}>
       <div className="timer-view__inner">
-        {action?.emoji && (
-          <span className="timer-view__emoji" aria-hidden="true">{action.emoji}</span>
+        {action?.id && getTaskIcon(action.id) && (
+          <TaskIcon iconName={getTaskIcon(action.id)} className="timer-view__icon" size={32} />
         )}
         <p className="timer-view__task">{action?.text}</p>
         <div className="timer-view__countdown" aria-live="polite">
