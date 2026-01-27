@@ -5,9 +5,60 @@ import './AddNoteModal.css'
 const AddNoteModal = ({ action, onConfirm, onSkip }) => {
   const [note, setNote] = useState('')
   const inputRef = useRef(null)
+  const sheetRef = useRef(null)
 
   useEffect(() => {
     inputRef.current?.focus()
+  }, [])
+
+  // Hacer scroll del input cuando recibe focus (para móviles)
+  useEffect(() => {
+    const input = inputRef.current
+    const sheet = sheetRef.current
+    if (!input || !sheet) return
+
+    let viewportResizeHandler = null
+
+    const handleFocus = () => {
+      // Usar visualViewport si está disponible (móviles modernos)
+      if (window.visualViewport) {
+        const viewport = window.visualViewport
+        viewportResizeHandler = () => {
+          // Cuando el teclado se abre, el viewport se reduce
+          if (viewport.height < window.innerHeight * 0.75) {
+            // Scroll del input para que sea visible
+            setTimeout(() => {
+              input.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' })
+              // Asegurar que el sheet también haga scroll
+              const inputRect = input.getBoundingClientRect()
+              if (inputRect.bottom > viewport.height) {
+                sheet.scrollTop += (inputRect.bottom - viewport.height) + 20
+              }
+            }, 100)
+          }
+        }
+        viewport.addEventListener('resize', viewportResizeHandler)
+        
+        // También hacer scroll inmediato
+        setTimeout(() => {
+          input.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' })
+        }, 300)
+      } else {
+        // Fallback para navegadores sin visualViewport
+        setTimeout(() => {
+          input.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' })
+        }, 300)
+      }
+    }
+
+    input.addEventListener('focus', handleFocus)
+
+    return () => {
+      input.removeEventListener('focus', handleFocus)
+      if (window.visualViewport && viewportResizeHandler) {
+        window.visualViewport.removeEventListener('resize', viewportResizeHandler)
+      }
+    }
   }, [])
 
   useEffect(() => {
@@ -32,7 +83,7 @@ const AddNoteModal = ({ action, onConfirm, onSkip }) => {
         onClick={onSkip}
         aria-label="Cerrar"
       />
-      <div className="add-note-modal__sheet">
+      <div ref={sheetRef} className="add-note-modal__sheet">
         <p className="add-note-modal__title">¿Dejás una nota? (opcional)</p>
         <textarea
           ref={inputRef}

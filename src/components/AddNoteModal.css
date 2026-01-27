@@ -30,6 +30,7 @@
   position: relative;
   width: 100%;
   max-width: 480px;
+  max-height: 90vh;
   background: var(--color-gray-111);
   border-radius: 16px 16px 0 0;
   padding: var(--spacing-md);
@@ -37,6 +38,8 @@
   pointer-events: auto;
   animation: add-note-slide 0.3s ease forwards;
   border-top: 1px solid var(--color-gray-222);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 @keyframes add-note-slide {

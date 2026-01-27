@@ -6,17 +6,33 @@ let audioContextInitialized = false
 
 const getAudioContext = async () => {
   if (!audioContext) {
-    audioContext = new (window.AudioContext || window.webkitAudioContext)()
+    try {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)()
+    } catch (e) {
+      return null
+    }
   }
   
   // En móviles, el AudioContext puede estar suspendido y necesita interacción del usuario
+  // Siempre intentar reactivar si está suspendido
   if (audioContext.state === 'suspended') {
     try {
       await audioContext.resume()
+      // Esperar un momento para asegurar que el contexto esté listo
+      if (audioContext.state === 'running') {
+        return audioContext
+      }
     } catch (e) {
-      // Si falla, intentar crear uno nuevo en la próxima interacción
-      audioContext = null
-      return null
+      // Si falla, intentar crear uno nuevo
+      try {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)()
+        if (audioContext.state === 'suspended') {
+          await audioContext.resume()
+        }
+      } catch (e2) {
+        audioContext = null
+        return null
+      }
     }
   }
   
@@ -25,13 +41,13 @@ const getAudioContext = async () => {
 
 // Inicializar AudioContext en la primera interacción del usuario
 export const initAudioContext = async () => {
-  if (!audioContextInitialized) {
-    try {
-      await getAudioContext()
+  try {
+    const ctx = await getAudioContext()
+    if (ctx && ctx.state === 'running') {
       audioContextInitialized = true
-    } catch (e) {
-      // Silenciar errores
     }
+  } catch (e) {
+    // Silenciar errores
   }
 }
 
@@ -130,8 +146,21 @@ export const playTapSound = async (enabled = true, volume = 0.15) => {
   if (!enabled) return
   
   try {
-    const ctx = await getAudioContext()
-    if (!ctx) return
+    // Siempre intentar obtener/reactivar el AudioContext
+    let ctx = await getAudioContext()
+    
+    // Si el contexto está suspendido, intentar reactivarlo
+    if (ctx && ctx.state === 'suspended') {
+      await ctx.resume()
+      // Verificar nuevamente después de resume
+      if (ctx.state !== 'running') {
+        // Si aún está suspendido, crear uno nuevo
+        ctx = new (window.AudioContext || window.webkitAudioContext)()
+      }
+    }
+    
+    if (!ctx || ctx.state !== 'running') return
+    
     const oscillator = ctx.createOscillator()
     const gainNode = ctx.createGain()
     
