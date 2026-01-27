@@ -13,6 +13,7 @@ const ANIM_CLASSES = ['starry-bg__star--anim', 'starry-bg__star--anim-2', 'starr
 export default function StarryBackground() {
   return (
     <div className="starry-bg" aria-hidden="true">
+      <div className="starry-bg__shooting-star" aria-hidden="true" />
       {POSITIONS.map(([x, y], i) => {
         const sizeClass = i % 4 === 0 ? 'starry-bg__star--m' : 'starry-bg__star--s'
         const animClass = ANIM_CLASSES[i % 3]
