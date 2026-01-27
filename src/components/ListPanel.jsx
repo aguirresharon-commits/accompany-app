@@ -33,6 +33,7 @@ const ListPanel = ({
   }
 
   const levelLabel = getEnergyLevelInfo(currentEnergyLevel)?.label || currentEnergyLevel
+  const title = levelLabel ? `Tareas de energía ${String(levelLabel).toLowerCase()}` : 'Tareas'
 
   return (
     <div className="list-panel" role="dialog" aria-label="Elegir tarea">
@@ -44,7 +45,7 @@ const ListPanel = ({
       />
       <div className="list-panel__drawer">
         <div className="list-panel__handle" aria-hidden="true" />
-        <p className="list-panel__title">Nivel {levelLabel}</p>
+        <p className="list-panel__title">{title}</p>
         <div className="list-panel__content">
           <TaskListView
             currentEnergyLevel={currentEnergyLevel}
