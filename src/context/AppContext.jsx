@@ -10,7 +10,8 @@ const migrateEnergyLevel = (level) => {
   return map[level] || null
 }
 
-// Estado inicial
+// Nivel programado para el día siguiente según "¿Cómo te sentís?" (silencioso, sin pantallas)
+// scheduledEnergyNextDay: { level: 'baja'|'media', setOnDate: 'YYYY-MM-DD' } | null
 const getInitialState = () => ({
   currentEnergyLevel: null,
   completedActions: [],
@@ -23,6 +24,7 @@ const getInitialState = () => ({
   },
   history: {},
   lastResetDate: getTodayDate(),
+  scheduledEnergyNextDay: null, // Ajuste silencioso para mañana según Bien/Regular/Me cuesta hoy
   sessionNotes: [], // Notas de sesión (timer) sin completar tarea
   sounds: {
     enabled: true,
@@ -81,16 +83,26 @@ export const AppProvider = ({ children }) => {
       const cleanedHistory = savedState.history || {}
       
       const energyLevel = migrateEnergyLevel(savedState.currentEnergyLevel)
+      const scheduled = savedState.scheduledEnergyNextDay || null
+
+      // Si hay nivel programado para “mañana” y ya es ese día (o después), aplicarlo en silencio
+      let effectiveEnergy = energyLevel
+      let effectiveScheduled = scheduled
+      if (scheduled && scheduled.setOnDate && scheduled.level && today > scheduled.setOnDate) {
+        effectiveEnergy = scheduled.level
+        effectiveScheduled = null
+      }
 
       return {
         ...getInitialState(),
         ...savedState,
-        currentEnergyLevel: energyLevel,
+        currentEnergyLevel: effectiveEnergy,
         completedActions: completedActionsToday,
         allActions: resetAllActions,
         history: cleanedHistory,
         streak: savedState.streak || getInitialState().streak,
         lastResetDate: today,
+        scheduledEnergyNextDay: effectiveScheduled,
         sessionNotes: savedState.sessionNotes || [],
         sounds: savedState.sounds || { enabled: true, volume: 0.3 }
       }
@@ -107,36 +119,36 @@ export const AppProvider = ({ children }) => {
     return () => clearTimeout(timer)
   }, [])
 
-  // Verificar y resetear acciones diarias
+  // Verificar y resetear acciones diarias; aplicar nivel programado para el día siguiente si corresponde
   useEffect(() => {
     const today = getTodayDate()
     const lastResetDate = state.lastResetDate || today
-    
-    // Si cambió el día, resetear acciones del día anterior
+
+    // Si cambió el día, resetear acciones y aplicar ajuste silencioso de exigencia si lo hay
     if (lastResetDate !== today) {
       setState(prev => {
-        // Filtrar acciones completadas solo del día de hoy
         const completedActionsToday = prev.completedActions.filter(
           action => action.date === today
         )
-        
-        // Resetear acciones de días anteriores en allActions (marcar como no completadas)
         const resetAllActions = prev.allActions.map(action => {
           if (action.date !== today) {
-            return {
-              ...action,
-              completed: false,
-              completedAt: undefined
-            }
+            return { ...action, completed: false, completedAt: undefined }
           }
           return action
         })
-        
+
+        const scheduled = prev.scheduledEnergyNextDay
+        const applyScheduled = scheduled && scheduled.setOnDate && scheduled.level && today > scheduled.setOnDate
+        const nextEnergy = applyScheduled ? scheduled.level : prev.currentEnergyLevel
+        const nextScheduled = applyScheduled ? null : prev.scheduledEnergyNextDay
+
         return {
           ...prev,
           completedActions: completedActionsToday,
           allActions: resetAllActions,
-          lastResetDate: today
+          lastResetDate: today,
+          currentEnergyLevel: nextEnergy,
+          scheduledEnergyNextDay: nextScheduled
         }
       })
     }
@@ -153,6 +165,37 @@ export const AppProvider = ({ children }) => {
       ...prev,
       currentEnergyLevel: level
     }))
+  }, [])
+
+  /**
+   * Programar exigencia del día siguiente según "¿Cómo te sentís?" al completar una tarea.
+   * Silencioso: sin pantallas ni config; solo se aplica al abrir la app al día siguiente.
+   * - Bien → mantener mismo ritmo (no programar nada).
+   * - Regular → bajar un escalón al día siguiente (alta→media, media→baja, baja→baja).
+   * - Me cuesta hoy → ritmo bajo al día siguiente.
+   */
+  const scheduleEnergyForNextDay = useCallback((choice) => {
+    const today = getTodayDate()
+    setState(prev => {
+      if (choice === 'Bien') {
+        return { ...prev, scheduledEnergyNextDay: null }
+      }
+      if (choice === 'Me cuesta hoy') {
+        return {
+          ...prev,
+          scheduledEnergyNextDay: { level: 'baja', setOnDate: today }
+        }
+      }
+      if (choice === 'Regular') {
+        const oneStepDown = { alta: 'media', media: 'baja', baja: 'baja' }
+        const level = oneStepDown[prev.currentEnergyLevel] || 'baja'
+        return {
+          ...prev,
+          scheduledEnergyNextDay: { level, setOnDate: today }
+        }
+      }
+      return prev
+    })
   }, [])
 
   // Función para completar una acción (note opcional)
@@ -404,6 +447,7 @@ export const AppProvider = ({ children }) => {
   const value = {
     ...state,
     setEnergyLevel,
+    scheduleEnergyForNextDay,
     completeAction,
     setCurrentAction,
     updateStreak,

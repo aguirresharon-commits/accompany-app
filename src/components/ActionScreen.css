@@ -171,7 +171,7 @@
   opacity: 0.9;
 }
 
-/* Overlays: Empezar (1–2 s) y Completado (1–2 palabras), fondo negro, fade in/out */
+/* Overlays: Empezar (1–2 s) y Completado (mensaje breve + opcional micro-pregunta) */
 .action-screen__overlay {
   position: fixed;
   inset: 0;
@@ -188,8 +188,21 @@
   animation-duration: 1.8s;
 }
 
+/* Completado: fondo bien opaco para que no se mezcle con la pantalla de atrás */
 .action-screen__overlay--completion {
-  animation-duration: 1s;
+  background: rgba(0, 0, 0, 0.96);
+  pointer-events: auto;
+  animation: action-overlay-fade-in-hold 0.6s ease forwards;
+  flex-direction: column;
+  gap: 0;
+}
+
+.action-screen__completion-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
 }
 
 .action-screen__overlay-text {
@@ -205,13 +218,129 @@
   animation-duration: 1.8s;
 }
 
-.action-screen__overlay--completion .action-screen__overlay-text {
-  animation-duration: 1s;
+.action-screen__overlay-text--completion {
+  font-weight: 300;
+  font-size: var(--font-size-xl);
+  animation: action-overlay-text-fade-in 0.5s ease forwards;
 }
 
-.action-screen__overlay--completion {
+.action-screen__completion-question {
+  font-weight: 300;
+  font-size: var(--font-size-base);
+  color: var(--color-gray-888);
+  background: none;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  opacity: 0.9;
+  transition: color 0.15s ease, opacity 0.15s ease;
+}
+
+.action-screen__completion-question:hover {
+  color: var(--color-white);
+  opacity: 1;
+}
+
+.action-screen__completion-question:focus {
+  outline: 1px solid var(--color-white);
+  outline-offset: 2px;
+}
+
+.action-screen__completion-feeling-label {
+  font-weight: 300;
+  font-size: var(--font-size-base);
+  color: var(--color-gray-888);
+  margin: 0;
+  text-align: center;
+}
+
+.action-screen__completion-feelings {
+  display: flex;
   flex-direction: column;
+  align-items: center;
   gap: var(--spacing-sm);
+  width: 100%;
+  max-width: 260px;
+}
+
+.action-screen__completion-feeling-btn {
+  width: 100%;
+  font-weight: 300;
+  font-size: var(--font-size-base);
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.action-screen__completion-feeling-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: var(--color-white);
+}
+
+.action-screen__completion-feeling-btn:focus {
+  outline: 1px solid var(--color-white);
+  outline-offset: 2px;
+}
+
+.action-screen__completion-write {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+  width: 100%;
+  max-width: 280px;
+}
+
+.action-screen__completion-textarea {
+  width: 100%;
+  font-family: inherit;
+  font-weight: 300;
+  font-size: var(--font-size-base);
+  color: var(--color-white);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: var(--spacing-sm) var(--spacing-md);
+  resize: none;
+  min-height: 72px;
+}
+
+.action-screen__completion-textarea::placeholder {
+  color: var(--color-gray-888);
+}
+
+.action-screen__completion-textarea:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.action-screen__completion-done-btn {
+  font-weight: 300;
+  font-size: var(--font-size-base);
+  color: var(--color-gray-888);
+  background: none;
+  border: none;
+  padding: 0.35rem 0.75rem;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  transition: color 0.15s ease;
+}
+
+.action-screen__completion-done-btn:hover {
+  color: var(--color-white);
+}
+
+.action-screen__completion-done-btn:focus {
+  outline: 1px solid var(--color-white);
+  outline-offset: 2px;
 }
 
 .action-screen__overlay--note-saved {
@@ -223,24 +352,22 @@
   animation-duration: 1s;
 }
 
-.action-screen__overlay-check {
-  display: inline-block;
-  font-size: 1.5rem;
-  color: var(--color-white);
-  animation: action-overlay-check 0.5s ease forwards;
-}
-
-@keyframes action-overlay-check {
-  0% { opacity: 0; transform: scale(0.5); }
-  50% { opacity: 1; transform: scale(1.15); }
-  100% { opacity: 1; transform: scale(1); }
-}
-
 @keyframes action-overlay-fade {
   0% { opacity: 0; }
   15% { opacity: 1; }
   85% { opacity: 1; }
   100% { opacity: 0; }
+}
+
+/* Overlay de completado: solo entra y se queda visible hasta que el usuario hace clic */
+@keyframes action-overlay-fade-in-hold {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes action-overlay-text-fade-in {
+  0% { opacity: 0; transform: scale(0.98); }
+  100% { opacity: 1; transform: scale(1); }
 }
 
 @keyframes action-overlay-text {

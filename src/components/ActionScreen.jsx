@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useAppState } from '../hooks/useAppState'
 import { getRandomAction, getReducedAction, isInstantTask } from '../data/actions'
 import { getTodayDate, formatTime } from '../utils/storage'
-import { playCompleteSound, playStartSound, initAudioContext } from '../utils/sounds'
+import { playStartSound, initAudioContext } from '../utils/sounds'
 import { getTaskIcon } from '../data/iconMap'
 import TaskIcon from './TaskIcon'
 import Loader from './Loader'
@@ -19,12 +19,19 @@ import AddNoteModal from './AddNoteModal'
 import StarryBackground from './StarryBackground'
 import './ActionScreen.css'
 
+const COMPLETION_MESSAGES = ['Hecho.', 'Avanzaste.', 'Eso ya está.', 'Suficiente por hoy.']
+const getRandomCompletionMessage = () =>
+  COMPLETION_MESSAGES[Math.floor(Math.random() * COMPLETION_MESSAGES.length)]
+
+const FEELING_OPTIONS = ['Bien', 'Regular', 'Me cuesta hoy']
+
 const ActionScreen = () => {
   const {
     currentEnergyLevel,
     setCurrentAction,
     completeAction,
     setEnergyLevel,
+    scheduleEnergyForNextDay,
     resetAllActions,
     completedActions,
     allActions,
@@ -37,7 +44,9 @@ const ActionScreen = () => {
   const [activeTab, setActiveTab] = useState('progress')
   const [listPanelOpen, setListPanelOpen] = useState(false)
   const [notePromptAction, setNotePromptAction] = useState(null)
-  const [completionOverlay, setCompletionOverlay] = useState(null)
+  const [completionOverlay, setCompletionOverlay] = useState(null) // { message: string, showQuestion?: boolean } | null
+  const [completionFeelingWriting, setCompletionFeelingWriting] = useState(false)
+  const [completionFeelingText, setCompletionFeelingText] = useState('')
   const [noteSavedOverlay, setNoteSavedOverlay] = useState(null)
 
   // Flujo Empezar: timeSelect → timer → timerEnd
@@ -80,6 +89,31 @@ const ActionScreen = () => {
       .sort((a, b) => (b.completedAt || '').localeCompare(a.completedAt || ''))
   }, [completedActions])
 
+  // Auto-cierre solo para “no todavía” (sin pregunta). El completado se cierra cuando el usuario elige opción o escribe.
+  useEffect(() => {
+    if (!completionOverlay || !completionOverlay.message || completionOverlay.showQuestion !== false) return
+    const t = setTimeout(() => {
+      setCompletionOverlay(null)
+      setInstantTaskResponse(null)
+    }, 2000)
+    return () => clearTimeout(t)
+  }, [completionOverlay])
+
+  // Al mostrar el overlay con “¿Cómo te sentís?” reseteamos modo escribir y texto
+  useEffect(() => {
+    if (completionOverlay?.message && completionOverlay.showQuestion !== false) {
+      setCompletionFeelingWriting(false)
+      setCompletionFeelingText('')
+    }
+  }, [completionOverlay?.message, completionOverlay?.showQuestion])
+
+  const closeCompletionAndNext = useCallback(() => {
+    setCompletionOverlay(null)
+    setCompletionFeelingWriting(false)
+    setCompletionFeelingText('')
+    selectNewAction()
+  }, [selectNewAction])
+
   const handleEmpezar = async () => {
     if (!displayedAction) return
     const soundsConfig = sounds || { enabled: true, volume: 0.3 }
@@ -108,26 +142,13 @@ const ActionScreen = () => {
     setEmpezarFlow('timerEnd')
   }
 
-  const handleTimerEndMarkComplete = async () => {
+  const handleTimerEndMarkComplete = () => {
     if (!empezarAction) return
-    // Guardar la acción antes de limpiar el estado
     const actionToComplete = empezarAction
-    // Cerrar el TimerEndModal
     setEmpezarFlow(null)
     setEmpezarAction(null)
-    
-    // Completar la acción directamente (sin mostrar NotePrompt)
     completeAction(actionToComplete)
-    const soundsConfig = sounds || { enabled: true, volume: 0.3 }
-    await initAudioContext()
-    playCompleteSound(soundsConfig.enabled, soundsConfig.volume)
-    
-    // Mostrar solo el mensaje de confirmación
-    setCompletionOverlay('Listo.')
-    setTimeout(() => {
-      setCompletionOverlay(null)
-      selectNewAction()
-    }, 1000)
+    setCompletionOverlay({ message: getRandomCompletionMessage() })
   }
 
   const handleTimerEndContinue = () => {
@@ -171,48 +192,22 @@ const ActionScreen = () => {
     setNotePromptAction(displayedAction)
   }
 
-  const handleNoteConfirm = async (note) => {
+  const handleNoteConfirm = (note) => {
     if (!notePromptAction) return
-    // Guardar la acción y limpiar el prompt inmediatamente para evitar que se muestre de nuevo
     const actionToComplete = notePromptAction
     setNotePromptAction(null)
     setInstantTaskResponse(null)
-    
-    // Completar la acción
     completeAction(actionToComplete, note)
-    const soundsConfig = sounds || { enabled: true, volume: 0.3 }
-    await initAudioContext()
-    playCompleteSound(soundsConfig.enabled, soundsConfig.volume)
-    
-    // Mensaje positivo pero sin euforia para tareas instantáneas
-    const message = instantTaskResponse === 'yes' ? 'Bien.' : 'Listo.'
-    setCompletionOverlay(message)
-    setTimeout(() => {
-      setCompletionOverlay(null)
-      selectNewAction()
-    }, 1000)
+    setCompletionOverlay({ message: getRandomCompletionMessage() })
   }
 
-  const handleNoteSkip = async () => {
+  const handleNoteSkip = () => {
     if (!notePromptAction) return
-    // Guardar la acción y limpiar el prompt inmediatamente para evitar que se muestre de nuevo
     const actionToComplete = notePromptAction
     setNotePromptAction(null)
     setInstantTaskResponse(null)
-    
-    // Completar la acción
     completeAction(actionToComplete)
-    const soundsConfig = sounds || { enabled: true, volume: 0.3 }
-    await initAudioContext()
-    playCompleteSound(soundsConfig.enabled, soundsConfig.volume)
-    
-    // Mensaje positivo pero sin euforia para tareas instantáneas
-    const message = instantTaskResponse === 'yes' ? 'Bien.' : 'Listo.'
-    setCompletionOverlay(message)
-    setTimeout(() => {
-      setCompletionOverlay(null)
-      selectNewAction()
-    }, 1000)
+    setCompletionOverlay({ message: getRandomCompletionMessage() })
   }
 
   // Handlers para tareas instantáneas
@@ -225,11 +220,7 @@ const ActionScreen = () => {
   const handleInstantNotYet = () => {
     if (!displayedAction) return
     setInstantTaskResponse('not-yet')
-    setCompletionOverlay('Está bien, puede ser después.')
-    setTimeout(() => {
-      setCompletionOverlay(null)
-      setInstantTaskResponse(null)
-    }, 2000)
+    setCompletionOverlay({ message: 'Está bien, puede ser después.', showQuestion: false })
   }
 
   const handleSelectTask = (action) => {
@@ -403,10 +394,71 @@ const ActionScreen = () => {
         />
       )}
 
-      {completionOverlay && (
-        <div className="action-screen__overlay action-screen__overlay--completion" role="status" aria-live="polite">
-          <span className="action-screen__overlay-check" aria-hidden="true">✓</span>
-        <p className="action-screen__overlay-text">{completionOverlay}</p>
+      {completionOverlay?.message && (
+        <div
+          className="action-screen__overlay action-screen__overlay--completion"
+          role="dialog"
+          aria-labelledby="completion-feeling-title"
+          aria-live="polite"
+        >
+          <div className="action-screen__completion-inner">
+            <p className="action-screen__overlay-text action-screen__overlay-text--completion">
+              {completionOverlay.message}
+            </p>
+            {completionOverlay.showQuestion !== false && (
+              <>
+                <p id="completion-feeling-title" className="action-screen__completion-feeling-label">
+                  ¿Cómo te sentís?
+                </p>
+                {!completionFeelingWriting ? (
+                  <div className="action-screen__completion-feelings">
+                    {FEELING_OPTIONS.map((opt) => (
+                      <button
+                        key={opt}
+                        type="button"
+                        className="action-screen__completion-feeling-btn"
+                        onClick={() => {
+                          scheduleEnergyForNextDay(opt)
+                          closeCompletionAndNext()
+                        }}
+                        aria-label={`Me siento ${opt}`}
+                      >
+                        {opt}
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      className="action-screen__completion-question"
+                      onClick={() => setCompletionFeelingWriting(true)}
+                      aria-label="Escribir cómo me siento"
+                    >
+                      Escribir cómo me siento
+                    </button>
+                  </div>
+                ) : (
+                  <div className="action-screen__completion-write">
+                    <textarea
+                      className="action-screen__completion-textarea"
+                      value={completionFeelingText}
+                      onChange={(e) => setCompletionFeelingText(e.target.value)}
+                      placeholder="Ej: tranquilo, con energía, agotado..."
+                      rows={3}
+                      aria-label="Escribir cómo te sentís"
+                      autoFocus
+                    />
+                    <button
+                      type="button"
+                      className="action-screen__completion-done-btn"
+                      onClick={closeCompletionAndNext}
+                      aria-label="Listo"
+                    >
+                      Listo
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         </div>
       )}
 
