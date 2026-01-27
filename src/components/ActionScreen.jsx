@@ -16,6 +16,7 @@ import TimeSelectModal from './TimeSelectModal'
 import TimerView from './TimerView'
 import TimerEndModal from './TimerEndModal'
 import AddNoteModal from './AddNoteModal'
+import StarryBackground from './StarryBackground'
 import './ActionScreen.css'
 
 const ActionScreen = () => {
@@ -260,6 +261,7 @@ const ActionScreen = () => {
 
   return (
     <div className="action-screen">
+      <StarryBackground />
       <header className="action-screen__header">
         <h1 className="action-screen__brand">CONTROL</h1>
       </header>

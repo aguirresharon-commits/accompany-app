@@ -8,6 +8,7 @@
   align-items: center;
   justify-content: center;
   background: var(--color-black);
+  isolation: isolate;
   padding: var(--spacing-md);
   padding-bottom: max(env(safe-area-inset-bottom), var(--spacing-xl));
   transition: opacity 0.4s ease, transform 0.4s ease;

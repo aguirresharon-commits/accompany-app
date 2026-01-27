@@ -1,6 +1,7 @@
 // Pantalla de inicio / bienvenida: logo, CONTROL, tagline, "Tomar el control"
 import { useCallback } from 'react'
 import logoHead from '../assets/logo-head.png'
+import StarryBackground from './StarryBackground'
 import './WelcomeScreen.css'
 
 const WelcomeScreen = ({ onEnter, isLeaving, onLeaveComplete }) => {
@@ -24,6 +25,7 @@ const WelcomeScreen = ({ onEnter, isLeaving, onLeaveComplete }) => {
       aria-label="Pantalla de bienvenida"
       onTransitionEnd={handleTransitionEnd}
     >
+      <StarryBackground />
       <div className="welcome__inner">
         <img
           src={logoHead}

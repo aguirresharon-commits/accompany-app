@@ -1,0 +1,57 @@
+/* Fondo de estrellas minimalista - solo CSS, detrás del contenido */
+.starry-bg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--color-black, #0a0a0a);
+}
+
+.starry-bg__star {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  transform: translateZ(0);
+}
+
+/* Tamaños sutiles: la mayoría 1px, algunas 2px para profundidad */
+.starry-bg__star--s {
+  width: 1px;
+  height: 1px;
+  opacity: 0.35;
+}
+
+.starry-bg__star--m {
+  width: 2px;
+  height: 2px;
+  opacity: 0.5;
+}
+
+/* Animación muy lenta y discreta (solo en parte de las estrellas) */
+.starry-bg__star--twinkle {
+  animation: starry-twinkle 8s ease-in-out infinite alternate;
+}
+
+@keyframes starry-twinkle {
+  from {
+    opacity: 0.2;
+  }
+  to {
+    opacity: 0.6;
+  }
+}
+
+/* Asegurar que estrellas tamaño "m" animadas no se salgan del rango */
+.starry-bg__star--m.starry-bg__star--twinkle {
+  animation: starry-twinkle-m 8s ease-in-out infinite alternate;
+}
+
+@keyframes starry-twinkle-m {
+  from {
+    opacity: 0.25;
+  }
+  to {
+    opacity: 0.55;
+  }
+}
