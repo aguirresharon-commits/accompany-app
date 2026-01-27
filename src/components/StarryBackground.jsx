@@ -1,4 +1,4 @@
-// Fondo de estrellas minimalista, solo en Welcome y ActionScreen. CSS puro, z-index detrás del contenido.
+// Fondo estrellas estilo Grok: parpadeo + movimiento muy lento. Solo en Welcome y ActionScreen.
 import './StarryBackground.css'
 
 const POSITIONS = [
@@ -8,21 +8,23 @@ const POSITIONS = [
   [10, 92], [80, 16], [50, 38], [28, 24], [92, 52],
 ]
 
+const ANIM_CLASSES = ['starry-bg__star--anim', 'starry-bg__star--anim-2', 'starry-bg__star--anim-3']
+
 export default function StarryBackground() {
   return (
     <div className="starry-bg" aria-hidden="true">
       {POSITIONS.map(([x, y], i) => {
-        const isMedium = i % 4 === 0
-        const twinkle = i % 3 !== 0
-        const delay = (i % 5) * 1.6
+        const sizeClass = i % 4 === 0 ? 'starry-bg__star--m' : 'starry-bg__star--s'
+        const animClass = ANIM_CLASSES[i % 3]
+        const delay = (i % 8) * 1.2
         return (
           <div
             key={`${x}-${y}-${i}`}
-            className={`starry-bg__star starry-bg__star--${isMedium ? 'm' : 's'} ${twinkle ? 'starry-bg__star--twinkle' : ''}`}
+            className={`starry-bg__star ${sizeClass} ${animClass}`}
             style={{
               left: `${x}%`,
               top: `${y}%`,
-              animationDelay: twinkle ? `${delay}s` : undefined,
+              animationDelay: `${delay}s`,
             }}
           />
         )

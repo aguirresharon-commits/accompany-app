@@ -1,4 +1,4 @@
-/* Fondo de estrellas minimalista - solo CSS, detrás del contenido */
+/* Fondo estrellas estilo Grok: parpadeo suave + movimiento muy lento. Solo CSS. */
 .starry-bg {
   position: absolute;
   inset: 0;
@@ -11,47 +11,63 @@
 .starry-bg__star {
   position: absolute;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.85);
+  background: #fff;
+  will-change: opacity, transform;
   transform: translateZ(0);
 }
 
-/* Tamaños sutiles: la mayoría 1px, algunas 2px para profundidad */
 .starry-bg__star--s {
-  width: 1px;
-  height: 1px;
-  opacity: 0.35;
+  width: 1.5px;
+  height: 1.5px;
 }
 
 .starry-bg__star--m {
-  width: 2px;
-  height: 2px;
-  opacity: 0.5;
+  width: 2.5px;
+  height: 2.5px;
 }
 
-/* Animación muy lenta y discreta (solo en parte de las estrellas) */
-.starry-bg__star--twinkle {
-  animation: starry-twinkle 8s ease-in-out infinite alternate;
-}
-
-@keyframes starry-twinkle {
-  from {
+/* Estilo Grok: parpadeo suave + desplazamiento muy lento */
+@keyframes grok-star {
+  0%, 100% {
     opacity: 0.2;
+    transform: translate(0, 0) translateZ(0);
   }
-  to {
-    opacity: 0.6;
+  50% {
+    opacity: 0.85;
+    transform: translate(4px, -3px) translateZ(0);
   }
 }
 
-/* Asegurar que estrellas tamaño "m" animadas no se salgan del rango */
-.starry-bg__star--m.starry-bg__star--twinkle {
-  animation: starry-twinkle-m 8s ease-in-out infinite alternate;
+@keyframes grok-star-2 {
+  0%, 100% {
+    opacity: 0.15;
+    transform: translate(0, 0) translateZ(0);
+  }
+  50% {
+    opacity: 0.7;
+    transform: translate(-3px, 4px) translateZ(0);
+  }
 }
 
-@keyframes starry-twinkle-m {
-  from {
+@keyframes grok-star-3 {
+  0%, 100% {
     opacity: 0.25;
+    transform: translate(0, 0) translateZ(0);
   }
-  to {
-    opacity: 0.55;
+  50% {
+    opacity: 0.8;
+    transform: translate(3px, 3px) translateZ(0);
   }
+}
+
+.starry-bg__star--anim {
+  animation: grok-star 6s ease-in-out infinite;
+}
+
+.starry-bg__star--anim-2 {
+  animation: grok-star-2 7s ease-in-out infinite;
+}
+
+.starry-bg__star--anim-3 {
+  animation: grok-star-3 5.5s ease-in-out infinite;
 }
