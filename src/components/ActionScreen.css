@@ -144,6 +144,24 @@
   box-shadow: 0 0 28px rgba(255, 255, 255, 0.25);
 }
 
+/* Tareas instantáneas: pregunta y opciones */
+.action-screen__instant {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  width: 100%;
+  align-items: center;
+}
+
+.action-screen__instant-question {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-white);
+  margin: 0;
+  text-align: center;
+  opacity: 0.9;
+}
+
 /* Overlays: Empezar (1–2 s) y Completado (1–2 palabras), fondo negro, fade in/out */
 .action-screen__overlay {
   position: fixed;

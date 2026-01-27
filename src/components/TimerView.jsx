@@ -1,12 +1,12 @@
 // Pantalla durante la tarea: temporizador visible pero no intrusivo, sin distracciones
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { playTimerEndSound } from '../utils/sounds'
+import { playTimerEndSound, initAudioContext } from '../utils/sounds'
 import './TimerView.css'
 
 const pad = (n) => String(n).padStart(2, '0')
 
-const TimerView = ({ action, minutes, onEnd, onStop, soundsEnabled, soundsVolume }) => {
-  const [secondsLeft, setSecondsLeft] = useState(minutes * 60)
+const TimerView = ({ action, seconds, onEnd, onStop, soundsEnabled, soundsVolume }) => {
+  const [secondsLeft, setSecondsLeft] = useState(seconds)
   const intervalRef = useRef(null)
   const onEndRef = useRef(onEnd)
   onEndRef.current = onEnd
@@ -18,7 +18,12 @@ const TimerView = ({ action, minutes, onEnd, onStop, soundsEnabled, soundsVolume
           clearInterval(intervalRef.current)
           intervalRef.current = null
         }
-        playTimerEndSound(soundsEnabled, soundsVolume)
+        // Inicializar y reproducir sonido de forma asíncrona
+        initAudioContext().then(() => {
+          playTimerEndSound(soundsEnabled, soundsVolume)
+        }).catch(() => {
+          // Silenciar errores
+        })
         onEndRef.current?.()
         return 0
       }
@@ -27,7 +32,7 @@ const TimerView = ({ action, minutes, onEnd, onStop, soundsEnabled, soundsVolume
   }, [soundsEnabled, soundsVolume])
 
   useEffect(() => {
-    setSecondsLeft(minutes * 60)
+    setSecondsLeft(seconds)
     intervalRef.current = setInterval(tick, 1000)
     return () => {
       if (intervalRef.current) {
@@ -35,7 +40,7 @@ const TimerView = ({ action, minutes, onEnd, onStop, soundsEnabled, soundsVolume
         intervalRef.current = null
       }
     }
-  }, [minutes, tick])
+  }, [seconds, tick])
 
   const m = Math.floor(secondsLeft / 60)
   const s = secondsLeft % 60

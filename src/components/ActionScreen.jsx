@@ -1,9 +1,9 @@
 // Pantalla principal: Control, Empezar (TimeSelect → Timer → TimerEnd), Completadas hoy, menú inferior
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useAppState } from '../hooks/useAppState'
-import { getRandomAction, getReducedAction } from '../data/actions'
+import { getRandomAction, getReducedAction, isInstantTask } from '../data/actions'
 import { getTodayDate, formatTime } from '../utils/storage'
-import { playCompleteSound, playStartSound } from '../utils/sounds'
+import { playCompleteSound, playStartSound, initAudioContext } from '../utils/sounds'
 import Loader from './Loader'
 import BottomMenu from './BottomMenu'
 import ListPanel from './ListPanel'
@@ -40,8 +40,9 @@ const ActionScreen = () => {
   // Flujo Empezar: timeSelect → timer → timerEnd
   const [empezarFlow, setEmpezarFlow] = useState(null)
   const [empezarAction, setEmpezarAction] = useState(null)
-  const [empezarMinutes, setEmpezarMinutes] = useState(10)
+  const [empezarSeconds, setEmpezarSeconds] = useState(600) // 10 minutos en segundos por defecto
   const [addNoteOpen, setAddNoteOpen] = useState(false)
+  const [instantTaskResponse, setInstantTaskResponse] = useState(null) // 'yes' | 'not-yet' | null
 
   const selectNewAction = useCallback(() => {
     if (!currentEnergyLevel) return
@@ -64,6 +65,11 @@ const ActionScreen = () => {
     }
   }, [currentEnergyLevel, displayedAction, selectNewAction])
 
+  // Resetear respuesta de tarea instantánea cuando cambia la acción mostrada
+  useEffect(() => {
+    setInstantTaskResponse(null)
+  }, [displayedAction?.id])
+
   const completedActionsToday = useMemo(() => {
     const today = getTodayDate()
     return [...completedActions]
@@ -71,17 +77,18 @@ const ActionScreen = () => {
       .sort((a, b) => (b.completedAt || '').localeCompare(a.completedAt || ''))
   }, [completedActions])
 
-  const handleEmpezar = () => {
+  const handleEmpezar = async () => {
     if (!displayedAction) return
     const soundsConfig = sounds || { enabled: true, volume: 0.3 }
+    await initAudioContext()
     playStartSound(soundsConfig.enabled, soundsConfig.volume)
     setListPanelOpen(false)
     setEmpezarAction(displayedAction)
     setEmpezarFlow('timeSelect')
   }
 
-  const handleTimeSelect = (minutes) => {
-    setEmpezarMinutes(minutes)
+  const handleTimeSelect = (seconds) => {
+    setEmpezarSeconds(seconds)
     setEmpezarFlow('timer')
   }
 
@@ -106,7 +113,7 @@ const ActionScreen = () => {
   }
 
   const handleTimerEndContinue = () => {
-    setEmpezarMinutes((m) => m + 5)
+    setEmpezarSeconds((s) => Math.min(s + 300, 1200)) // Agregar 5 minutos (300 segundos), máximo 20 min (1200 segundos)
     setEmpezarFlow('timer')
   }
 
@@ -146,30 +153,55 @@ const ActionScreen = () => {
     setNotePromptAction(displayedAction)
   }
 
-  const handleNoteConfirm = (note) => {
+  const handleNoteConfirm = async (note) => {
     if (!notePromptAction) return
     completeAction(notePromptAction, note)
     const soundsConfig = sounds || { enabled: true, volume: 0.3 }
+    await initAudioContext()
     playCompleteSound(soundsConfig.enabled, soundsConfig.volume)
     setNotePromptAction(null)
-    setCompletionOverlay('Listo.')
+    setInstantTaskResponse(null)
+    // Mensaje positivo pero sin euforia para tareas instantáneas
+    const message = instantTaskResponse === 'yes' ? 'Bien.' : 'Listo.'
+    setCompletionOverlay(message)
     setTimeout(() => {
       setCompletionOverlay(null)
       selectNewAction()
     }, 1000)
   }
 
-  const handleNoteSkip = () => {
+  const handleNoteSkip = async () => {
     if (!notePromptAction) return
     completeAction(notePromptAction)
     const soundsConfig = sounds || { enabled: true, volume: 0.3 }
+    await initAudioContext()
     playCompleteSound(soundsConfig.enabled, soundsConfig.volume)
     setNotePromptAction(null)
-    setCompletionOverlay('Listo.')
+    setInstantTaskResponse(null)
+    // Mensaje positivo pero sin euforia para tareas instantáneas
+    const message = instantTaskResponse === 'yes' ? 'Bien.' : 'Listo.'
+    setCompletionOverlay(message)
     setTimeout(() => {
       setCompletionOverlay(null)
       selectNewAction()
     }, 1000)
+  }
+
+  // Handlers para tareas instantáneas
+  const handleInstantYes = () => {
+    if (!displayedAction) return
+    setInstantTaskResponse('yes')
+    setNotePromptAction(displayedAction)
+  }
+
+  const handleInstantNotYet = () => {
+    if (!displayedAction) return
+    setInstantTaskResponse('not-yet')
+    setCompletionOverlay('Está bien, puede ser después.')
+    setTimeout(() => {
+      setCompletionOverlay(null)
+      setInstantTaskResponse(null)
+    }, 2000)
   }
 
   const handleSelectTask = (action) => {
@@ -177,6 +209,7 @@ const ActionScreen = () => {
     setCurrentAction(action)
     setListPanelOpen(false)
     setActiveTab('progress')
+    setInstantTaskResponse(null) // Reset instant task response when selecting new task
   }
 
   const handleListPanelToggle = () => {
@@ -196,6 +229,7 @@ const ActionScreen = () => {
   if (activeTab === 'progress' && !displayedAction) return <Loader isLoading={true} />
 
   const soundsConfig = sounds || { enabled: true, volume: 0.3 }
+  const isInstant = displayedAction ? isInstantTask(displayedAction) : false
 
   return (
     <div className="action-screen">
@@ -213,22 +247,46 @@ const ActionScreen = () => {
                 )}
                 <p className="action-screen__action-text">{displayedAction?.text}</p>
               </div>
-              <div className="action-screen__buttons">
-                <button
-                  className="action-screen__button action-screen__button--secondary"
-                  onClick={handleReduce}
-                  aria-label="Hacerlo más chico"
-                >
-                  Hacerlo más chico
-                </button>
-                <button
-                  className="action-screen__button action-screen__button--primary"
-                  onClick={handleEmpezar}
-                  aria-label="Empezar"
-                >
-                  Empezar
-                </button>
-              </div>
+              {isInstant ? (
+                // UI para tareas instantáneas: pregunta y dos opciones
+                <div className="action-screen__instant">
+                  <p className="action-screen__instant-question">¿Pudiste hacerlo?</p>
+                  <div className="action-screen__buttons">
+                    <button
+                      className="action-screen__button action-screen__button--secondary"
+                      onClick={handleInstantNotYet}
+                      aria-label="No todavía"
+                    >
+                      No todavía
+                    </button>
+                    <button
+                      className="action-screen__button action-screen__button--primary"
+                      onClick={handleInstantYes}
+                      aria-label="Sí"
+                    >
+                      Sí
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                // UI normal para tareas con cronograma
+                <div className="action-screen__buttons">
+                  <button
+                    className="action-screen__button action-screen__button--secondary"
+                    onClick={handleReduce}
+                    aria-label="Hacerlo más chico"
+                  >
+                    Hacerlo más chico
+                  </button>
+                  <button
+                    className="action-screen__button action-screen__button--primary"
+                    onClick={handleEmpezar}
+                    aria-label="Empezar"
+                  >
+                    Empezar
+                  </button>
+                </div>
+              )}
             </div>
             {completedActionsToday.length > 0 && (
               <section className="action-screen__today" aria-label="Completadas hoy">
@@ -288,7 +346,7 @@ const ActionScreen = () => {
       {empezarFlow === 'timer' && (
         <TimerView
           action={empezarAction}
-          minutes={empezarMinutes}
+          seconds={empezarSeconds}
           onEnd={handleTimerEnd}
           onStop={handleTimerStop}
           soundsEnabled={soundsConfig.enabled}

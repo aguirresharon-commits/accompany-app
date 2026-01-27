@@ -2,23 +2,46 @@
 // Sonidos muy cortos, suaves y opcionales para feedback calmado
 
 let audioContext = null
+let audioContextInitialized = false
 
-const getAudioContext = () => {
+const getAudioContext = async () => {
   if (!audioContext) {
     audioContext = new (window.AudioContext || window.webkitAudioContext)()
   }
+  
+  // En móviles, el AudioContext puede estar suspendido y necesita interacción del usuario
   if (audioContext.state === 'suspended') {
-    audioContext.resume()
+    try {
+      await audioContext.resume()
+    } catch (e) {
+      // Si falla, intentar crear uno nuevo en la próxima interacción
+      audioContext = null
+      return null
+    }
   }
+  
   return audioContext
 }
 
+// Inicializar AudioContext en la primera interacción del usuario
+export const initAudioContext = async () => {
+  if (!audioContextInitialized) {
+    try {
+      await getAudioContext()
+      audioContextInitialized = true
+    } catch (e) {
+      // Silenciar errores
+    }
+  }
+}
+
 // Sonido de confirmación: breve y suave
-export const playCompleteSound = (enabled = true, volume = 0.3) => {
+export const playCompleteSound = async (enabled = true, volume = 0.3) => {
   if (!enabled) return
   
   try {
-    const ctx = getAudioContext()
+    const ctx = await getAudioContext()
+    if (!ctx) return
     const oscillator = ctx.createOscillator()
     const gainNode = ctx.createGain()
     
@@ -43,11 +66,12 @@ export const playCompleteSound = (enabled = true, volume = 0.3) => {
 }
 
 // Sonido de inicio: suave y calmado
-export const playStartSound = (enabled = true, volume = 0.25) => {
+export const playStartSound = async (enabled = true, volume = 0.25) => {
   if (!enabled) return
   
   try {
-    const ctx = getAudioContext()
+    const ctx = await getAudioContext()
+    if (!ctx) return
     const oscillator = ctx.createOscillator()
     const gainNode = ctx.createGain()
     
@@ -72,11 +96,12 @@ export const playStartSound = (enabled = true, volume = 0.25) => {
 }
 
 // Sonido de finalización de tiempo: calmado, no alarma
-export const playTimerEndSound = (enabled = true, volume = 0.3) => {
+export const playTimerEndSound = async (enabled = true, volume = 0.3) => {
   if (!enabled) return
   
   try {
-    const ctx = getAudioContext()
+    const ctx = await getAudioContext()
+    if (!ctx) return
     const oscillator = ctx.createOscillator()
     const gainNode = ctx.createGain()
     
@@ -101,11 +126,12 @@ export const playTimerEndSound = (enabled = true, volume = 0.3) => {
 }
 
 // Sonido mínimo para feedback de toque: muy breve
-export const playTapSound = (enabled = true, volume = 0.15) => {
+export const playTapSound = async (enabled = true, volume = 0.15) => {
   if (!enabled) return
   
   try {
-    const ctx = getAudioContext()
+    const ctx = await getAudioContext()
+    if (!ctx) return
     const oscillator = ctx.createOscillator()
     const gainNode = ctx.createGain()
     

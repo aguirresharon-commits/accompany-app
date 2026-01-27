@@ -1,5 +1,5 @@
 // Menú inferior flotante: ✔ Progreso, ≡ Lista, ⋯ Ajustes
-import { playTapSound } from '../utils/sounds'
+import { playTapSound, initAudioContext } from '../utils/sounds'
 import './BottomMenu.css'
 
 const BottomMenu = ({
@@ -16,7 +16,8 @@ const BottomMenu = ({
     if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10)
   }
 
-  const handleWithSound = (callback) => {
+  const handleWithSound = async (callback) => {
+    await initAudioContext()
     playTapSound(soundsEnabled, soundsVolume)
     callback()
   }

@@ -32,55 +32,55 @@ export const ENERGY_LEVEL_KEYS = Object.keys(ENERGY_LEVELS)
 
 export const actionsByEnergyLevel = {
   baja: [
-    { id: 'baja-001', text: 'Respirá profundo una vez', emoji: '🫁', level: 'baja', category: 'activar', canReduce: false },
-    { id: 'baja-002', text: 'Sentate derecho 10 segundos', emoji: '🪑', level: 'baja', category: 'activar', canReduce: false },
-    { id: 'baja-003', text: 'Tomá un vaso de agua', emoji: '💧', level: 'baja', category: 'activar', canReduce: false },
-    { id: 'baja-004', text: 'Abrí una ventana', emoji: '🪟', level: 'baja', category: 'activar', canReduce: false },
-    { id: 'baja-005', text: 'Mirá alrededor y nombrá 3 cosas', emoji: '👀', level: 'baja', category: 'activar', canReduce: false },
-    { id: 'baja-006', text: 'Ordená solo lo que tenés enfrente', emoji: '📦', level: 'baja', category: 'orden', canReduce: false },
-    { id: 'baja-007', text: 'Estirá brazos y cuello', emoji: '🙆', level: 'baja', category: 'activar', canReduce: false },
-    { id: 'baja-008', text: 'Borrá una notificación', emoji: '📱', level: 'baja', category: 'digital', canReduce: false },
-    { id: 'baja-009', text: 'Cerrá una app', emoji: '✖️', level: 'baja', category: 'digital', canReduce: false },
-    { id: 'baja-010', text: 'Cambiá de posición', emoji: '🔄', level: 'baja', category: 'activar', canReduce: false },
-    { id: 'baja-011', text: 'Prepará un café o una infusión', emoji: '☕', level: 'baja', category: 'activar', canReduce: false },
-    { id: 'baja-012', text: 'Poné una canción que te guste', emoji: '🎵', level: 'baja', category: 'activar', canReduce: false },
-    { id: 'baja-013', text: 'Lavate la cara', emoji: '🧼', level: 'baja', category: 'activar', canReduce: false },
-    { id: 'baja-014', text: 'Abrí la ventana y dejá entrar aire', emoji: '🪟', level: 'baja', category: 'activar', canReduce: false },
-    { id: 'baja-015', text: 'Tocá algo frío o caliente (una taza, agua, una mesa)', emoji: '🖐️', level: 'baja', category: 'activar', canReduce: false }
+    { id: 'baja-001', text: 'Respirá profundo una vez', emoji: '🫁', level: 'baja', category: 'activar', canReduce: false, duration: 0.5 },
+    { id: 'baja-002', text: 'Sentate derecho 10 segundos', emoji: '🪑', level: 'baja', category: 'activar', canReduce: false, duration: 0.5 },
+    { id: 'baja-003', text: 'Tomá un vaso de agua', emoji: '💧', level: 'baja', category: 'activar', canReduce: false, duration: 1 },
+    { id: 'baja-004', text: 'Abrí una ventana', emoji: '🪟', level: 'baja', category: 'activar', canReduce: false, duration: 0.5 },
+    { id: 'baja-005', text: 'Mirá alrededor y nombrá 3 cosas', emoji: '👀', level: 'baja', category: 'activar', canReduce: false, duration: 1 },
+    { id: 'baja-006', text: 'Ordená solo lo que tenés enfrente', emoji: '📦', level: 'baja', category: 'orden', canReduce: false, duration: 5 },
+    { id: 'baja-007', text: 'Estirá brazos y cuello', emoji: '🙆', level: 'baja', category: 'activar', canReduce: false, duration: 1 },
+    { id: 'baja-008', text: 'Borrá una notificación', emoji: '📱', level: 'baja', category: 'digital', canReduce: false, duration: 0.5 },
+    { id: 'baja-009', text: 'Cerrá una app', emoji: '✖️', level: 'baja', category: 'digital', canReduce: false, duration: 0.5 },
+    { id: 'baja-010', text: 'Cambiá de posición', emoji: '🔄', level: 'baja', category: 'activar', canReduce: false, duration: 0.5 },
+    { id: 'baja-011', text: 'Prepará un café o una infusión', emoji: '☕', level: 'baja', category: 'activar', canReduce: false, duration: 5 },
+    { id: 'baja-012', text: 'Poné una canción que te guste', emoji: '🎵', level: 'baja', category: 'activar', canReduce: false, duration: 1 },
+    { id: 'baja-013', text: 'Lavate la cara', emoji: '🧼', level: 'baja', category: 'activar', canReduce: false, duration: 2 },
+    { id: 'baja-014', text: 'Abrí la ventana y dejá entrar aire', emoji: '🪟', level: 'baja', category: 'activar', canReduce: false, duration: 0.5 },
+    { id: 'baja-015', text: 'Tocá algo frío o caliente (una taza, agua, una mesa)', emoji: '🖐️', level: 'baja', category: 'activar', canReduce: false, duration: 0.5 }
   ],
   media: [
-    { id: 'media-001', text: 'Ordená una parte del cuarto', emoji: '🧹', level: 'media', category: 'orden', canReduce: false },
-    { id: 'media-002', text: 'Respondé un mensaje pendiente', emoji: '💬', level: 'media', category: 'comunicación', canReduce: false },
-    { id: 'media-003', text: 'Escribí una sola frase', emoji: '✏️', level: 'media', category: 'escritura', canReduce: false },
-    { id: 'media-004', text: 'Lavá una taza', emoji: '☕', level: 'media', category: 'higiene', canReduce: false },
-    { id: 'media-005', text: 'Armá una lista de 3 cosas', emoji: '📋', level: 'media', category: 'organizar', canReduce: false },
-    { id: 'media-006', text: 'Caminá 2 minutos', emoji: '🚶', level: 'media', category: 'movimiento', canReduce: false },
-    { id: 'media-007', text: 'Leé una página', emoji: '📖', level: 'media', category: 'lectura', canReduce: false },
-    { id: 'media-008', text: 'Abrí ese archivo (solo abrirlo)', emoji: '📂', level: 'media', category: 'digital', canReduce: false },
-    { id: 'media-009', text: 'Guardá algo fuera de lugar', emoji: '📦', level: 'media', category: 'orden', canReduce: false },
-    { id: 'media-010', text: 'Prepará lo que vas a usar después', emoji: '🎯', level: 'media', category: 'organizar', canReduce: false },
-    { id: 'media-011', text: 'Eliminá 5 fotos', emoji: '🖼️', level: 'media', category: 'digital', canReduce: false },
-    { id: 'media-012', text: 'Organizá una carpeta', emoji: '📁', level: 'media', category: 'orden', canReduce: false },
-    { id: 'media-013', text: 'Tomá una ducha corta', emoji: '🚿', level: 'media', category: 'higiene', canReduce: false },
-    { id: 'media-014', text: 'Sacá la basura', emoji: '🗑️', level: 'media', category: 'orden', canReduce: false },
-    { id: 'media-015', text: 'Abrí una nota y escribí cómo estás', emoji: '📝', level: 'media', category: 'escritura', canReduce: false },
-    { id: 'media-016', text: 'Dejá algo listo para más tarde', emoji: '⏰', level: 'media', category: 'organizar', canReduce: false }
+    { id: 'media-001', text: 'Ordená una parte del cuarto', emoji: '🧹', level: 'media', category: 'orden', canReduce: false, duration: 10 },
+    { id: 'media-002', text: 'Respondé un mensaje pendiente', emoji: '💬', level: 'media', category: 'comunicación', canReduce: false, duration: 3 },
+    { id: 'media-003', text: 'Escribí una sola frase', emoji: '✏️', level: 'media', category: 'escritura', canReduce: false, duration: 2 },
+    { id: 'media-004', text: 'Lavá una taza', emoji: '☕', level: 'media', category: 'higiene', canReduce: false, duration: 2 },
+    { id: 'media-005', text: 'Armá una lista de 3 cosas', emoji: '📋', level: 'media', category: 'organizar', canReduce: false, duration: 2 },
+    { id: 'media-006', text: 'Caminá 2 minutos', emoji: '🚶', level: 'media', category: 'movimiento', canReduce: false, duration: 2 },
+    { id: 'media-007', text: 'Leé una página', emoji: '📖', level: 'media', category: 'lectura', canReduce: false, duration: 5 },
+    { id: 'media-008', text: 'Abrí ese archivo (solo abrirlo)', emoji: '📂', level: 'media', category: 'digital', canReduce: false, duration: 1 },
+    { id: 'media-009', text: 'Guardá algo fuera de lugar', emoji: '📦', level: 'media', category: 'orden', canReduce: false, duration: 2 },
+    { id: 'media-010', text: 'Prepará lo que vas a usar después', emoji: '🎯', level: 'media', category: 'organizar', canReduce: false, duration: 5 },
+    { id: 'media-011', text: 'Eliminá 5 fotos', emoji: '🖼️', level: 'media', category: 'digital', canReduce: false, duration: 2 },
+    { id: 'media-012', text: 'Organizá una carpeta', emoji: '📁', level: 'media', category: 'orden', canReduce: false, duration: 5 },
+    { id: 'media-013', text: 'Tomá una ducha corta', emoji: '🚿', level: 'media', category: 'higiene', canReduce: false, duration: 10 },
+    { id: 'media-014', text: 'Sacá la basura', emoji: '🗑️', level: 'media', category: 'orden', canReduce: false, duration: 3 },
+    { id: 'media-015', text: 'Abrí una nota y escribí cómo estás', emoji: '📝', level: 'media', category: 'escritura', canReduce: false, duration: 5 },
+    { id: 'media-016', text: 'Dejá algo listo para más tarde', emoji: '⏰', level: 'media', category: 'organizar', canReduce: false, duration: 5 }
   ],
   alta: [
-    { id: 'alta-001', text: 'Terminá una tarea pendiente', emoji: '✅', level: 'alta', category: 'avanzar', canReduce: false },
-    { id: 'alta-002', text: 'Ordená un espacio completo', emoji: '🧹', level: 'alta', category: 'orden', canReduce: false },
-    { id: 'alta-003', text: 'Avanzá 20 minutos', emoji: '⏱️', level: 'alta', category: 'avanzar', canReduce: false },
-    { id: 'alta-004', text: 'Escribí sin parar 5 min', emoji: '✏️', level: 'alta', category: 'escritura', canReduce: false },
-    { id: 'alta-005', text: 'Entrená / movete fuerte', emoji: '💪', level: 'alta', category: 'movimiento', canReduce: false },
-    { id: 'alta-006', text: 'Limpiá algo que evitabas', emoji: '🧽', level: 'alta', category: 'orden', canReduce: false },
-    { id: 'alta-007', text: 'Planificá mañana', emoji: '📅', level: 'alta', category: 'organizar', canReduce: false },
-    { id: 'alta-008', text: 'Tomá una decisión pendiente', emoji: '⚖️', level: 'alta', category: 'avanzar', canReduce: false },
-    { id: 'alta-009', text: 'Cerrá un tema abierto', emoji: '🔒', level: 'alta', category: 'avanzar', canReduce: false },
-    { id: 'alta-010', text: 'Empezá eso que venís postergando', emoji: '🚀', level: 'alta', category: 'avanzar', canReduce: false },
-    { id: 'alta-011', text: 'Creá algo (texto, idea, boceto)', emoji: '💡', level: 'alta', category: 'crear', canReduce: false },
-    { id: 'alta-012', text: 'Ayudá a alguien', emoji: '🤝', level: 'alta', category: 'social', canReduce: false },
-    { id: 'alta-013', text: 'Dejá algo listo para tu yo de mañana', emoji: '🌅', level: 'alta', category: 'organizar', canReduce: false },
-    { id: 'alta-014', text: 'Revisá y cerrá pendientes', emoji: '✅', level: 'alta', category: 'avanzar', canReduce: false }
+    { id: 'alta-001', text: 'Terminá una tarea pendiente', emoji: '✅', level: 'alta', category: 'avanzar', canReduce: false, duration: 15 },
+    { id: 'alta-002', text: 'Ordená un espacio completo', emoji: '🧹', level: 'alta', category: 'orden', canReduce: false, duration: 20 },
+    { id: 'alta-003', text: 'Avanzá 20 minutos', emoji: '⏱️', level: 'alta', category: 'avanzar', canReduce: false, duration: 20 },
+    { id: 'alta-004', text: 'Escribí sin parar 5 min', emoji: '✏️', level: 'alta', category: 'escritura', canReduce: false, duration: 5 },
+    { id: 'alta-005', text: 'Entrená / movete fuerte', emoji: '💪', level: 'alta', category: 'movimiento', canReduce: false, duration: 30 },
+    { id: 'alta-006', text: 'Limpiá algo que evitabas', emoji: '🧽', level: 'alta', category: 'orden', canReduce: false, duration: 15 },
+    { id: 'alta-007', text: 'Planificá mañana', emoji: '📅', level: 'alta', category: 'organizar', canReduce: false, duration: 10 },
+    { id: 'alta-008', text: 'Tomá una decisión pendiente', emoji: '⚖️', level: 'alta', category: 'avanzar', canReduce: false, duration: 10 },
+    { id: 'alta-009', text: 'Cerrá un tema abierto', emoji: '🔒', level: 'alta', category: 'avanzar', canReduce: false, duration: 15 },
+    { id: 'alta-010', text: 'Empezá eso que venís postergando', emoji: '🚀', level: 'alta', category: 'avanzar', canReduce: false, duration: 20 },
+    { id: 'alta-011', text: 'Creá algo (texto, idea, boceto)', emoji: '💡', level: 'alta', category: 'crear', canReduce: false, duration: 15 },
+    { id: 'alta-012', text: 'Ayudá a alguien', emoji: '🤝', level: 'alta', category: 'social', canReduce: false, duration: 10 },
+    { id: 'alta-013', text: 'Dejá algo listo para tu yo de mañana', emoji: '🌅', level: 'alta', category: 'organizar', canReduce: false, duration: 10 },
+    { id: 'alta-014', text: 'Revisá y cerrá pendientes', emoji: '✅', level: 'alta', category: 'avanzar', canReduce: false, duration: 15 }
   ]
 }
 
@@ -155,3 +155,10 @@ export const getPreviousEnergyLevel = (currentLevel) => {
 }
 
 export const getEnergyLevelInfo = (level) => ENERGY_LEVELS[level] || null
+
+// Helper para determinar si una tarea es instantánea (duración ≤ 1 minuto)
+export const isInstantTask = (action) => {
+  if (!action) return false
+  const duration = action.duration || 10 // Default a 10 minutos si no tiene duración
+  return duration <= 1
+}
