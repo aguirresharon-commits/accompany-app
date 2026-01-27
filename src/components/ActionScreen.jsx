@@ -133,7 +133,7 @@ const ActionScreen = () => {
     if (!displayedAction) return
     const soundsConfig = sounds || { enabled: true, volume: 0.3 }
     await initAudioContext()
-    playStartSound(soundsConfig.enabled, soundsConfig.volume)
+    await playStartSound(soundsConfig.enabled, soundsConfig.volume)
     setListPanelOpen(false)
     setEmpezarAction(displayedAction)
     setEmpezarFlow('timeSelect')

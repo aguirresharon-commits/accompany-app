@@ -1,53 +1,58 @@
 // Utilidades de sonido: sonidos sutiles generados con Web Audio API
 // Sonidos muy cortos, suaves y opcionales para feedback calmado
+// En móviles (iOS/Android) el audio debe desbloquearse en la primera interacción del usuario.
 
 let audioContext = null
-let audioContextInitialized = false
 
 const getAudioContext = async () => {
-  if (!audioContext) {
+  const createContext = () => {
     try {
-      audioContext = new (window.AudioContext || window.webkitAudioContext)()
+      return new (window.AudioContext || window.webkitAudioContext)()
     } catch (e) {
       return null
     }
   }
-  
-  // En móviles, el AudioContext puede estar suspendido y necesita interacción del usuario
-  // Siempre intentar reactivar si está suspendido
+
+  if (!audioContext || audioContext.state === 'closed') {
+    audioContext = createContext()
+    if (!audioContext) return null
+  }
+
+  // En móviles el contexto suele empezar en 'suspended'; hace falta resume() dentro de un gesto.
   if (audioContext.state === 'suspended') {
     try {
       await audioContext.resume()
-      // Esperar un momento para asegurar que el contexto esté listo
-      if (audioContext.state === 'running') {
-        return audioContext
-      }
     } catch (e) {
-      // Si falla, intentar crear uno nuevo
-      try {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)()
-        if (audioContext.state === 'suspended') {
-          await audioContext.resume()
-        }
-      } catch (e2) {
-        audioContext = null
-        return null
-      }
+      return null
     }
   }
-  
-  return audioContext
+
+  // En iOS a veces el estado queda "running" pero no avanza; intentar suspend+resume una vez.
+  if (audioContext.state === 'running') {
+    return audioContext
+  }
+  if (audioContext.state === 'suspended') {
+    try {
+      await audioContext.suspend()
+      await audioContext.resume()
+    } catch (e) {
+      // ignorar
+    }
+  }
+
+  return audioContext.state === 'running' ? audioContext : null
 }
 
-// Inicializar AudioContext en la primera interacción del usuario
+/**
+ * Desbloquear audio en la primera interacción (tap/click).
+ * Debe llamarse desde un manejador de touchend/click para que en móviles funcione.
+ */
 export const initAudioContext = async () => {
   try {
     const ctx = await getAudioContext()
-    if (ctx && ctx.state === 'running') {
-      audioContextInitialized = true
-    }
+    return !!(ctx && ctx.state === 'running')
   } catch (e) {
-    // Silenciar errores
+    return false
   }
 }
 
@@ -147,23 +152,11 @@ export const playTimerEndSound = async (enabled = true, volume = 0.3) => {
 // Sonido mínimo para feedback de toque: muy breve
 export const playTapSound = async (enabled = true, volume = 0.15) => {
   if (!enabled) return
-  
+
   try {
-    // Siempre intentar obtener/reactivar el AudioContext
-    let ctx = await getAudioContext()
-    
-    // Si el contexto está suspendido, intentar reactivarlo
-    if (ctx && ctx.state === 'suspended') {
-      await ctx.resume()
-      // Verificar nuevamente después de resume
-      if (ctx.state !== 'running') {
-        // Si aún está suspendido, crear uno nuevo
-        ctx = new (window.AudioContext || window.webkitAudioContext)()
-      }
-    }
-    
-    if (!ctx || ctx.state !== 'running') return
-    
+    const ctx = await getAudioContext()
+    if (!ctx) return
+
     const oscillator = ctx.createOscillator()
     const gainNode = ctx.createGain()
     

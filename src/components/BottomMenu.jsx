@@ -17,11 +17,8 @@ const BottomMenu = ({
   }
 
   const handleWithSound = async (callback) => {
-    // En móviles, siempre intentar reactivar el AudioContext en cada interacción
     try {
       await initAudioContext()
-      // Pequeño delay para asegurar que el contexto esté listo
-      await new Promise(resolve => setTimeout(resolve, 10))
       await playTapSound(soundsEnabled, soundsVolume)
     } catch (e) {
       // Si falla el sonido, continuar con la acción de todas formas

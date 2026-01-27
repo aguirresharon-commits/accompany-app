@@ -3,12 +3,14 @@
 import { useAppState } from '../hooks/useAppState'
 import { ENERGY_LEVELS, ENERGY_LEVEL_KEYS } from '../data/actions'
 import { EnergyLevelIcon } from './TaskIcon'
+import { initAudioContext } from '../utils/sounds'
 import './EnergyLevelSelector.css'
 
 const EnergyLevelSelector = () => {
   const { setEnergyLevel } = useAppState()
 
   const handleSelectLevel = (levelKey) => {
+    initAudioContext().catch(() => {})
     setEnergyLevel(levelKey)
   }
 
