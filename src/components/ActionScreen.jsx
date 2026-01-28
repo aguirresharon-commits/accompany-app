@@ -1,6 +1,7 @@
 // Pantalla principal: Control, Empezar (TimeSelect → Timer → TimerEnd), Completadas hoy, menú inferior
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useAppState } from '../hooks/useAppState'
+import { useAuth } from '../context/AuthContext'
 import { getRandomAction, getReducedAction, isInstantTask, getSectionLabel, getEnergyLevelInfo } from '../data/actions'
 import { getTodayDate, formatTime } from '../utils/storage'
 import { playStartSound, initAudioContext } from '../utils/sounds'
@@ -31,6 +32,7 @@ const getRandomConfirmMessage = () =>
   CONFIRM_MESSAGES[Math.floor(Math.random() * CONFIRM_MESSAGES.length)]
 
 const ActionScreen = () => {
+  const { logout } = useAuth()
   const {
     currentEnergyLevel,
     setCurrentAction,
@@ -386,6 +388,7 @@ const ActionScreen = () => {
             onSoundsEnabledChange={setSoundsEnabled}
             userPlan={userPlan || 'free'}
             onUpgrade={() => setPremiumViewOpen(true)}
+            onLogout={logout}
           />
         )}
           </>

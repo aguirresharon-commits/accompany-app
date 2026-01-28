@@ -1,9 +1,11 @@
 import { useState, useCallback, useEffect } from 'react'
+import { AuthProvider, useAuth } from './context/AuthContext'
 import { AppProvider, useAppState } from './context/AppContext'
 import EnergyLevelSelector from './components/EnergyLevelSelector'
 import ActionScreen from './components/ActionScreen'
 import Loader from './components/Loader'
 import WelcomeScreen from './components/WelcomeScreen'
+import LoginScreen from './components/LoginScreen'
 import { initAudioContext } from './utils/sounds'
 
 const AppContent = () => {
@@ -72,11 +74,34 @@ const AppWithWelcome = () => {
   )
 }
 
-function App() {
+const AppWithAuth = () => {
+  const { isAuthenticated, authLoading, login, signUp } = useAuth()
+
+  if (authLoading) {
+    return <Loader isLoading />
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <LoginScreen
+        onLogin={login}
+        onSignUp={signUp}
+      />
+    )
+  }
+
   return (
     <AppProvider>
       <AppWithWelcome />
     </AppProvider>
+  )
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppWithAuth />
+    </AuthProvider>
   )
 }
 
