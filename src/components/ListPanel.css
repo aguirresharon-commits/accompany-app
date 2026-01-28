@@ -35,6 +35,38 @@
   box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.3);
 }
 
+.list-panel__back {
+  position: absolute;
+  left: var(--spacing-md);
+  /* Alineado con el texto del título (debajo del handle) */
+  top: calc(var(--spacing-sm) + var(--spacing-md));
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  line-height: 1;
+  font-family: inherit;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.list-panel__back:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.list-panel__back:active {
+  transform: scale(0.98);
+}
+
 @keyframes list-panel-slide-up {
   from {
     opacity: 0;

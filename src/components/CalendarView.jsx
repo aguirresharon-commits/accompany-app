@@ -1,7 +1,6 @@
 // Vista Calendario: calendario mensual, días marcados con tareas, detalle al tocar
 import { useState, useMemo } from 'react'
 import { useAppState } from '../hooks/useAppState'
-import { formatTime } from '../utils/storage'
 import DayDetailModal from './DayDetailModal'
 import './CalendarView.css'
 
@@ -71,7 +70,8 @@ const CalendarView = ({ isPremium: isPremiumProp, onRequestPremium }) => {
   const handleDayClick = (day) => {
     if (!day) return
     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-    if (!isPremium && (isPastDay(day) || !isToday(day))) {
+    // El calendario (días) es visible para todos, pero ver el detalle del día requiere Premium.
+    if (!isPremium) {
       onRequestPremium?.()
       return
     }

@@ -31,6 +31,14 @@ const TimerEndModal = ({
         onClick={onClose}
         aria-label="Cerrar"
       />
+      <button
+        type="button"
+        className="timer-end__back"
+        onClick={onClose}
+        aria-label="Volver"
+      >
+        ←
+      </button>
       <div className="timer-end__sheet">
         <p className="timer-end__message">{msg}</p>
         <div className="timer-end__actions">

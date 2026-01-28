@@ -83,6 +83,14 @@ const AddNoteModal = ({ action, onConfirm, onSkip }) => {
         onClick={onSkip}
         aria-label="Cerrar"
       />
+      <button
+        type="button"
+        className="add-note-modal__back"
+        onClick={onSkip}
+        aria-label="Volver"
+      >
+        ←
+      </button>
       <div ref={sheetRef} className="add-note-modal__sheet">
         <p className="add-note-modal__title">¿Dejás una nota? (opcional)</p>
         <textarea

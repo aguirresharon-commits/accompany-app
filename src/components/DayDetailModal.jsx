@@ -36,6 +36,14 @@ const DayDetailModal = ({ date, onClose }) => {
         onClick={onClose}
         aria-label="Cerrar"
       />
+      <button
+        type="button"
+        className="day-detail__back"
+        onClick={onClose}
+        aria-label="Volver"
+      >
+        ←
+      </button>
       <div className="day-detail__sheet" onClick={handleBackdropClick}>
         <div className="day-detail__content" onClick={(e) => e.stopPropagation()}>
           <h3 className="day-detail__date">{formattedDate}</h3>

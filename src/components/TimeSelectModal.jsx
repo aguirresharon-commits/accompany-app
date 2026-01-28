@@ -100,6 +100,14 @@ const TimeSelectModal = ({ action, onSelect, onClose, isPremium = false, onReque
         onClick={onClose}
         aria-label="Cerrar"
       />
+      <button
+        type="button"
+        className="time-select__back"
+        onClick={onClose}
+        aria-label="Volver"
+      >
+        ←
+      </button>
       <div className="time-select__sheet">
         <p className="time-select__title">¿Cuánto tiempo?</p>
         {action?.id && getTaskIcon(action.id) && (

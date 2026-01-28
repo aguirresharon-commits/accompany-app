@@ -15,6 +15,14 @@ const PremiumView = ({ isPremium: isPremiumProp, userPlan, onActivate, onClose }
   return (
     <div className="premium-view">
       <div className="premium-view__inner">
+        <button
+          type="button"
+          className="premium-view__back"
+          onClick={onClose}
+          aria-label="Volver"
+        >
+          ←
+        </button>
         <h1 className="premium-view__title">Premium</h1>
         <p className="premium-view__intro">
           {isPremium

@@ -121,6 +121,32 @@ const ActionScreen = () => {
 
   const isPremiumUser = currentUser ? checkIsPremium(currentUser.uid) : false
 
+  const handleActivatePremium = useCallback(() => {
+    // Usar authService.getCurrentUser() (carga diferida para no romper la app si Firebase falla)
+    import('../services/authService')
+      .then(({ getCurrentUser }) => {
+        const user = getCurrentUser()
+        if (!user) {
+          // Si no hay usuario logueado: ir a LoginScreen
+          setPreviousTab(activeTab)
+          setPremiumViewOpen(false)
+          setActiveTab('login')
+          return
+        }
+
+        // Si hay usuario: activar premium solo para ese uid y reflejarlo al instante
+        activatePremium(user.uid)
+        setPremiumRefresh((r) => r + 1)
+        setPremiumViewOpen(false)
+      })
+      .catch(() => {
+        // Si auth no está disponible, tratar como no logueado y mostrar login (con fallback a Loader)
+        setPreviousTab(activeTab)
+        setPremiumViewOpen(false)
+        setActiveTab('login')
+      })
+  }, [activeTab])
+
   const selectNewAction = useCallback(() => {
     if (!currentEnergyLevel) return
     const today = getTodayDate()
@@ -336,13 +362,7 @@ const ActionScreen = () => {
           <PremiumView
             isPremium={isPremiumUser}
             userPlan={userPlan || 'free'}
-            onActivate={() => {
-              if (currentUser) {
-                activatePremium(currentUser.uid)
-                setPremiumRefresh((r) => r + 1)
-              }
-              setPremiumViewOpen(false)
-            }}
+            onActivate={handleActivatePremium}
             onClose={() => setPremiumViewOpen(false)}
           />
         ) : activeTab === 'login' ? (
@@ -350,6 +370,7 @@ const ActionScreen = () => {
             <Suspense fallback={<Loader isLoading={true} />}>
               <LoginScreen
                 onSuccess={() => setActiveTab(previousTab)}
+                onBack={() => setActiveTab(previousTab)}
               />
             </Suspense>
           </LoginErrorBoundary>

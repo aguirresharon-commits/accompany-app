@@ -74,6 +74,14 @@ const NotePrompt = ({ action, onConfirm, onSkip }) => {
   return (
     <div className="note-prompt" role="dialog" aria-label="Nota opcional">
       <button type="button" className="note-prompt__backdrop" onClick={onSkip} aria-label="Cerrar" />
+      <button
+        type="button"
+        className="note-prompt__back"
+        onClick={onSkip}
+        aria-label="Volver"
+      >
+        ←
+      </button>
       <div ref={sheetRef} className="note-prompt__sheet">
         <p className="note-prompt__title">¿Dejás una nota? (opcional)</p>
         <textarea

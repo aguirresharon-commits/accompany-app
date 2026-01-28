@@ -1,11 +1,21 @@
 // Pantalla de login: email, contraseña, Firebase signInWithEmailAndPassword.
 // Exportado pero no conectado a la app todavía.
 import { useState, useCallback } from 'react'
-import { signInWithEmailAndPassword } from 'firebase/auth'
-import { auth } from '../firebaseConfig'
 import logoHead from '../assets/logo-head.png'
 import StarryBackground from './StarryBackground'
 import './LoginScreen.css'
+
+const AUTH_LOAD_TIMEOUT_MS = 8000
+
+function withTimeout(promise, ms) {
+  let timeoutId
+  const timeoutPromise = new Promise((_, reject) => {
+    timeoutId = setTimeout(() => reject(new Error('AUTH_TIMEOUT')), ms)
+  })
+  return Promise.race([promise, timeoutPromise]).finally(() => {
+    clearTimeout(timeoutId)
+  })
+}
 
 const mapAuthError = (err) => {
   const code = err?.code
@@ -14,10 +24,11 @@ const mapAuthError = (err) => {
   if (code === 'auth/invalid-email') return 'Email inválido.'
   if (code === 'auth/too-many-requests') return 'Demasiados intentos. Probá más tarde.'
   if (code === 'auth/network-request-failed') return 'Error de conexión.'
+  if (err?.message === 'AUTH_TIMEOUT') return 'Demasiado lento. Probá de nuevo.'
   return err?.message || 'Error al ingresar.'
 }
 
-const LoginScreen = ({ onSuccess }) => {
+const LoginScreen = ({ onSuccess, onBack }) => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -38,7 +49,12 @@ const LoginScreen = ({ onSuccess }) => {
       }
       setLoading(true)
       try {
-        await signInWithEmailAndPassword(auth, trimEmail, password)
+        // No bloquear el render esperando Firebase/Auth:
+        // Cargamos authService solo al enviar, con timeout para evitar loading infinito.
+        await withTimeout(
+          import('../services/authService').then(({ login }) => login(trimEmail, password)),
+          AUTH_LOAD_TIMEOUT_MS
+        )
         onSuccess?.()
       } catch (err) {
         setError(mapAuthError(err))
@@ -52,6 +68,14 @@ const LoginScreen = ({ onSuccess }) => {
   return (
     <div className="login" role="region" aria-label="Iniciar sesión">
       <StarryBackground />
+      <button
+        type="button"
+        className="login__back"
+        onClick={() => onBack?.()}
+        aria-label="Volver"
+      >
+        ←
+      </button>
       <div className="login__inner">
         <img src={logoHead} alt="" className="login__logo" aria-hidden="true" />
         <h1 className="login__brand">CONTROL</h1>

@@ -20,6 +20,14 @@ const UpgradeModal = ({ onConfirm, onClose }) => {
         onClick={onClose}
         aria-label="Cerrar"
       />
+      <button
+        type="button"
+        className="upgrade-modal__back"
+        onClick={onClose}
+        aria-label="Volver"
+      >
+        ←
+      </button>
       <div className="upgrade-modal__sheet">
         <h2 id="upgrade-modal-title" className="upgrade-modal__title">Premium</h2>
         <p className="upgrade-modal__text">
