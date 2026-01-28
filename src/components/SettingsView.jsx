@@ -11,11 +11,25 @@ const SettingsView = ({
   onSoundsEnabledChange,
   userPlan,
   onUpgrade,
+  onOpenLogin,
 }) => {
   const isPremium = userPlan === 'premium'
 
   return (
     <div className="settings-view">
+      {onOpenLogin && (
+        <section className="settings-view__section">
+          <h2 className="settings-view__title">Cuenta</h2>
+          <p className="settings-view__desc">Iniciar sesión con tu email.</p>
+          <button
+            type="button"
+            className="settings-view__upgrade-btn"
+            onClick={onOpenLogin}
+          >
+            Iniciar sesión
+          </button>
+        </section>
+      )}
       <section className="settings-view__section">
         <h2 className="settings-view__title">Premium</h2>
         <p className="settings-view__desc">

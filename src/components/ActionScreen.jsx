@@ -1,5 +1,5 @@
 // Pantalla principal: Control, Empezar (TimeSelect → Timer → TimerEnd), Completadas hoy, menú inferior
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, lazy, Suspense } from 'react'
 import { useAppState } from '../hooks/useAppState'
 import { getRandomAction, getReducedAction, isInstantTask, getSectionLabel, getEnergyLevelInfo } from '../data/actions'
 import { getTodayDate, formatTime } from '../utils/storage'
@@ -18,6 +18,8 @@ import TimerEndModal from './TimerEndModal'
 import AddNoteModal from './AddNoteModal'
 import PremiumView from './PremiumView'
 import StarryBackground from './StarryBackground'
+
+const LoginScreen = lazy(() => import('./LoginScreen'))
 import './ActionScreen.css'
 
 const COMPLETION_MESSAGES = ['Hecho.', 'Avanzaste.', 'Eso ya está.', 'Suficiente por hoy.']
@@ -49,6 +51,7 @@ const ActionScreen = () => {
 
   const [displayedAction, setDisplayedAction] = useState(null)
   const [activeTab, setActiveTab] = useState('progress')
+  const [previousTab, setPreviousTab] = useState('settings')
   const [listPanelOpen, setListPanelOpen] = useState(false)
   const [notePromptAction, setNotePromptAction] = useState(null)
   const [completionOverlay, setCompletionOverlay] = useState(null) // { message: string, showQuestion?: boolean } | null
@@ -264,7 +267,6 @@ const ActionScreen = () => {
   }
 
   if (!currentEnergyLevel) return null
-  if (activeTab === 'progress' && !displayedAction) return <Loader isLoading={true} />
 
   const soundsConfig = sounds || { enabled: true, volume: 0.3 }
   const isInstant = displayedAction ? isInstantTask(displayedAction) : false
@@ -286,9 +288,14 @@ const ActionScreen = () => {
             }}
             onClose={() => setPremiumViewOpen(false)}
           />
-        ) : (
-          <>
-        {activeTab === 'progress' && (
+        ) : activeTab === 'login' ? (
+          <Suspense fallback={<Loader isLoading={true} />}>
+            <LoginScreen
+              onSuccess={() => setActiveTab(previousTab)}
+            />
+          </Suspense>
+        ) : activeTab === 'progress' ? (
+          displayedAction ? (
           <div className="action-screen__progress">
             <div className="action-screen__card">
               <div className="action-screen__task">
@@ -371,13 +378,12 @@ const ActionScreen = () => {
               </section>
             )}
           </div>
-        )}
-
-        {activeTab === 'today' && (
+          ) : (
+            <Loader isLoading={true} />
+          )
+        ) : activeTab === 'today' ? (
           <CalendarView onRequestPremium={() => setPremiumViewOpen(true)} />
-        )}
-
-        {activeTab === 'settings' && (
+        ) : activeTab === 'settings' ? (
           <SettingsView
             currentEnergyLevel={currentEnergyLevel}
             onEnergyLevelChange={setEnergyLevel}
@@ -386,9 +392,13 @@ const ActionScreen = () => {
             onSoundsEnabledChange={setSoundsEnabled}
             userPlan={userPlan || 'free'}
             onUpgrade={() => setPremiumViewOpen(true)}
+            onOpenLogin={() => {
+              setPreviousTab(activeTab)
+              setActiveTab('login')
+            }}
           />
-        )}
-          </>
+        ) : (
+          <Loader isLoading={true} />
         )}
       </main>
 
