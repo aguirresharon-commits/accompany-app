@@ -23,25 +23,6 @@ Control es una web app basada en "Hábitos Atómicos" de James Clear, diseñada 
 npm install
 ```
 
-### Autenticación (Firebase)
-
-La app usa Firebase Auth (email/contraseña). La sesión se persiste en el dispositivo de forma segura (IndexedDB/local vía Firebase).
-
-1. Crear un proyecto en [Firebase Console](https://console.firebase.google.com).
-2. En **Authentication** → **Sign-in method**, activar **Email/Password**.
-3. Copiar `.env.example` a `.env` y completar con los valores de **Configuración del proyecto** (ícono de engranaje) → **Tus apps** → SDK de Web:
-
-```
-VITE_FIREBASE_API_KEY=...
-VITE_FIREBASE_AUTH_DOMAIN=...
-VITE_FIREBASE_PROJECT_ID=...
-VITE_FIREBASE_STORAGE_BUCKET=...
-VITE_FIREBASE_MESSAGING_SENDER_ID=...
-VITE_FIREBASE_APP_ID=...
-```
-
-Sin `.env` configurado, la pantalla de login se mostrará pero login/registro fallarán hasta que las variables estén definidas.
-
 ### Ejecutar en desarrollo
 
 ```bash
