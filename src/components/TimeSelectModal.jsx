@@ -117,7 +117,7 @@ const TimeSelectModal = ({ action, onSelect, onClose, isPremium = false, onReque
               {m} min
             </button>
           ))}
-          {isPremium && (
+          {isPremium ? (
             <button
               type="button"
               className={`time-select__btn ${customMode ? 'time-select__btn--active' : ''}`}
@@ -125,20 +125,25 @@ const TimeSelectModal = ({ action, onSelect, onClose, isPremium = false, onReque
             >
               Otro
             </button>
-          )}
-        </div>
-        {!isPremium && (
-          onRequestPremium ? (
+          ) : (
             <button
               type="button"
-              className="time-select__premium-hint-btn"
-              onClick={onRequestPremium}
+              className="time-select__btn time-select__btn--disabled"
+              disabled
+              aria-label="Función Premium"
             >
-              Con Premium podés elegir cualquier duración.
+              Función Premium
             </button>
-          ) : (
-            <p className="time-select__premium-hint">Con Premium podés elegir cualquier duración.</p>
-          )
+          )}
+        </div>
+        {!isPremium && onRequestPremium && (
+          <button
+            type="button"
+            className="time-select__premium-hint-btn"
+            onClick={onRequestPremium}
+          >
+            Con Premium podés elegir cualquier duración.
+          </button>
         )}
         {customMode && (
           <div className="time-select__custom">

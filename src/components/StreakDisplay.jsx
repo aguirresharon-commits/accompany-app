@@ -1,14 +1,43 @@
 // Componente para mostrar racha de forma empática y discreta
-// FREE: solo ver. PREMIUM: pausar/reanudar
+// FREE: solo ver. PREMIUM: pausar/reanudar (bloqueo real por premiumService + authService)
+import { useEffect, useState } from 'react'
 import { useStreak } from '../hooks/useStreak'
 import { useAppState } from '../hooks/useAppState'
+import { isPremium as checkIsPremium } from '../services/premiumService'
 import './StreakDisplay.css'
 
 const StreakDisplay = () => {
   const streakInfo = useStreak()
-  const { updateStreak, userPlan } = useAppState()
+  const { updateStreak } = useAppState()
   const { current, paused, message } = streakInfo
-  const isPremium = userPlan === 'premium'
+  // Evitar import estático de Firebase/Auth al cargar la app.
+  // Si no podemos obtener usuario, tratamos como no premium.
+  const [currentUser, setCurrentUser] = useState(null)
+  useEffect(() => {
+    let unsubscribe = () => {}
+    let cancelled = false
+    import('../services/authService')
+      .then(({ getCurrentUser, onAuthChange }) => {
+        if (cancelled) return
+        setCurrentUser(getCurrentUser())
+        unsubscribe = onAuthChange((u) => {
+          if (!cancelled) setCurrentUser(u)
+        })
+      })
+      .catch(() => {
+        if (!cancelled) setCurrentUser(null)
+      })
+    return () => {
+      cancelled = true
+      try {
+        unsubscribe?.()
+      } catch {
+        // ignore
+      }
+    }
+  }, [])
+
+  const isPremium = currentUser ? checkIsPremium(currentUser.uid) : false
 
   const handleTogglePause = () => {
     if (!isPremium) return
@@ -33,7 +62,7 @@ const StreakDisplay = () => {
         </button>
       )}
       {current > 0 && !isPremium && (
-        <span className="streak-display__premium-hint">Con Premium podés pausar la racha.</span>
+        <span className="streak-display__premium-hint">Función Premium</span>
       )}
     </div>
   )

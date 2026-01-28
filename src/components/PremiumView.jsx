@@ -9,8 +9,8 @@ const BENEFITS = [
   'Con Premium podés acceder a todas las funciones avanzadas de la app.',
 ]
 
-const PremiumView = ({ userPlan, onActivate, onClose }) => {
-  const isPremium = userPlan === 'premium'
+const PremiumView = ({ isPremium: isPremiumProp, userPlan, onActivate, onClose }) => {
+  const isPremium = isPremiumProp !== undefined ? isPremiumProp : userPlan === 'premium'
 
   return (
     <div className="premium-view">

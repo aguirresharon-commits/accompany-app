@@ -11,9 +11,9 @@ const MONTHS = [
   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
 ]
 
-const CalendarView = ({ onRequestPremium }) => {
-  const { completedActions, userPlan } = useAppState()
-  const isPremium = userPlan === 'premium'
+const CalendarView = ({ isPremium: isPremiumProp, onRequestPremium }) => {
+  const { completedActions } = useAppState()
+  const isPremium = isPremiumProp === true
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState(null)
 

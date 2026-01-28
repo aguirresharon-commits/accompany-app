@@ -9,11 +9,12 @@ const SettingsView = ({
   onRestartDay,
   soundsEnabled,
   onSoundsEnabledChange,
+  isPremium: isPremiumProp,
   userPlan,
   onUpgrade,
   onOpenLogin,
 }) => {
-  const isPremium = userPlan === 'premium'
+  const isPremium = isPremiumProp !== undefined ? isPremiumProp : userPlan === 'premium'
 
   return (
     <div className="settings-view">

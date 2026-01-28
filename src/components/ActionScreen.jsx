@@ -18,9 +18,10 @@ import TimerEndModal from './TimerEndModal'
 import AddNoteModal from './AddNoteModal'
 import PremiumView from './PremiumView'
 import StarryBackground from './StarryBackground'
+import { isPremium as checkIsPremium, activatePremium } from '../services/premiumService'
+import './ActionScreen.css'
 
 const LoginScreen = lazy(() => import('./LoginScreen'))
-import './ActionScreen.css'
 
 const COMPLETION_MESSAGES = ['Hecho.', 'Avanzaste.', 'Eso ya está.', 'Suficiente por hoy.']
 const getRandomCompletionMessage = () =>
@@ -67,6 +68,37 @@ const ActionScreen = () => {
   const [addNoteOpen, setAddNoteOpen] = useState(false)
   const [instantTaskResponse, setInstantTaskResponse] = useState(null) // 'yes' | 'not-yet' | null
   const [premiumViewOpen, setPremiumViewOpen] = useState(false)
+  const [currentUser, setCurrentUser] = useState(null)
+  const [premiumRefresh, setPremiumRefresh] = useState(0)
+
+  useEffect(() => {
+    let unsubscribe = () => {}
+    let cancelled = false
+    // Cargar authService de forma diferida para evitar que un fallo de Firebase
+    // rompa la app completa (pantalla en blanco).
+    import('../services/authService')
+      .then(({ getCurrentUser, onAuthChange }) => {
+        if (cancelled) return
+        setCurrentUser(getCurrentUser())
+        unsubscribe = onAuthChange((u) => {
+          if (!cancelled) setCurrentUser(u)
+        })
+      })
+      .catch(() => {
+        // Si Firebase/Auth no está disponible, tratar como no logueado.
+        if (!cancelled) setCurrentUser(null)
+      })
+    return () => {
+      cancelled = true
+      try {
+        unsubscribe?.()
+      } catch {
+        // ignore
+      }
+    }
+  }, [])
+
+  const isPremiumUser = currentUser ? checkIsPremium(currentUser.uid) : false
 
   const selectNewAction = useCallback(() => {
     if (!currentEnergyLevel) return
@@ -281,9 +313,13 @@ const ActionScreen = () => {
       <main className="action-screen__main">
         {premiumViewOpen ? (
           <PremiumView
+            isPremium={isPremiumUser}
             userPlan={userPlan || 'free'}
             onActivate={() => {
-              setUserPlan('premium')
+              if (currentUser) {
+                activatePremium(currentUser.uid)
+                setPremiumRefresh((r) => r + 1)
+              }
               setPremiumViewOpen(false)
             }}
             onClose={() => setPremiumViewOpen(false)}
@@ -382,7 +418,10 @@ const ActionScreen = () => {
             <Loader isLoading={true} />
           )
         ) : activeTab === 'today' ? (
-          <CalendarView onRequestPremium={() => setPremiumViewOpen(true)} />
+          <CalendarView
+            isPremium={isPremiumUser}
+            onRequestPremium={() => setPremiumViewOpen(true)}
+          />
         ) : activeTab === 'settings' ? (
           <SettingsView
             currentEnergyLevel={currentEnergyLevel}
@@ -390,6 +429,7 @@ const ActionScreen = () => {
             onRestartDay={handleRestartDay}
             soundsEnabled={soundsConfig.enabled}
             onSoundsEnabledChange={setSoundsEnabled}
+            isPremium={isPremiumUser}
             userPlan={userPlan || 'free'}
             onUpgrade={() => setPremiumViewOpen(true)}
             onOpenLogin={() => {
@@ -416,7 +456,7 @@ const ActionScreen = () => {
           action={empezarAction}
           onSelect={handleTimeSelect}
           onClose={handleTimeSelectClose}
-          isPremium={userPlan === 'premium'}
+          isPremium={isPremiumUser}
           onRequestPremium={() => {
             handleTimeSelectClose()
             setPremiumViewOpen(true)
@@ -442,7 +482,7 @@ const ActionScreen = () => {
           onContinueMore={handleTimerEndContinue}
           onAddNote={handleTimerEndAddNote}
           onClose={handleTimerEndClose}
-          isPremium={userPlan === 'premium'}
+          isPremium={isPremiumUser}
           onRequestPremium={() => {
             handleTimerEndClose()
             setPremiumViewOpen(true)

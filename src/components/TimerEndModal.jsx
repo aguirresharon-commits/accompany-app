@@ -60,17 +60,25 @@ const TimerEndModal = ({
               Agregar nota
             </button>
           ) : (
-            onRequestPremium ? (
+            <>
               <button
                 type="button"
-                className="timer-end__premium-hint-btn"
-                onClick={onRequestPremium}
+                className="timer-end__btn timer-end__btn--secondary"
+                disabled
+                aria-label="Función Premium"
               >
-                Con Premium podés agregar notas al finalizar.
+                Función Premium
               </button>
-            ) : (
-              <p className="timer-end__premium-hint">Con Premium podés agregar notas al finalizar.</p>
-            )
+              {onRequestPremium && (
+                <button
+                  type="button"
+                  className="timer-end__premium-hint-btn"
+                  onClick={onRequestPremium}
+                >
+                  Con Premium podés agregar notas al finalizar.
+                </button>
+              )}
+            </>
           )}
           <button
             type="button"
