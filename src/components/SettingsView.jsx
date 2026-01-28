@@ -1,4 +1,4 @@
-// Ajustes: ritmo, reiniciar día, sonidos, ayuda
+// Ajustes: ritmo, reiniciar día, sonidos, Premium, ayuda
 import { ENERGY_LEVELS, ENERGY_LEVEL_KEYS } from '../data/actions'
 import { EnergyLevelIcon } from './TaskIcon'
 import './SettingsView.css'
@@ -9,9 +9,42 @@ const SettingsView = ({
   onRestartDay,
   soundsEnabled,
   onSoundsEnabledChange,
+  userPlan,
+  onUpgrade,
 }) => {
+  const isPremium = userPlan === 'premium'
+
   return (
     <div className="settings-view">
+      <section className="settings-view__section">
+        <h2 className="settings-view__title">Premium</h2>
+        <p className="settings-view__desc">
+          {isPremium
+            ? 'Tenés acceso a duración libre del timer, notas, historial por día, calendario completo y pausar la racha.'
+            : 'Con Premium podés elegir cualquier duración, agregar notas, ver historial por día, navegar el calendario y pausar la racha.'}
+        </p>
+        {isPremium ? (
+          <div className="settings-view__premium-active">
+            <p className="settings-view__premium-badge">Premium activo</p>
+            <button
+              type="button"
+              className="settings-view__upgrade-btn settings-view__upgrade-btn--link"
+              onClick={onUpgrade}
+            >
+              Ver beneficios
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            className="settings-view__upgrade-btn"
+            onClick={onUpgrade}
+          >
+            Hacerse Premium
+          </button>
+        )}
+      </section>
+
       <section className="settings-view__section">
         <h2 className="settings-view__title">Ritmo</h2>
         <p className="settings-view__desc">Nivel de exigencia de las acciones.</p>

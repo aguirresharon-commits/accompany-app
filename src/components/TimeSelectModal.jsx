@@ -1,14 +1,17 @@
-// Modal: elegir cuántos minutos dedicar a la tarea (5, 10, 15, 20 u otro)
+// Modal: elegir cuántos minutos dedicar a la tarea
+// FREE: presets cortos (1, 3, 5, 10 min). PREMIUM: 5, 10, 15, 20 + duración libre
 import { useState, useRef, useEffect } from 'react'
 import { getTaskIcon } from '../data/iconMap'
 import TaskIcon from './TaskIcon'
 import './TimeSelectModal.css'
 
-const PRESETS = [5, 10, 15, 20] // En minutos
+const PRESETS_FREE = [1, 3, 5, 10]   // minutos
+const PRESETS_PREMIUM = [5, 10, 15, 20]
 
-const TimeSelectModal = ({ action, onSelect, onClose }) => {
+const TimeSelectModal = ({ action, onSelect, onClose, isPremium = false, onRequestPremium }) => {
+  const PRESETS = isPremium ? PRESETS_PREMIUM : PRESETS_FREE
   const [customMode, setCustomMode] = useState(false)
-  const [customSeconds, setCustomSeconds] = useState(10) // 10 segundos por defecto
+  const [customSeconds, setCustomSeconds] = useState(isPremium ? 600 : 60)
   const [selected, setSelected] = useState(null)
   const inputRef = useRef(null)
 
@@ -30,19 +33,27 @@ const TimeSelectModal = ({ action, onSelect, onClose }) => {
   }
 
   const handleOtro = () => {
+    if (!isPremium) return
     setCustomMode(true)
     setSelected(customSeconds)
   }
 
   const handleCustomChange = (e) => {
-    const v = parseInt(e.target.value, 10)
-    if (!Number.isNaN(v) && v >= 10) {
-      setCustomSeconds(v)
-      setSelected(v)
-    } else {
-      setSelected(null)
-      if (e.target.value === '') setCustomSeconds(10)
+    const raw = e.target.value
+    if (raw === '') {
+      setCustomSeconds(10)
+      setSelected(10)
+      return
     }
+    const v = parseInt(raw, 10)
+    if (Number.isNaN(v) || v < 10) {
+      setCustomSeconds(10)
+      setSelected(10)
+      return
+    }
+    const clamped = Math.min(Math.max(v, 10), 1200)
+    setCustomSeconds(clamped)
+    setSelected(clamped)
   }
 
   const handleIncrement = () => {
@@ -71,9 +82,9 @@ const TimeSelectModal = ({ action, onSelect, onClose }) => {
 
   const handleConfirm = () => {
     const seconds = customMode ? customSeconds : selected
-    if (seconds && seconds >= 10 && seconds <= 1200) { // Máximo 20 minutos (1200 segundos)
-      // Pasar segundos directamente
-      onSelect(seconds)
+    const safe = seconds != null ? Math.max(10, Math.min(1200, seconds)) : null
+    if (safe != null && safe >= 10) {
+      onSelect(safe)
     }
   }
 
@@ -106,14 +117,29 @@ const TimeSelectModal = ({ action, onSelect, onClose }) => {
               {m} min
             </button>
           ))}
-          <button
-            type="button"
-            className={`time-select__btn ${customMode ? 'time-select__btn--active' : ''}`}
-            onClick={handleOtro}
-          >
-            Otro
-          </button>
+          {isPremium && (
+            <button
+              type="button"
+              className={`time-select__btn ${customMode ? 'time-select__btn--active' : ''}`}
+              onClick={handleOtro}
+            >
+              Otro
+            </button>
+          )}
         </div>
+        {!isPremium && (
+          onRequestPremium ? (
+            <button
+              type="button"
+              className="time-select__premium-hint-btn"
+              onClick={onRequestPremium}
+            >
+              Con Premium podés elegir cualquier duración.
+            </button>
+          ) : (
+            <p className="time-select__premium-hint">Con Premium podés elegir cualquier duración.</p>
+          )
+        )}
         {customMode && (
           <div className="time-select__custom">
             <label className="time-select__label" htmlFor="time-select-input">

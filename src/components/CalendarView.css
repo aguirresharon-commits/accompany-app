@@ -49,6 +49,13 @@
   border-color: rgba(255, 255, 255, 0.2);
 }
 
+.calendar-view__premium-hint {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  text-align: center;
+  margin: 0 0 var(--spacing-sm);
+}
+
 .calendar-view__calendar {
   width: 100%;
 }

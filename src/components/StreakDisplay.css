@@ -23,6 +23,13 @@
   font-weight: var(--font-weight-regular);
 }
 
+.streak-display__premium-hint {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin: 0;
+  opacity: 0.8;
+}
+
 .streak-display__pause-button {
   background: transparent;
   border: none;

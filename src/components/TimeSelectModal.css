@@ -86,8 +86,33 @@
   flex-wrap: wrap;
   gap: var(--spacing-sm);
   justify-content: center;
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
   width: 100%;
+}
+
+.time-select__premium-hint,
+.time-select__premium-hint-btn {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  text-align: center;
+  margin: 0 0 var(--spacing-md);
+  display: block;
+  width: 100%;
+}
+
+.time-select__premium-hint-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  padding: var(--spacing-xs) 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color var(--transition-base);
+}
+
+.time-select__premium-hint-btn:hover {
+  color: var(--color-text-secondary);
 }
 
 .time-select__btn {

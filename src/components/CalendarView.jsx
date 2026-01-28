@@ -11,8 +11,9 @@ const MONTHS = [
   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
 ]
 
-const CalendarView = () => {
-  const { completedActions } = useAppState()
+const CalendarView = ({ onRequestPremium }) => {
+  const { completedActions, userPlan } = useAppState()
+  const isPremium = userPlan === 'premium'
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState(null)
 
@@ -54,13 +55,34 @@ const CalendarView = () => {
     days.push(day)
   }
 
+  const today = new Date()
+  const todayYear = today.getFullYear()
+  const todayMonth = today.getMonth()
+  const todayDay = today.getDate()
+  const isPastDay = (day) => {
+    if (year < todayYear) return true
+    if (year === todayYear && month < todayMonth) return true
+    if (year === todayYear && month === todayMonth && day < todayDay) return true
+    return false
+  }
+  const isToday = (day) =>
+    year === todayYear && month === todayMonth && day === todayDay
+
   const handleDayClick = (day) => {
     if (!day) return
     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+    if (!isPremium && (isPastDay(day) || !isToday(day))) {
+      onRequestPremium?.()
+      return
+    }
     setSelectedDate(dateStr)
   }
 
   const handlePrevMonth = () => {
+    if (!isPremium) {
+      onRequestPremium?.()
+      return
+    }
     setCurrentDate(new Date(year, month - 1, 1))
   }
 
@@ -70,25 +92,6 @@ const CalendarView = () => {
 
   const handleCloseModal = () => {
     setSelectedDate(null)
-  }
-
-  // Obtener fecha actual para comparar
-  const today = new Date()
-  const todayYear = today.getFullYear()
-  const todayMonth = today.getMonth()
-  const todayDay = today.getDate()
-
-  // Función para verificar si un día es del pasado
-  const isPastDay = (day) => {
-    if (year < todayYear) return true
-    if (year === todayYear && month < todayMonth) return true
-    if (year === todayYear && month === todayMonth && day < todayDay) return true
-    return false
-  }
-
-  // Función para verificar si un día es hoy
-  const isToday = (day) => {
-    return year === todayYear && month === todayMonth && day === todayDay
   }
 
   return (

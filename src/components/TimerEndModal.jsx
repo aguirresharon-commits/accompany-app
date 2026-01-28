@@ -1,4 +1,4 @@
-// Al finalizar tiempo (o parar): mensaje humano + Marcar completada | Continuar más | Agregar nota | Cerrar
+// Al finalizar tiempo (o parar): mensaje humano + Marcar completada | Continuar más | Agregar nota (Premium) | Cerrar
 import { useEffect } from 'react'
 import './TimerEndModal.css'
 
@@ -10,6 +10,8 @@ const TimerEndModal = ({
   onContinueMore,
   onAddNote,
   onClose,
+  isPremium = false,
+  onRequestPremium,
 }) => {
   const msg = CLOSE_MESSAGES[Math.floor(Math.random() * CLOSE_MESSAGES.length)]
 
@@ -48,14 +50,28 @@ const TimerEndModal = ({
           >
             Continuar un poco más
           </button>
-          <button
-            type="button"
-            className="timer-end__btn timer-end__btn--secondary"
-            onClick={onAddNote}
-            aria-label="Agregar nota opcional"
-          >
-            Agregar nota
-          </button>
+          {isPremium ? (
+            <button
+              type="button"
+              className="timer-end__btn timer-end__btn--secondary"
+              onClick={onAddNote}
+              aria-label="Agregar nota opcional"
+            >
+              Agregar nota
+            </button>
+          ) : (
+            onRequestPremium ? (
+              <button
+                type="button"
+                className="timer-end__premium-hint-btn"
+                onClick={onRequestPremium}
+              >
+                Con Premium podés agregar notas al finalizar.
+              </button>
+            ) : (
+              <p className="timer-end__premium-hint">Con Premium podés agregar notas al finalizar.</p>
+            )
+          )}
           <button
             type="button"
             className="timer-end__btn timer-end__btn--ghost"

@@ -16,6 +16,7 @@ import TimeSelectModal from './TimeSelectModal'
 import TimerView from './TimerView'
 import TimerEndModal from './TimerEndModal'
 import AddNoteModal from './AddNoteModal'
+import PremiumView from './PremiumView'
 import StarryBackground from './StarryBackground'
 import './ActionScreen.css'
 
@@ -42,6 +43,8 @@ const ActionScreen = () => {
     addSessionNote,
     sounds,
     setSoundsEnabled,
+    userPlan,
+    setUserPlan,
   } = useAppState()
 
   const [displayedAction, setDisplayedAction] = useState(null)
@@ -60,6 +63,7 @@ const ActionScreen = () => {
   const [empezarSeconds, setEmpezarSeconds] = useState(600) // 10 minutos en segundos por defecto
   const [addNoteOpen, setAddNoteOpen] = useState(false)
   const [instantTaskResponse, setInstantTaskResponse] = useState(null) // 'yes' | 'not-yet' | null
+  const [premiumViewOpen, setPremiumViewOpen] = useState(false)
 
   const selectNewAction = useCallback(() => {
     if (!currentEnergyLevel) return
@@ -273,6 +277,17 @@ const ActionScreen = () => {
       </header>
 
       <main className="action-screen__main">
+        {premiumViewOpen ? (
+          <PremiumView
+            userPlan={userPlan || 'free'}
+            onActivate={() => {
+              setUserPlan('premium')
+              setPremiumViewOpen(false)
+            }}
+            onClose={() => setPremiumViewOpen(false)}
+          />
+        ) : (
+          <>
         {activeTab === 'progress' && (
           <div className="action-screen__progress">
             <div className="action-screen__card">
@@ -359,7 +374,7 @@ const ActionScreen = () => {
         )}
 
         {activeTab === 'today' && (
-          <CalendarView />
+          <CalendarView onRequestPremium={() => setPremiumViewOpen(true)} />
         )}
 
         {activeTab === 'settings' && (
@@ -369,7 +384,11 @@ const ActionScreen = () => {
             onRestartDay={handleRestartDay}
             soundsEnabled={soundsConfig.enabled}
             onSoundsEnabledChange={setSoundsEnabled}
+            userPlan={userPlan || 'free'}
+            onUpgrade={() => setPremiumViewOpen(true)}
           />
+        )}
+          </>
         )}
       </main>
 
@@ -387,6 +406,11 @@ const ActionScreen = () => {
           action={empezarAction}
           onSelect={handleTimeSelect}
           onClose={handleTimeSelectClose}
+          isPremium={userPlan === 'premium'}
+          onRequestPremium={() => {
+            handleTimeSelectClose()
+            setPremiumViewOpen(true)
+          }}
         />
       )}
 
@@ -408,6 +432,11 @@ const ActionScreen = () => {
           onContinueMore={handleTimerEndContinue}
           onAddNote={handleTimerEndAddNote}
           onClose={handleTimerEndClose}
+          isPremium={userPlan === 'premium'}
+          onRequestPremium={() => {
+            handleTimerEndClose()
+            setPremiumViewOpen(true)
+          }}
         />
       )}
 
@@ -506,7 +535,7 @@ const ActionScreen = () => {
         />
       )}
 
-      {!empezarFlow && (
+      {!empezarFlow && !premiumViewOpen && (
         <BottomMenu
           activeTab={activeTab}
           onTabChange={setActiveTab}

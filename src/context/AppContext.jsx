@@ -29,7 +29,8 @@ const getInitialState = () => ({
   sounds: {
     enabled: true,
     volume: 0.3 // Volumen bajo por defecto (0-1)
-  }
+  },
+  userPlan: 'free' // 'free' | 'premium'; persistido tras pago exitoso
 })
 
 // Crear contexto
@@ -91,6 +92,8 @@ export const AppProvider = ({ children }) => {
         effectiveScheduled = null
       }
 
+      const userPlan = (savedState.userPlan === 'premium' ? 'premium' : 'free')
+
       return {
         ...getInitialState(),
         ...savedState,
@@ -102,7 +105,8 @@ export const AppProvider = ({ children }) => {
         lastResetDate: today,
         scheduledEnergyNextDay: effectiveScheduled,
         sessionNotes: savedState.sessionNotes || [],
-        sounds: savedState.sounds || { enabled: true, volume: 0.3 }
+        sounds: savedState.sounds || { enabled: true, volume: 0.3 },
+        userPlan
       }
     }
     return getInitialState()
@@ -438,6 +442,11 @@ export const AppProvider = ({ children }) => {
     }))
   }, [])
 
+  const setUserPlan = useCallback((plan) => {
+    if (plan !== 'free' && plan !== 'premium') return
+    setState(prev => ({ ...prev, userPlan: plan }))
+  }, [])
+
   // Valor del contexto
   const value = {
     ...state,
@@ -453,6 +462,7 @@ export const AppProvider = ({ children }) => {
     addSessionNote,
     setSoundsEnabled,
     setSoundsVolume,
+    setUserPlan,
     isInitialLoading
   }
 

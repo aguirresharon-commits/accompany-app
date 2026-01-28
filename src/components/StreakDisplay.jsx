@@ -1,21 +1,20 @@
 // Componente para mostrar racha de forma empática y discreta
-// Rachas humanas que no se rompen, pueden pausarse sin culpa
+// FREE: solo ver. PREMIUM: pausar/reanudar
 import { useStreak } from '../hooks/useStreak'
 import { useAppState } from '../hooks/useAppState'
 import './StreakDisplay.css'
 
 const StreakDisplay = () => {
   const streakInfo = useStreak()
-  const { updateStreak } = useAppState()
+  const { updateStreak, userPlan } = useAppState()
   const { current, paused, message } = streakInfo
+  const isPremium = userPlan === 'premium'
 
-  // Manejar pausar/reanudar racha
   const handleTogglePause = () => {
+    if (!isPremium) return
     updateStreak({ paused: !paused })
   }
 
-  // Solo mostrar si hay racha o si está pausada
-  // Si current es 0 y no está pausada, no mostrar (para no presionar)
   if (current === 0 && !paused) {
     return null
   }
@@ -23,7 +22,7 @@ const StreakDisplay = () => {
   return (
     <div className="streak-display">
       <p className="streak-display__message">{message}</p>
-      {current > 0 && (
+      {current > 0 && isPremium && (
         <button
           className="streak-display__pause-button"
           onClick={handleTogglePause}
@@ -32,6 +31,9 @@ const StreakDisplay = () => {
         >
           {paused ? '▶' : '⏸'}
         </button>
+      )}
+      {current > 0 && !isPremium && (
+        <span className="streak-display__premium-hint">Con Premium podés pausar la racha.</span>
       )}
     </div>
   )

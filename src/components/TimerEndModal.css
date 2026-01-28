@@ -113,3 +113,27 @@
   color: var(--color-text-secondary);
   border-color: var(--color-gray-444);
 }
+
+.timer-end__premium-hint,
+.timer-end__premium-hint-btn {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  text-align: center;
+  margin: 0;
+  padding: var(--spacing-xs) 0;
+}
+
+.timer-end__premium-hint-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  width: 100%;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color var(--transition-base);
+}
+
+.timer-end__premium-hint-btn:hover {
+  color: var(--color-text-secondary);
+}
