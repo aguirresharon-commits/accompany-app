@@ -1,5 +1,5 @@
 // Pantalla principal: Control, Empezar (TimeSelect → Timer → TimerEnd), Completadas hoy, menú inferior
-import { useState, useEffect, useCallback, useMemo, lazy, Suspense } from 'react'
+import { useState, useEffect, useCallback, useMemo, lazy, Suspense, Component } from 'react'
 import { useAppState } from '../hooks/useAppState'
 import { getRandomAction, getReducedAction, isInstantTask, getSectionLabel, getEnergyLevelInfo } from '../data/actions'
 import { getTodayDate, formatTime } from '../utils/storage'
@@ -21,7 +21,28 @@ import StarryBackground from './StarryBackground'
 import { isPremium as checkIsPremium, activatePremium } from '../services/premiumService'
 import './ActionScreen.css'
 
-const LoginScreen = lazy(() => import('./LoginScreen'))
+// Si el chunk de LoginScreen falla (ej. Firebase no instalado), mostrar Loader en lugar de pantalla negra
+const LoginScreen = lazy(() =>
+  import('./LoginScreen').catch(() => ({
+    default: function LoginScreenFallback () {
+      return <Loader isLoading={true} />
+    }
+  }))
+)
+
+// Si LoginScreen lanza al renderizar (ej. Firebase), mostrar Loader en lugar de pantalla negra
+class LoginErrorBoundary extends Component {
+  state = { hasError: false }
+  static getDerivedStateFromError () {
+    return { hasError: true }
+  }
+  render () {
+    if (this.state.hasError) {
+      return <Loader isLoading={true} />
+    }
+    return this.props.children
+  }
+}
 
 const COMPLETION_MESSAGES = ['Hecho.', 'Avanzaste.', 'Eso ya está.', 'Suficiente por hoy.']
 const getRandomCompletionMessage = () =>
@@ -325,11 +346,13 @@ const ActionScreen = () => {
             onClose={() => setPremiumViewOpen(false)}
           />
         ) : activeTab === 'login' ? (
-          <Suspense fallback={<Loader isLoading={true} />}>
-            <LoginScreen
-              onSuccess={() => setActiveTab(previousTab)}
-            />
-          </Suspense>
+          <LoginErrorBoundary>
+            <Suspense fallback={<Loader isLoading={true} />}>
+              <LoginScreen
+                onSuccess={() => setActiveTab(previousTab)}
+              />
+            </Suspense>
+          </LoginErrorBoundary>
         ) : activeTab === 'progress' ? (
           displayedAction ? (
           <div className="action-screen__progress">

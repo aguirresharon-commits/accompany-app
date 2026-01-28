@@ -100,6 +100,13 @@ const LoginScreen = ({ onSuccess }) => {
           >
             {loading ? 'Ingresando…' : 'Ingresar'}
           </button>
+
+          {loading && (
+            <div className="login__loading" role="status" aria-live="polite">
+              <span className="login__loading-spinner" aria-hidden="true" />
+              <span className="login__loading-text">Ingresando…</span>
+            </div>
+          )}
         </form>
       </div>
     </div>

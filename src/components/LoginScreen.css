@@ -135,6 +135,36 @@
   transform: scale(0.98);
 }
 
+.login__loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-sm) 0;
+}
+
+.login__loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--color-gray-444);
+  border-top-color: var(--color-white);
+  border-radius: 50%;
+  animation: login-spin 0.8s linear infinite;
+}
+
+.login__loading-text {
+  font-size: var(--font-size-base);
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-regular);
+}
+
+@keyframes login-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 @media (max-width: 480px) {
   .login__inner {
     gap: var(--spacing-sm);

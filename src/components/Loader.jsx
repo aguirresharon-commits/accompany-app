@@ -9,11 +9,14 @@ const Loader = ({ isLoading }) => {
 
   return (
     <div className="loader-container">
-      <img 
-        src={logoImage} 
-        alt="Control" 
-        className="loader-logo"
-      />
+      <div className="loader-inner">
+        <img
+          src={logoImage}
+          alt="Control"
+          className="loader-logo"
+        />
+        <span className="loader-spinner" aria-hidden="true" />
+      </div>
     </div>
   )
 }
