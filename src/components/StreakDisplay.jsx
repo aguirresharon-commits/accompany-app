@@ -1,5 +1,5 @@
 // Componente para mostrar racha de forma empática y discreta
-// FREE: solo ver. PREMIUM: pausar/reanudar (bloqueo real por premiumService + authService)
+// FREE: solo ver. PREMIUM: pausar/reanudar (premiumService + authService)
 import { useEffect, useState } from 'react'
 import { useStreak } from '../hooks/useStreak'
 import { useAppState } from '../hooks/useAppState'
@@ -10,8 +10,6 @@ const StreakDisplay = () => {
   const streakInfo = useStreak()
   const { updateStreak } = useAppState()
   const { current, paused, message } = streakInfo
-  // Evitar import estático de Firebase/Auth al cargar la app.
-  // Si no podemos obtener usuario, tratamos como no premium.
   const [currentUser, setCurrentUser] = useState(null)
   useEffect(() => {
     let unsubscribe = () => {}

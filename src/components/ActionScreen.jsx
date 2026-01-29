@@ -24,16 +24,10 @@ import { isPremium as checkIsPremium, activatePremium } from '../services/premiu
 import { useRemindersScheduler } from '../hooks/useRemindersScheduler'
 import './ActionScreen.css'
 
-// Si el chunk de LoginScreen falla (ej. Firebase no instalado), mostrar Loader en lugar de pantalla negra
-const LoginScreen = lazy(() =>
-  import('./LoginScreen').catch(() => ({
-    default: function LoginScreenFallback () {
-      return <Loader isLoading={true} />
-    }
-  }))
-)
+const LoginScreen = lazy(() => import('./LoginScreen'))
 
-// Si LoginScreen lanza al renderizar (ej. Firebase), mostrar Loader en lugar de pantalla negra
+const CreatePremiumAccountScreen = lazy(() => import('./CreatePremiumAccountScreen'))
+
 class LoginErrorBoundary extends Component {
   state = { hasError: false }
   static getDerivedStateFromError () {
@@ -93,6 +87,7 @@ const ActionScreen = () => {
   const [addNoteOpen, setAddNoteOpen] = useState(false)
   const [instantTaskResponse, setInstantTaskResponse] = useState(null) // 'yes' | 'not-yet' | null
   const [premiumViewOpen, setPremiumViewOpen] = useState(false)
+  const [createPremiumAccountOpen, setCreatePremiumAccountOpen] = useState(false)
   const [currentUser, setCurrentUser] = useState(null)
   const [premiumRefresh, setPremiumRefresh] = useState(0)
   const [showNamePrompt, setShowNamePrompt] = useState(false)
@@ -159,8 +154,6 @@ const ActionScreen = () => {
   useEffect(() => {
     let unsubscribe = () => {}
     let cancelled = false
-    // Cargar authService de forma diferida para evitar que un fallo de Firebase
-    // rompa la app completa (pantalla en blanco).
     import('../services/authService')
       .then(({ getCurrentUser, onAuthChange }) => {
         if (cancelled) return
@@ -170,7 +163,6 @@ const ActionScreen = () => {
         })
       })
       .catch(() => {
-        // Si Firebase/Auth no está disponible, tratar como no logueado.
         if (!cancelled) setCurrentUser(null)
       })
     return () => {
@@ -186,30 +178,23 @@ const ActionScreen = () => {
   const isPremiumUser = currentUser ? checkIsPremium(currentUser.uid) : false
 
   const handleActivatePremium = useCallback(() => {
-    // Usar authService.getCurrentUser() (carga diferida para no romper la app si Firebase falla)
     import('../services/authService')
       .then(({ getCurrentUser }) => {
         const user = getCurrentUser()
         if (!user) {
-          // Si no hay usuario logueado: ir a LoginScreen
-          setPreviousTab(activeTab)
           setPremiumViewOpen(false)
-          setActiveTab('login')
+          setCreatePremiumAccountOpen(true)
           return
         }
-
-        // Si hay usuario: iniciar flujo de pago (por ahora simulado). NO activar Premium hasta confirmación.
         setPremiumViewOpen(false)
         setPremiumPending(true)
         setPremiumPendingUid(user.uid)
       })
       .catch(() => {
-        // Si auth no está disponible, tratar como no logueado y mostrar login (con fallback a Loader)
-        setPreviousTab(activeTab)
         setPremiumViewOpen(false)
-        setActiveTab('login')
+        setCreatePremiumAccountOpen(true)
       })
-  }, [activeTab])
+  }, [])
 
   const selectNewAction = useCallback(() => {
     if (!currentEnergyLevel) return
@@ -435,7 +420,14 @@ const ActionScreen = () => {
       </header>
 
       <main className="action-screen__main">
-        {premiumViewOpen ? (
+        {createPremiumAccountOpen ? (
+          <Suspense fallback={<Loader isLoading={true} />}>
+            <CreatePremiumAccountScreen
+              onSuccess={() => setCreatePremiumAccountOpen(false)}
+              onBack={() => setCreatePremiumAccountOpen(false)}
+            />
+          </Suspense>
+        ) : premiumViewOpen ? (
           <PremiumView
             isPremium={isPremiumUser}
             userPlan={userPlan || 'free'}
@@ -448,6 +440,10 @@ const ActionScreen = () => {
               <LoginScreen
                 onSuccess={() => setActiveTab(previousTab)}
                 onBack={() => setActiveTab(previousTab)}
+                onNavigateToCreatePremium={() => {
+                  setActiveTab(previousTab)
+                  setCreatePremiumAccountOpen(true)
+                }}
               />
             </Suspense>
           </LoginErrorBoundary>
@@ -822,7 +818,7 @@ const ActionScreen = () => {
         />
       )}
 
-      {!empezarFlow && !premiumViewOpen && (
+      {!empezarFlow && !premiumViewOpen && !createPremiumAccountOpen && (
         <BottomMenu
           activeTab={activeTab}
           onTabChange={(tab) => {

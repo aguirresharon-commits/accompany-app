@@ -65,6 +65,16 @@
   padding: var(--spacing-md) 0;
 }
 
+.welcome__logged-in {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-regular);
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
+  line-height: 1.5;
+  text-align: center;
+  padding: 0 var(--spacing-md);
+}
+
 .welcome__cta {
   width: 100%;
   max-width: 280px;

@@ -17,6 +17,7 @@ const SettingsView = ({
 }) => {
   const isPremium = isPremiumProp !== undefined ? isPremiumProp : userPlan === 'premium'
   const [currentUser, setCurrentUser] = useState(null)
+  const [confirmLogout, setConfirmLogout] = useState(false)
 
   useEffect(() => {
     let unsubscribe = () => {}
@@ -29,10 +30,11 @@ const SettingsView = ({
     return () => unsubscribe()
   }, [])
 
-  const handleLogout = () => {
+  const doLogout = () => {
     import('../services/authService')
       .then(({ logout }) => logout())
       .catch(() => {})
+    setConfirmLogout(false)
   }
 
   return (
@@ -42,13 +44,37 @@ const SettingsView = ({
         {currentUser ? (
           <>
             <p className="settings-view__desc settings-view__email" aria-label="Email">{currentUser.email || 'Sin email'}</p>
-            <button
-              type="button"
-              className="settings-view__upgrade-btn"
-              onClick={handleLogout}
-            >
-              Cerrar sesión
-            </button>
+            {confirmLogout ? (
+              <div className="settings-view__logout-confirm" role="dialog" aria-labelledby="logout-question">
+                <p id="logout-question" className="settings-view__logout-question">
+                  ¿Querés cerrar sesión?
+                </p>
+                <div className="settings-view__logout-btns">
+                  <button
+                    type="button"
+                    className="settings-view__logout-btn settings-view__logout-btn--no"
+                    onClick={() => setConfirmLogout(false)}
+                  >
+                    No
+                  </button>
+                  <button
+                    type="button"
+                    className="settings-view__logout-btn settings-view__logout-btn--yes"
+                    onClick={doLogout}
+                  >
+                    Sí
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                type="button"
+                className="settings-view__upgrade-btn"
+                onClick={() => setConfirmLogout(true)}
+              >
+                Cerrar sesión
+              </button>
+            )}
           </>
         ) : (
           <>
@@ -59,7 +85,7 @@ const SettingsView = ({
                 className="settings-view__upgrade-btn"
                 onClick={onOpenLogin}
               >
-                Iniciar sesión (solo Premium)
+                Iniciar sesión
               </button>
             )}
           </>

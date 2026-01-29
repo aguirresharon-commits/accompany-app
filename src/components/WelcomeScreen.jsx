@@ -4,7 +4,7 @@ import logoHead from '../assets/logo-head.png'
 import StarryBackground from './StarryBackground'
 import './WelcomeScreen.css'
 
-const WelcomeScreen = ({ onEnter, isLeaving, onLeaveComplete }) => {
+const WelcomeScreen = ({ onEnter, isLeaving, onLeaveComplete, currentUser }) => {
   const handleClick = useCallback(() => {
     onEnter?.()
   }, [onEnter])
@@ -17,6 +17,8 @@ const WelcomeScreen = ({ onEnter, isLeaving, onLeaveComplete }) => {
     },
     [isLeaving, onLeaveComplete]
   )
+
+  const isLoggedIn = Boolean(currentUser?.uid)
 
   return (
     <div
@@ -35,6 +37,11 @@ const WelcomeScreen = ({ onEnter, isLeaving, onLeaveComplete }) => {
         />
         <h1 className="welcome__brand">CONTROL</h1>
         <p className="welcome__tagline">Menos ruido. Más claridad.</p>
+        {isLoggedIn && (
+          <p className="welcome__logged-in">
+            Bienvenido de nuevo. Gracias por acompañarnos.
+          </p>
+        )}
         <button
           type="button"
           className="welcome__cta"

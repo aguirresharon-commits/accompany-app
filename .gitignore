@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# Env (backend secrets: MongoDB, Firebase Admin, etc.)
+.env
+.env.local
+.env.*.local
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
