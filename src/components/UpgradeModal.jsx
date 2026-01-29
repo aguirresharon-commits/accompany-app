@@ -30,10 +30,15 @@ const UpgradeModal = ({ onConfirm, onClose }) => {
       </button>
       <div className="upgrade-modal__sheet">
         <h2 id="upgrade-modal-title" className="upgrade-modal__title">Premium</h2>
-        <p className="upgrade-modal__text">
-          Iniciá sesión y completá el pago para desbloquear duración libre del timer, notas al finalizar,
-          historial por día, calendario completo y pausar la racha.
-        </p>
+        <p className="upgrade-modal__text">Desbloqueá:</p>
+        <ul className="upgrade-modal__list" aria-label="Ventajas Premium">
+          <li>Timer con duración libre (cualquier tiempo)</li>
+          <li>Notas al terminar una tarea</li>
+          <li>Detalle de cada día en el calendario</li>
+          <li>Pausar y reanudar la racha</li>
+          <li>Recordatorios ilimitados y poder borrarlos</li>
+        </ul>
+        <p className="upgrade-modal__text upgrade-modal__text--small">Iniciá sesión y activá Premium.</p>
         <div className="upgrade-modal__actions">
           <button
             type="button"

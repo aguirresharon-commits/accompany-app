@@ -35,8 +35,8 @@ const SettingsView = ({
         <h2 className="settings-view__title">Premium</h2>
         <p className="settings-view__desc">
           {isPremium
-            ? 'Tenés acceso a duración libre del timer, notas, historial por día, calendario completo y pausar la racha.'
-            : 'Con Premium podés elegir cualquier duración, agregar notas, ver historial por día, navegar el calendario y pausar la racha.'}
+            ? 'Tenés acceso a: timer libre, notas, detalle del calendario, pausar racha, recordatorios ilimitados y borrarlos.'
+            : 'Desbloqueá: timer con duración libre, notas al terminar tareas, detalle de cada día en el calendario, pausar la racha, recordatorios ilimitados y poder borrarlos.'}
         </p>
         {isPremium ? (
           <div className="settings-view__premium-active">

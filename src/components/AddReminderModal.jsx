@@ -1,5 +1,5 @@
 // Modal: crear o editar recordatorio (texto, día, hora, alarma)
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { getTodayDate } from '../utils/storage'
 import './AddReminderModal.css'
 
@@ -9,6 +9,7 @@ const AddReminderModal = ({ onClose, onCreate, initial }) => {
   const [date, setDate] = useState(initial?.date ?? today)
   const [time, setTime] = useState(initial?.time ?? '09:00')
   const [alarmEnabled, setAlarmEnabled] = useState(initial?.alarmEnabled ?? true)
+  const submittingRef = useRef(false)
 
   useEffect(() => {
     if (initial) {
@@ -31,24 +32,30 @@ const AddReminderModal = ({ onClose, onCreate, initial }) => {
 
   const handleSave = async () => {
     if (!canSave) return
+    if (submittingRef.current) return
+    submittingRef.current = true
 
-    // Pedir permiso solo si el usuario quiere alarma.
-    if (alarmEnabled && typeof Notification !== 'undefined' && Notification.permission === 'default') {
-      try {
-        await Notification.requestPermission()
-      } catch {
-        // ignore
+    try {
+      // Pedir permiso solo si el usuario quiere alarma.
+      if (alarmEnabled && typeof Notification !== 'undefined' && Notification.permission === 'default') {
+        try {
+          await Notification.requestPermission()
+        } catch {
+          // ignore
+        }
       }
-    }
 
-    onCreate?.({
-      id: initial?.id,
-      text: (text || '').trim(),
-      date,
-      time,
-      alarmEnabled,
-    })
-    onClose?.()
+      onCreate?.({
+        id: initial?.id,
+        text: (text || '').trim(),
+        date,
+        time,
+        alarmEnabled,
+      })
+      onClose?.()
+    } finally {
+      submittingRef.current = false
+    }
   }
 
   return (

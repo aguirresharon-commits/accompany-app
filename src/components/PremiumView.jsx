@@ -3,10 +3,11 @@
 import './PremiumView.css'
 
 const BENEFITS = [
-  'Con Premium podés ver tu historial y el calendario de días anteriores.',
-  'Con Premium podés usar el timer sin límites y agregar notas al finalizar.',
-  'Con Premium podés pausar y proteger tu racha cuando lo necesites.',
-  'Con Premium podés acceder a todas las funciones avanzadas de la app.',
+  'Timer con duración libre: elegí cualquier tiempo (no solo hasta 10 min).',
+  'Agregar notas al terminar una tarea.',
+  'Ver el detalle de cada día en el calendario (tareas completadas).',
+  'Pausar y reanudar tu racha cuando lo necesites.',
+  'Recordatorios ilimitados y poder borrarlos.',
 ]
 
 const PremiumView = ({ isPremium: isPremiumProp, userPlan, onActivate, onClose }) => {
@@ -27,7 +28,7 @@ const PremiumView = ({ isPremium: isPremiumProp, userPlan, onActivate, onClose }
         <p className="premium-view__intro">
           {isPremium
             ? 'Tenés Premium activo. Acá podés ver todo lo que incluye.'
-            : 'Desbloqueá más control sobre tu ritmo y tu historial.'}
+            : 'Desbloqueá estas ventajas:'}
         </p>
 
         <ul className="premium-view__benefits" aria-label="Beneficios de Premium">

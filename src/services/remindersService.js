@@ -16,7 +16,14 @@ function readAll() {
   if (typeof window === 'undefined' || !window.localStorage) return []
   const raw = window.localStorage.getItem(STORAGE_KEY)
   if (!raw) return []
-  return safeParse(raw)
+  const parsed = safeParse(raw)
+  // Evitar duplicados por id (p. ej. por doble clic o datos corruptos)
+  const seen = new Set()
+  return parsed.filter((r) => {
+    if (!r || seen.has(r.id)) return false
+    seen.add(r.id)
+    return true
+  })
 }
 
 function writeAll(items) {

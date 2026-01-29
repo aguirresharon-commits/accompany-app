@@ -92,7 +92,30 @@
   font-size: var(--font-size-base);
   color: var(--color-text-muted);
   line-height: 1.5;
+  margin-bottom: var(--spacing-sm);
+}
+
+.upgrade-modal__text--small {
+  margin-top: var(--spacing-md);
   margin-bottom: var(--spacing-lg);
+  font-size: var(--font-size-sm);
+}
+
+.upgrade-modal__list {
+  list-style: disc;
+  padding-left: var(--spacing-lg);
+  margin: 0 0 var(--spacing-md);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-base);
+  line-height: 1.5;
+}
+
+.upgrade-modal__list li {
+  margin-bottom: var(--spacing-xs);
+}
+
+.upgrade-modal__list li:last-child {
+  margin-bottom: 0;
 }
 
 .upgrade-modal__actions {

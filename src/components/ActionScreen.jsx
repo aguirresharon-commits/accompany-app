@@ -1,5 +1,5 @@
 // Pantalla principal: Control, Empezar (TimeSelect → Timer → TimerEnd), Completadas hoy, menú inferior
-import { useState, useEffect, useCallback, useMemo, lazy, Suspense, Component } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense, Component } from 'react'
 import { useAppState } from '../hooks/useAppState'
 import { getRandomAction, getReducedAction, isInstantTask, getSectionLabel, getEnergyLevelInfo } from '../data/actions'
 import { getTodayDate, formatTime } from '../utils/storage'
@@ -226,6 +226,18 @@ const ActionScreen = () => {
     }
   }, [currentEnergyLevel, displayedAction, selectNewAction])
 
+  // Al cambiar el nivel de energía (p. ej. en Ajustes), actualizar la tarea sugerida al nuevo nivel
+  const prevEnergyLevelRef = useRef(currentEnergyLevel)
+  useEffect(() => {
+    if (currentEnergyLevel == null) return
+    if (prevEnergyLevelRef.current !== currentEnergyLevel) {
+      prevEnergyLevelRef.current = currentEnergyLevel
+      selectNewAction()
+    } else {
+      prevEnergyLevelRef.current = currentEnergyLevel
+    }
+  }, [currentEnergyLevel, selectNewAction])
+
   // Resetear respuesta de tarea instantánea cuando cambia la acción mostrada
   useEffect(() => {
     setInstantTaskResponse(null)
@@ -369,11 +381,12 @@ const ActionScreen = () => {
     setCompletionOverlay({ message: getRandomCompletionMessage() })
   }
 
-  // Handlers para tareas instantáneas
+  // Handlers para tareas instantáneas: solo mostrar "¿Cómo te sentís?", sin nota
   const handleInstantYes = () => {
     if (!displayedAction) return
     setInstantTaskResponse('yes')
-    setNotePromptAction(displayedAction)
+    completeAction(displayedAction)
+    setCompletionOverlay({ message: getRandomCompletionMessage() })
   }
 
   const handleInstantNotYet = () => {
