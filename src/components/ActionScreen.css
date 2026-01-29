@@ -361,6 +361,86 @@
   animation-duration: 1s;
 }
 
+/* Overlay de recordatorio: fondo opaco, mensaje + motivacional + botones */
+.action-screen__overlay--reminder {
+  background: rgba(0, 0, 0, 0.96);
+  pointer-events: auto;
+  animation: action-overlay-fade-in-hold 0.4s ease forwards;
+  flex-direction: column;
+  z-index: 390;
+}
+
+.action-screen__reminder-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  max-width: 400px;
+  width: 100%;
+}
+
+.action-screen__reminder-text {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-white);
+  margin: 0;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.action-screen__reminder-motivational {
+  font-size: var(--font-size-base);
+  color: var(--color-text-muted);
+  margin: 0;
+  text-align: center;
+  font-style: italic;
+}
+
+.action-screen__reminder-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  width: 100%;
+  margin-top: var(--spacing-sm);
+}
+
+.action-screen__reminder-btn {
+  flex: 1;
+  padding: var(--spacing-md) var(--spacing-lg);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  font-family: inherit;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: opacity var(--transition-base), transform var(--transition-fast);
+  border: 1px solid transparent;
+}
+
+.action-screen__reminder-btn:active {
+  transform: scale(0.98);
+}
+
+.action-screen__reminder-btn--secondary {
+  background: transparent;
+  color: var(--color-text-muted);
+  border-color: var(--color-gray-222);
+}
+
+.action-screen__reminder-btn--secondary:hover {
+  color: var(--color-text-secondary);
+  border-color: var(--color-gray-444);
+}
+
+.action-screen__reminder-btn--primary {
+  background: var(--color-white);
+  color: var(--color-black);
+  border-color: var(--color-white);
+}
+
+.action-screen__reminder-btn--primary:hover {
+  opacity: 0.95;
+}
+
 @keyframes action-overlay-fade {
   0% { opacity: 0; }
   15% { opacity: 1; }

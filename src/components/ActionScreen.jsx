@@ -11,6 +11,7 @@ import BottomMenu from './BottomMenu'
 import ListPanel from './ListPanel'
 import SettingsView from './SettingsView'
 import CalendarView from './CalendarView'
+import RemindersView from './RemindersView'
 import NotePrompt from './NotePrompt'
 import TimeSelectModal from './TimeSelectModal'
 import TimerView from './TimerView'
@@ -19,6 +20,7 @@ import AddNoteModal from './AddNoteModal'
 import PremiumView from './PremiumView'
 import StarryBackground from './StarryBackground'
 import { isPremium as checkIsPremium, activatePremium } from '../services/premiumService'
+import { useRemindersScheduler } from '../hooks/useRemindersScheduler'
 import './ActionScreen.css'
 
 // Si el chunk de LoginScreen falla (ej. Firebase no instalado), mostrar Loader en lugar de pantalla negra
@@ -81,6 +83,7 @@ const ActionScreen = () => {
   const [completionFeelingText, setCompletionFeelingText] = useState('')
   const [completionConfirmMessage, setCompletionConfirmMessage] = useState(null) // "Eso es todo por hoy." etc. después de elegir cómo se sintió
   const [noteSavedOverlay, setNoteSavedOverlay] = useState(null)
+  const [reminderOverlay, setReminderOverlay] = useState(null) // { text: string, id: string } | null
 
   // Flujo Empezar: timeSelect → timer → timerEnd
   const [empezarFlow, setEmpezarFlow] = useState(null)
@@ -91,6 +94,61 @@ const ActionScreen = () => {
   const [premiumViewOpen, setPremiumViewOpen] = useState(false)
   const [currentUser, setCurrentUser] = useState(null)
   const [premiumRefresh, setPremiumRefresh] = useState(0)
+
+  // Scheduler de recordatorios (notificaciones locales mientras la app está abierta)
+  useRemindersScheduler()
+
+  // Escuchar eventos de recordatorios y mostrar overlay en pantalla (siempre funciona)
+  useEffect(() => {
+    const MOTIVATIONAL_MESSAGES = [
+      '¿Podés hacerlo ahora?',
+      'Es momento de avanzar.',
+      '¿Te animás?',
+      'Vamos, podés hacerlo.',
+      'Es tu momento.',
+    ]
+    const getRandomMessage = () => MOTIVATIONAL_MESSAGES[Math.floor(Math.random() * MOTIVATIONAL_MESSAGES.length)]
+
+    const handleReminderDue = (e) => {
+      const { reminder } = e.detail
+      if (!reminder || !reminder.text) return
+      setReminderOverlay({
+        text: reminder.text,
+        id: reminder.id,
+        motivational: getRandomMessage(),
+      })
+    }
+
+    window.addEventListener('reminder-due', handleReminderDue)
+    return () => window.removeEventListener('reminder-due', handleReminderDue)
+  }, [])
+
+  // Si una notificación pidió abrir Recordatorios, respetarlo sin rutas nuevas.
+  useEffect(() => {
+    const OPEN_TAB_KEY = 'control-open-tab'
+    const applyOpenTab = () => {
+      try {
+        const requested = window.localStorage?.getItem(OPEN_TAB_KEY)
+        if (requested === 'reminders') {
+          setPreviousTab(activeTab)
+          setActiveTab('reminders')
+          window.localStorage?.removeItem(OPEN_TAB_KEY)
+        }
+      } catch {
+        // ignore
+      }
+    }
+    applyOpenTab()
+    const onStorage = (e) => {
+      if (e.key === OPEN_TAB_KEY) applyOpenTab()
+    }
+    window.addEventListener('storage', onStorage)
+    window.addEventListener('focus', applyOpenTab)
+    return () => {
+      window.removeEventListener('storage', onStorage)
+      window.removeEventListener('focus', applyOpenTab)
+    }
+  }, [activeTab])
 
   useEffect(() => {
     let unsubscribe = () => {}
@@ -466,6 +524,11 @@ const ActionScreen = () => {
             isPremium={isPremiumUser}
             onRequestPremium={() => setPremiumViewOpen(true)}
           />
+        ) : activeTab === 'reminders' ? (
+          <RemindersView
+            isPremium={isPremiumUser}
+            onRequestPremium={() => setPremiumViewOpen(true)}
+          />
         ) : activeTab === 'settings' ? (
           <SettingsView
             currentEnergyLevel={currentEnergyLevel}
@@ -621,6 +684,35 @@ const ActionScreen = () => {
         </div>
       )}
 
+      {reminderOverlay && (
+        <div className="action-screen__overlay action-screen__overlay--reminder" role="dialog" aria-label="Recordatorio">
+          <div className="action-screen__reminder-inner">
+            <p className="action-screen__reminder-text">{reminderOverlay.text}</p>
+            <p className="action-screen__reminder-motivational">{reminderOverlay.motivational}</p>
+            <div className="action-screen__reminder-actions">
+              <button
+                type="button"
+                className="action-screen__reminder-btn action-screen__reminder-btn--secondary"
+                onClick={() => setReminderOverlay(null)}
+              >
+                Más tarde
+              </button>
+              <button
+                type="button"
+                className="action-screen__reminder-btn action-screen__reminder-btn--primary"
+                onClick={() => {
+                  setPreviousTab(activeTab)
+                  setActiveTab('reminders')
+                  setReminderOverlay(null)
+                }}
+              >
+                Ver recordatorios
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {notePromptAction && (
         <NotePrompt
           action={notePromptAction}
@@ -632,7 +724,10 @@ const ActionScreen = () => {
       {!empezarFlow && !premiumViewOpen && (
         <BottomMenu
           activeTab={activeTab}
-          onTabChange={setActiveTab}
+          onTabChange={(tab) => {
+            setPreviousTab(activeTab)
+            setActiveTab(tab)
+          }}
           onMarkComplete={activeTab === 'progress' ? handleMarkComplete : undefined}
           listPanelOpen={listPanelOpen}
           onListPanelToggle={handleListPanelToggle}
