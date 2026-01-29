@@ -6,6 +6,7 @@
 
 import {
   signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
   type User,
@@ -25,6 +26,31 @@ function toAuthUser(user: User | null): AuthUser | null {
 export async function login(email: string, password: string): Promise<AuthUser> {
   const result = await signInWithEmailAndPassword(auth, email, password)
   return toAuthUser(result.user)!
+}
+
+/**
+ * Inicia sesión o crea la cuenta si no existe (registro automático).
+ * Solo para el flujo de activar Premium: el usuario ingresa email y contraseña;
+ * si existe → login; si no existe → se crea la cuenta y queda logueado.
+ */
+export async function loginOrRegister(email: string, password: string): Promise<AuthUser> {
+  try {
+    const result = await signInWithEmailAndPassword(auth, email, password)
+    return toAuthUser(result.user)!
+  } catch (err: unknown) {
+    const code = (err as { code?: string })?.code
+    const isNoAccount = code === 'auth/user-not-found' || code === 'auth/invalid-credential'
+    if (!isNoAccount) throw err
+
+    try {
+      const result = await createUserWithEmailAndPassword(auth, email, password)
+      return toAuthUser(result.user)!
+    } catch (createErr: unknown) {
+      const createCode = (createErr as { code?: string })?.code
+      if (createCode === 'auth/email-already-in-use') throw err
+      throw createErr
+    }
+  }
 }
 
 /**

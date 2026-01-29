@@ -1,204 +1,252 @@
-# Detalle de funciones de la app Control
+# Control – Detalle de funciones de la app
 
-Documento que describe todas las funciones y flujos que tiene la app hasta ahora.
+Documento que describe todas las funciones actuales de la app **Control** (hábitos por nivel de energía, recordatorios, Premium, auth, etc.).
 
 ---
 
 ## 1. Flujo general de la app
 
-### 1.1 Arranque
-- **App** → `AppProvider` (estado global) → `AppWithWelcome`.
-- **WelcomeScreen** (pantalla de bienvenida): logo, marca "CONTROL", tagline "Menos ruido. Más claridad.", botón "Tomar el control".
-- Al hacer clic en "Tomar el control" se ejecuta una transición de salida y luego se muestra el contenido principal.
+1. **WelcomeScreen** → pantalla de bienvenida (“Menos ruido. Más claridad.”). Al tocar “Entrar” se oculta y se muestra el contenido principal.
+2. **Sin nivel de energía** → se muestra **EnergyLevelSelector** (Baja, Media, Alta). El usuario elige uno y queda guardado.
+3. **Con nivel elegido** → se muestra **ActionScreen** (pantalla principal con menú inferior y pestañas).
 
-### 1.2 Contenido principal (AppContent)
-- Si **no hay nivel de energía** elegido:
-  - Se muestra **Loader** (logo con animación) durante la carga inicial.
-  - Luego **EnergyLevelSelector** ("¿Cómo te sentís hoy?" con niveles Baja, Media, Alta).
-- Si **hay nivel de energía**:
-  - Se muestra **Loader** durante la carga inicial.
-  - Luego **ActionScreen** (pantalla principal con tareas, timer, calendario, ajustes).
+No hay rutas/URLs: todo se maneja con estado (`activeTab`, `premiumViewOpen`, `empezarFlow`, etc.) dentro de **ActionScreen**.
 
 ---
 
-## 2. Selector de nivel de energía (EnergyLevelSelector)
+## 2. Pantalla principal (ActionScreen)
 
-- **Función:** Elegir el nivel de energía del día (Baja, Media, Alta).
-- **Niveles:**
-  - **Baja:** "Cansancio, bloqueo, cabeza quemada" → tareas mínimas.
-  - **Media:** "Funcional, pero sin épica" → tareas intermedias.
-  - **Alta:** "Ganas, foco, impulso" → tareas más exigentes.
-- El nivel elegido determina qué tareas se ofrecen (según `data/actions.js`).
-- El nivel se persiste en el estado global (localStorage) y se puede cambiar desde Ajustes.
+### 2.1 Menú inferior (BottomMenu)
 
----
+- **Progreso** (✓): va a la pestaña Progreso. Si ya está en Progreso, al tocar ejecuta “marcar completada” (sin timer).
+- **Lista** (≡): abre/cierra el **ListPanel** (lista de tareas filtradas por nivel de energía).
+- **Completadas hoy** (calendario): va a la pestaña **Calendario** (vista mensual + detalle de día con Premium).
+- **Recordatorios** (campana): va a la pestaña **Recordatorios** (tareas puntuales con fecha/hora y notificaciones).
+- **Ajustes** (⋯): va a la pestaña **Ajustes** (ritmo, sonidos, Premium, reiniciar día, cuenta).
 
-## 3. Pantalla principal (ActionScreen)
+Todas las vistas/modales tienen botón **←** (volver) arriba a la izquierda, salvo las que ya tenían otra salida clara.
 
-### 3.1 Navegación por pestañas (BottomMenu)
-- **Progreso:** tarea actual, botones "Empezar" / "Hacerlo más chico", lista "Completadas hoy".
-- **Lista:** panel lateral con todas las tareas disponibles para elegir una.
-- **Completadas hoy / Calendario:** vista de calendario mensual con días con tareas.
-- **Ajustes:** ritmo (nivel de energía), sonidos, reiniciar día, Premium, cuenta (login), sobre la app.
+### 2.2 Pestañas de contenido (main)
 
-### 3.2 Vista Progreso (tab "progress")
-- **Tarea actual:** una acción aleatoria según el nivel de energía (sin repetir las ya completadas hoy).
-- **Opciones:**
-  - **Tareas con tiempo:** "Hacerlo más chico" (versión reducida de la tarea), "Empezar" (abre selector de tiempo → timer).
-  - **Tareas instantáneas:** "¿Pudiste hacerlo?" → "Sí" (marca completada, opcionalmente pide nota) o "No todavía".
-- **Completadas hoy:** lista de tareas completadas hoy con hora y nota si existe.
-- Al completar una tarea se muestra un overlay con mensaje y pregunta "¿Cómo te sentís?" (Bien / Regular / Me cuesta hoy) para ajustar silenciosamente el nivel del día siguiente.
+Según `activeTab` se muestra una sola vista:
 
-### 3.3 Lista de tareas (ListPanel)
-- Panel lateral (lista) con tareas disponibles para el nivel actual.
-- Al elegir una tarea se muestra en la vista Progreso y se cierra el panel.
-- Las tareas vienen de `data/actions.js` por sección (Mente, Cuerpo, Bienestar, Productividad, Social, Otros) y nivel.
+- **progress** → Progreso (tarea actual + Empezar / Hacerlo más chico / marcar completada).
+- **today** → **CalendarView** (calendario mensual; ver detalle de un día requiere Premium).
+- **reminders** → **RemindersView** (lista de recordatorios, agregar/editar/borrar; free: 2, Premium: ilimitados).
+- **settings** → **SettingsView** (ritmo, sonidos, Premium, reiniciar día, cuenta / Iniciar sesión).
+- **login** → **LoginScreen** (email/contraseña, Firebase Auth). Se llega desde Ajustes (“Iniciar sesión”) o desde Premium (“Activar Premium” sin usuario).
 
-### 3.4 Timer (flujo Empezar)
-1. **TimeSelectModal:** elegir duración.
-   - **Free:** presets 1, 3, 5, 10 minutos; opción "Otro" deshabilitada con texto "Función Premium".
-   - **Premium:** presets 5, 10, 15, 20 min + "Otro" (duración personalizada 10 s–20 min).
-2. **TimerView:** cuenta regresiva con la tarea y opción de parar.
-3. **TimerEndModal:** "Marcar completada", "Continuar un poco más", "Agregar nota" (Premium) o "Función Premium" (Free), "Cerrar".
-- Sonidos al iniciar y al finalizar (si están activados en Ajustes).
+Vistas full-screen tipo overlay:
 
-### 3.5 Notas
-- **Al completar tarea instantánea:** modal (NotePrompt) para agregar nota opcional.
-- **Al finalizar timer (Premium):** opción "Agregar nota" que abre AddNoteModal.
-- Las notas se guardan en el estado (sessionNotes / en la acción completada) y se muestran en "Completadas hoy".
-
-### 3.6 Vista Calendario (tab "today")
-- Calendario mensual con días que tienen tareas completadas.
-- **Free:** solo se puede ver/clickear hoy; al tocar día pasado o navegar mes anterior se abre el modal Premium.
-- **Premium:** se puede navegar meses y abrir detalle de cualquier día.
-- Al tocar un día (si está permitido) se abre **DayDetailModal** con las tareas de ese día.
-
-### 3.7 Vista Ajustes (tab "settings")
-- **Cuenta:** botón "Iniciar sesión" (abre LoginScreen en la misma pantalla).
-- **Premium:** texto explicativo; si es Premium "Premium activo" + "Ver beneficios"; si no "Hacerse Premium" (abre PremiumView).
-- **Ritmo:** cambiar nivel de energía (Baja, Media, Alta).
-- **Sonidos:** activar/desactivar feedback sonoro.
-- **Reiniciar día:** marcar todas las tareas del día como no completadas (con confirmación).
-- **Sobre Control:** texto de filosofía de la app.
-
-### 3.8 Login (tab "login")
-- **LoginScreen** (carga diferida para no romper la app si Firebase falla): email, contraseña, "Iniciar sesión".
-- Al iniciar sesión correctamente se vuelve a la pestaña anterior (normalmente Ajustes).
-- Se puede salir del login tocando otra pestaña del menú.
-
-### 3.9 Premium (PremiumView)
-- Se abre desde Ajustes ("Hacerse Premium") o al intentar usar una función Premium (ej. duración libre, nota al finalizar, calendario pasado).
-- Muestra beneficios y botón "Activar Premium" (si hay usuario logueado activa con `premiumService.activatePremium(uid)`) o "Iniciar sesión para activar".
-- Si ya es Premium: "Premium activo" y "Cerrar".
+- **premiumViewOpen** → **PremiumView** (beneficios + Activar Premium / Cerrar). Se abre desde Ajustes, desde modales de timer (Premium) o desde Recordatorios al superar el límite free.
 
 ---
 
-## 4. Autenticación
+## 3. Progreso (hábitos / tareas por energía)
 
-### 4.1 Servicio (authService.ts)
-- **login(email, password):** inicia sesión con Firebase Auth (email/contraseña).
-- **logout():** cierra sesión.
-- **getCurrentUser():** devuelve `{ uid, email }` o `null`.
-- **onAuthChange(callback):** suscripción a cambios de sesión; devuelve función para cancelar.
+- **Tarea actual**: una acción aleatoria del nivel de energía elegido (Baja, Media, Alta), sin repetir las ya completadas hoy.
+- **Empezar**: abre **TimeSelectModal** (elegir duración) → **TimerView** (cuenta regresiva) → **TimerEndModal** (marcar completada, continuar más, agregar nota [Premium], cerrar).
+- **Hacerlo más chico**: reemplaza la tarea por una “reducida” del mismo nivel (si existe en `actions`).
+- **Marcar completada** (sin timer): desde el botón ✓ del menú o desde la tarjeta; marca la tarea como hecha y muestra overlay “Hecho.” / “Avanzaste.” etc., y opcionalmente “¿Cómo te sentís?” (Bien, Regular, Me cuesta hoy) para programar el nivel del día siguiente.
+- **Tareas instantáneas**: algunas tareas tienen `duration: 0.5` y no usan timer; solo “¿Pudiste hacerlo?” → Sí / No todavía.
+- **Completadas hoy**: lista debajo de la tarjeta con las tareas ya completadas hoy (texto, hora, nota si la tiene).
 
-### 4.2 Uso en la app
-- **ActionScreen** carga auth de forma diferida (para no dejar pantalla en blanco si Firebase falla).
-- Si hay usuario → se usa para Premium (`premiumService.isPremium(uid)`).
-- LoginScreen usa Firebase `signInWithEmailAndPassword`; al éxito llama `onSuccess` y se vuelve atrás.
+**Datos**: `completedActions`, `allActions`, `currentAction`, `displayedAction` vienen del **AppContext** y se persisten en **localStorage** (`control-app-state`). Las tareas están definidas en **data/actions.js** por sección (Mente, Cuerpo, Bienestar, etc.) y nivel (baja, media, alta).
 
 ---
 
-## 5. Premium (bloqueo real)
+## 4. Timer (Empezar)
 
-### 5.1 Servicio (premiumService.ts)
-- **isPremium(uid):** indica si el usuario tiene Premium (persistido por uid en localStorage).
-- **activatePremium(uid):** activa Premium para ese usuario (sin pagos).
-- **deactivatePremium(uid):** desactiva Premium.
+- **TimeSelectModal**  
+  - **Free**: presets 1, 3, 5, 10 min. Opción “Otro” (duración libre) deshabilitada con texto “Función Premium”.  
+  - **Premium**: presets 5, 10, 15, 20 min + “Otro” (10 s–20 min).  
+  - Al elegir duración → cierra y pasa a **TimerView**.
 
-### 5.2 Cómo se decide si es Premium
-- Se obtiene el usuario con `authService.getCurrentUser()`.
-- Si **no hay usuario** → se trata como **no Premium**.
-- Si hay usuario → `premiumService.isPremium(uid)`.
+- **TimerView**  
+  - Cuenta regresiva con la duración elegida.  
+  - Al terminar (o al parar) → **TimerEndModal**.
 
-### 5.3 Funciones Premium (siempre visibles, bloqueadas si no es Premium)
-- **Duración libre del timer:** en TimeSelectModal, opción "Otro" / duración personalizada. Free: botón deshabilitado "Función Premium".
-- **Agregar nota al finalizar timer:** en TimerEndModal. Free: botón deshabilitado "Función Premium" + enlace a Premium.
-- **Calendario:** ver días pasados y navegar mes anterior. Free: al tocar día pasado o "anterior" se abre PremiumView.
-- **Pausar racha:** en StreakDisplay (si se usa). Free: se muestra "Función Premium" en lugar del botón pausar.
+- **TimerEndModal**  
+  - Mensaje tipo “Listo.” / “Terminaste.”  
+  - **Marcar completada** → marca la tarea como completada y cierra el flujo.  
+  - **Continuar un poco más** → vuelve a **TimeSelectModal** (misma tarea, nueva duración).  
+  - **Agregar nota**: **Free** → botón deshabilitado “Función Premium”; **Premium** → abre **AddNoteModal** para guardar nota con la sesión (sin marcar completada aún).  
+  - **Cerrar** → cierra sin marcar completada.
 
----
+- **AddNoteModal** (desde TimerEndModal con Premium): texto opcional, “Listo” / “Omitir”. La nota se asocia a la sesión/tarea.
 
-## 6. Estado global (AppContext)
-
-### 6.1 Estado persistido (localStorage)
-- **currentEnergyLevel:** 'baja' | 'media' | 'alta'.
-- **completedActions:** array de acciones completadas (todas las fechas).
-- **allActions:** historial de acciones mostradas/completadas por fecha.
-- **history:** mapa fecha → ids de acciones (para racha y calendario).
-- **streak:** { current, lastDate, paused }.
-- **lastResetDate**, **scheduledEnergyNextDay** (nivel programado para mañana).
-- **sessionNotes:** notas de sesión (timer sin completar).
-- **sounds:** { enabled, volume }.
-- **userPlan:** 'free' | 'premium' (legacy; el bloqueo real usa premiumService + uid).
-
-### 6.2 Acciones del contexto
-- **setEnergyLevel(level)**
-- **completeAction(action, note?)**
-- **setCurrentAction(action)**
-- **scheduleEnergyForNextDay(choice)** (Bien / Regular / Me cuesta hoy)
-- **updateStreak({ paused?, ... })**
-- **resetState**
-- **getTodayActions**
-- **resetTodayActions**
-- **resetAllActions**
-- **addSessionNote(action, note)**
-- **setSoundsEnabled(enabled)**
-- **setSoundsVolume(volume)**
-- **setUserPlan(plan)**
+**Nota**: También existe **NotePrompt** (flujo alternativo de “¿Dejás una nota?” al completar). El flujo principal de “agregar nota” en timer es el anterior.
 
 ---
 
-## 7. Racha (streak)
+## 5. Calendario (Completadas hoy / historial por día)
 
-- **useStreak:** hook que calcula mensaje y estado (current, paused, hasActionToday, etc.).
-- **Lógica:** racha "humana": no se rompe por 1–6 días sin actividad; a partir de 7 días se reinicia suavemente.
-- **Pausar/reanudar:** solo si el usuario es Premium (`premiumService.isPremium(uid)`); si no, se muestra "Función Premium".
+- **CalendarView**  
+  - Calendario mensual con el mes actual.  
+  - Días con tareas completadas tienen marca visual.  
+  - Navegación ← / → entre meses (siempre permitida).  
+  - Al tocar un **día**:  
+    - **Free** → no abre detalle; se llama `onRequestPremium()` y se abre **PremiumView**.  
+    - **Premium** → abre **DayDetailModal** con la fecha elegida.
 
----
+- **DayDetailModal**  
+  - Muestra la fecha formateada y la lista de tareas completadas ese día (texto, hora, nota si hay).  
+  - Si no hay tareas: mensaje “Ese día no completaste ninguna tarea.”  
+  - Botón “Cerrar” y ← para volver.
 
-## 8. Sonidos
-
-- **utils/sounds:** initAudioContext, playStartSound, playTapSound (para menú).
-- Activación en el primer toque/clic (compatibilidad móvil).
-- Encendido/apagado y volumen desde Ajustes.
-
----
-
-## 9. Persistencia y utilidades
-
-- **utils/storage:** saveState, loadState, clearState, getTodayDate, formatTime, etc. Clave principal: `control-app-state`.
-- **firebaseConfig.ts:** inicialización de Firebase (env VITE_FIREBASE_*).
-- **Premium:** clave `control-app-premium` (mapa uid → boolean).
+Los datos vienen de `completedActions` (todas las fechas); el calendario filtra por mes y el detalle por día.
 
 ---
 
-## 10. Pantallas / componentes que no están en el flujo principal
+## 6. Recordatorios
 
-- **PremiumInfoScreen:** pantalla informativa de Premium (qué es, funciones, "Activar Premium"); lista tareas inteligentes, notas con recordatorios, desbloqueo de límites. No está conectada a la navegación.
-- **UpgradeModal:** modal para activar Premium; no se usa en el flujo actual (se usa PremiumView).
-- **StreakDisplay:** muestra racha y botón pausar (Premium); no está montado en ActionScreen en el listado actual, pero está preparado para usar auth + premiumService.
+- **RemindersView**  
+  - Lista de recordatorios (texto + día + hora).  
+  - **Límite free**: 2 recordatorios. Con 2 ya creados, el botón “+” se deshabilita y al tocarlo se abre **PremiumView**.  
+  - **Premium**: sin límite.  
+  - Hint cuando es free y hay 2: “Límite free: 2 recordatorios. Con Premium podés agregar más.”
+
+- **Botón “+”**  
+  - Abre **AddReminderModal** (solo si puede agregar: free con &lt; 2 o Premium).
+
+- **AddReminderModal**  
+  - Crear: texto, día (date), hora (time), alarma on/off.  
+  - Editar: mismo formulario con datos del recordatorio elegido (botón lápiz en cada ítem).  
+  - Al guardar: **authService** no se usa aquí; solo se guarda en **localStorage** (`control-app-reminders`). Si la alarma está on, se puede pedir permiso de **Notification** para notificaciones del sistema.
+
+- **Selección y borrado**  
+  - Cada ítem tiene casilla para seleccionar.  
+  - Botón tacho (mismo tamaño que “+”) borra los recordatorios seleccionados (vía **remindersService.deleteReminders(ids)**).
+
+- **Notificaciones**  
+  - **useRemindersScheduler** (hook en ActionScreen): lee recordatorios con alarma on y sin `firedAt`, calcula la fecha/hora en hora local y programa un `setTimeout` hasta ese momento.  
+  - Al llegar la hora:  
+    1. Dispara evento `reminder-due` (siempre).  
+    2. Si hay permiso, muestra **Notification** del navegador.  
+    3. Marca el recordatorio con `firedAt`.  
+  - **ActionScreen** escucha `reminder-due` y muestra un **overlay en pantalla** con el texto del recordatorio + mensaje motivacional aleatorio y botones “Más tarde” / “Ver recordatorios”.  
+  - Si el usuario agregó/editó recordatorios en la misma pestaña, el scheduler se reprograma vía evento `reminders-updated` (porque `storage` solo se dispara en otras pestañas).  
+  - Recordatorios vencidos hace hasta 24 h se disparan al abrir la app (overlay + opcional Notification).  
+  - Al hacer clic en la notificación del sistema se guarda `control-open-tab = 'reminders'` y al volver a foco la app cambia a la pestaña Recordatorios.
+
+**Persistencia**: `remindersService` (listReminders, addReminder, updateReminder, deleteReminders, markReminderFired) en **localStorage** con clave `control-app-reminders`.
 
 ---
 
-## Resumen rápido
+## 7. Ajustes (SettingsView)
 
-| Área            | Funciones principales                                                                 |
-|-----------------|----------------------------------------------------------------------------------------|
-| Entrada         | Bienvenida → Selector de energía → ActionScreen                                       |
-| Tareas          | Una tarea por vez, aleatoria por nivel; "Hacerlo más chico" o "Empezar" (timer)       |
-| Timer           | Elegir duración (Free: 1–10 min; Premium: libre) → cuenta regresiva → Marcar/Nota/Cerrar |
-| Completadas     | Lista "Completadas hoy" + notas; overlay "¿Cómo te sentís?"                            |
-| Calendario      | Mes actual; Premium: meses pasados y detalle por día                                  |
-| Ajustes         | Cuenta (login), Premium, ritmo, sonidos, reiniciar día                                 |
-| Auth            | Login/Logout con Firebase; uid usado para Premium                                     |
-| Premium         | Por usuario (uid); activar sin pago; bloqueo real en timer, nota, calendario, racha     |
+- **Cuenta**  
+  - Botón “Iniciar sesión” → `onOpenLogin()` → `activeTab = 'login'` (LoginScreen).
+
+- **Premium**  
+  - Descripción de beneficios.  
+  - Si **Premium activo** → “Ver beneficios” (abre PremiumView).  
+  - Si **free** → “Hacerse Premium” (abre PremiumView).  
+  - En **PremiumView**, “Activar Premium” usa **authService.getCurrentUser()** y **premiumService.activatePremium(uid)**; si no hay usuario, redirige a LoginScreen.
+
+- **Ritmo**  
+  - Selector de nivel de energía: Baja, Media, Alta. Actualiza `currentEnergyLevel` en el contexto.
+
+- **Sonidos**  
+  - Toggle para activar/desactivar sonidos al completar y en el menú (persistido en contexto).
+
+- **Reiniciar día**  
+  - Confirmación y luego `resetAllActions()`: marca todas las tareas del día como no completadas y resetea estado relacionado.
+
+- **Sobre Control**  
+  - Texto fijo sobre la filosofía de la app.
+
+---
+
+## 8. Login y Premium
+
+- **LoginScreen**  
+  - Email + contraseña.  
+  - Al enviar se usa **authService** (login con Firebase Auth). Carga diferida para no bloquear si Firebase falla.  
+  - Timeout de carga de auth; si falla, se muestra error (ej. “Demasiado lento. Probá de nuevo.”).  
+  - `onSuccess` → vuelve a la pestaña anterior (`setActiveTab(previousTab)`).  
+  - Botón ← para volver sin iniciar sesión.
+
+- **Premium (estado)**  
+  - **premiumService**: `isPremium(uid)`, `activatePremium(uid)`, `deactivatePremium(uid)`. Persistencia en **localStorage** (`control-app-premium`) por `uid`.  
+  - **authService**: `getCurrentUser()`, `onAuthChange()`, `login()`, `logout()`. Usa Firebase Auth.  
+  - En **ActionScreen**, `currentUser` viene de `onAuthChange` (carga diferida) y `isPremiumUser = currentUser ? checkIsPremium(currentUser.uid) : false`.  
+  - Ese `isPremiumUser` se pasa a: PremiumView, SettingsView, CalendarView, TimeSelectModal, TimerEndModal, RemindersView, StreakDisplay (donde aplica).
+
+- **PremiumView**  
+  - Lista de beneficios.  
+  - “Activar Premium” → si no hay usuario, cierra y va a Login; si hay usuario, activa Premium para ese uid, cierra la vista y refresca estado.  
+  - “Cerrar” / “Más tarde” → cierra la vista.
+
+---
+
+## 9. Racha (streak)
+
+- **StreakDisplay**  
+  - Muestra mensaje de racha (días seguidos con al menos una tarea completada).  
+  - **Premium**: botón para pausar/reanudar la racha (`updateStreak({ paused })`).  
+  - **Free**: solo lectura, sin botón de pausar.
+
+Lógica de racha en **useStreak** y estado en **AppContext** (`streak.current`, `streak.lastDate`, `streak.paused`), persistido en `control-app-state`.
+
+---
+
+## 10. Lista de tareas (ListPanel)
+
+- Panel tipo drawer desde abajo con título “Tareas de energía [nivel]”.
+- **TaskListView** muestra tareas del nivel actual que no están completadas hoy (o todas, según implementación).
+- Al elegir una tarea → se pone como tarea actual, se cierra el panel y se va a Progreso.
+- Botón ← arriba para cerrar.
+- Escape y clic en backdrop también cierran.
+
+---
+
+## 11. Persistencia y datos
+
+- **localStorage**  
+  - `control-app-state`: estado global (nivel de energía, completedActions, allActions, streak, sounds, userPlan, etc.).  
+  - `control-app-reminders`: array de recordatorios.  
+  - `control-app-premium`: mapa `{ [uid]: boolean }` para Premium por usuario.  
+  - `control-open-tab`: usado por notificaciones para abrir la pestaña Recordatorios al volver a la app.
+
+- **Firebase**  
+  - Solo Auth (email/contraseña). No hay Firestore ni Realtime DB en este detalle.
+
+---
+
+## 12. Resumen por función
+
+| Función | Dónde | Free | Premium |
+|--------|--------|------|--------|
+| Elegir nivel de energía (Baja/Media/Alta) | EnergyLevelSelector, Ajustes | ✓ | ✓ |
+| Ver una tarea al azar por nivel | Progreso | ✓ | ✓ |
+| Lista de tareas del nivel | ListPanel | ✓ | ✓ |
+| Timer con presets 1–10 min | TimeSelectModal | ✓ (1,3,5,10 min) | ✓ (5,10,15,20 + Otro) |
+| Duración libre (10 s–20 min) | TimeSelectModal | ✗ (bloqueado) | ✓ |
+| Marcar completada con/sin timer | Progreso, TimerEndModal | ✓ | ✓ |
+| Agregar nota al finalizar timer | TimerEndModal → AddNoteModal | ✗ (bloqueado) | ✓ |
+| Calendario mensual | CalendarView | ✓ | ✓ |
+| Ver detalle de un día (tareas + notas) | DayDetailModal | ✗ (abre Premium) | ✓ |
+| Recordatorios (crear/editar/borrar) | RemindersView, AddReminderModal | ✓ (máx. 2) | ✓ (ilimitados) |
+| Notificaciones de recordatorios | useRemindersScheduler + overlay | ✓ (overlay siempre; Notification si hay permiso) | ✓ |
+| Iniciar sesión / Cerrar sesión | LoginScreen, Ajustes | ✓ | ✓ |
+| Activar Premium por usuario | PremiumView | ✓ (requiere login) | ✓ |
+| Pausar/reanudar racha | StreakDisplay | ✗ (solo ver) | ✓ |
+| Sonidos on/off | Ajustes | ✓ | ✓ |
+| Reiniciar día | Ajustes | ✓ | ✓ |
+
+---
+
+## 13. Archivos clave
+
+- **App**: `App.jsx`, `main.jsx`
+- **Estado global**: `context/AppContext.jsx`, `hooks/useAppState.js`
+- **Pantallas principales**: `ActionScreen.jsx`, `EnergyLevelSelector.jsx`, `WelcomeScreen.jsx`
+- **Menú y vistas**: `BottomMenu.jsx`, `ListPanel.jsx`, `SettingsView.jsx`, `CalendarView.jsx`, `RemindersView.jsx`
+- **Timer**: `TimeSelectModal.jsx`, `TimerView.jsx`, `TimerEndModal.jsx`, `AddNoteModal.jsx`, `NotePrompt.jsx`
+- **Premium y login**: `PremiumView.jsx`, `LoginScreen.jsx`, `services/premiumService.ts`, `services/authService.ts`
+- **Recordatorios**: `RemindersView.jsx`, `AddReminderModal.jsx`, `services/remindersService.js`, `hooks/useRemindersScheduler.js`
+- **Datos**: `data/actions.js`, `data/iconMap.js`, `utils/storage.js`
+- **Racha**: `StreakDisplay.jsx`, `hooks/useStreak.js`
+
+Si querés, puedo bajar esto a un README más corto “Funciones de la app” o dejarlo solo en este archivo.

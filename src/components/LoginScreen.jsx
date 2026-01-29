@@ -1,5 +1,5 @@
-// Pantalla de login: email, contraseña, Firebase signInWithEmailAndPassword.
-// Exportado pero no conectado a la app todavía.
+// Pantalla de login/registro: email y contraseña. Se abre solo al intentar activar Premium (o desde Ajustes).
+// Si el usuario existe → login. Si no existe → se crea la cuenta y queda logueado. Un solo botón "Ingresar".
 import { useState, useCallback } from 'react'
 import logoHead from '../assets/logo-head.png'
 import StarryBackground from './StarryBackground'
@@ -24,6 +24,8 @@ const mapAuthError = (err) => {
   if (code === 'auth/invalid-email') return 'Email inválido.'
   if (code === 'auth/too-many-requests') return 'Demasiados intentos. Probá más tarde.'
   if (code === 'auth/network-request-failed') return 'Error de conexión.'
+  if (code === 'auth/weak-password') return 'La contraseña debe tener al menos 6 caracteres.'
+  if (code === 'auth/email-already-in-use') return 'Ese email ya está en uso.'
   if (err?.message === 'AUTH_TIMEOUT') return 'Demasiado lento. Probá de nuevo.'
   return err?.message || 'Error al ingresar.'
 }
@@ -52,7 +54,7 @@ const LoginScreen = ({ onSuccess, onBack }) => {
         // No bloquear el render esperando Firebase/Auth:
         // Cargamos authService solo al enviar, con timeout para evitar loading infinito.
         await withTimeout(
-          import('../services/authService').then(({ login }) => login(trimEmail, password)),
+          import('../services/authService').then(({ loginOrRegister }) => loginOrRegister(trimEmail, password)),
           AUTH_LOAD_TIMEOUT_MS
         )
         onSuccess?.()
