@@ -127,6 +127,8 @@ const LoginScreen = ({ onSuccess, onBack }) => {
             {loading ? 'Ingresando…' : 'Ingresar'}
           </button>
 
+          <p className="login__hint">Podés usar Control gratis sin cuenta.</p>
+
           {loading && (
             <div className="login__loading" role="status" aria-live="polite">
               <span className="login__loading-spinner" aria-hidden="true" />

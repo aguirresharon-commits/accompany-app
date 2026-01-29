@@ -1,4 +1,5 @@
 // Ajustes: ritmo, reiniciar día, sonidos, Premium, ayuda
+import { useState, useEffect } from 'react'
 import { ENERGY_LEVELS, ENERGY_LEVEL_KEYS } from '../data/actions'
 import { EnergyLevelIcon } from './TaskIcon'
 import './SettingsView.css'
@@ -15,22 +16,55 @@ const SettingsView = ({
   onOpenLogin,
 }) => {
   const isPremium = isPremiumProp !== undefined ? isPremiumProp : userPlan === 'premium'
+  const [currentUser, setCurrentUser] = useState(null)
+
+  useEffect(() => {
+    let unsubscribe = () => {}
+    import('../services/authService')
+      .then(({ getCurrentUser, onAuthChange }) => {
+        setCurrentUser(getCurrentUser())
+        unsubscribe = onAuthChange(setCurrentUser)
+      })
+      .catch(() => {})
+    return () => unsubscribe()
+  }, [])
+
+  const handleLogout = () => {
+    import('../services/authService')
+      .then(({ logout }) => logout())
+      .catch(() => {})
+  }
 
   return (
     <div className="settings-view">
-      {onOpenLogin && (
-        <section className="settings-view__section">
-          <h2 className="settings-view__title">Cuenta</h2>
-          <p className="settings-view__desc">Iniciar sesión con tu email.</p>
-          <button
-            type="button"
-            className="settings-view__upgrade-btn"
-            onClick={onOpenLogin}
-          >
-            Iniciar sesión
-          </button>
-        </section>
-      )}
+      <section className="settings-view__section">
+        <h2 className="settings-view__title">Cuenta</h2>
+        {currentUser ? (
+          <>
+            <p className="settings-view__desc settings-view__email" aria-label="Email">{currentUser.email || 'Sin email'}</p>
+            <button
+              type="button"
+              className="settings-view__upgrade-btn"
+              onClick={handleLogout}
+            >
+              Cerrar sesión
+            </button>
+          </>
+        ) : (
+          <>
+            <p className="settings-view__desc">Podés usar Control gratis sin cuenta.</p>
+            {onOpenLogin && (
+              <button
+                type="button"
+                className="settings-view__upgrade-btn"
+                onClick={onOpenLogin}
+              >
+                Iniciar sesión (solo Premium)
+              </button>
+            )}
+          </>
+        )}
+      </section>
       <section className="settings-view__section">
         <h2 className="settings-view__title">Premium</h2>
         <p className="settings-view__desc">
@@ -50,13 +84,15 @@ const SettingsView = ({
             </button>
           </div>
         ) : (
-          <button
-            type="button"
-            className="settings-view__upgrade-btn"
-            onClick={onUpgrade}
-          >
-            Hacerse Premium
-          </button>
+          <>
+            <button
+              type="button"
+              className="settings-view__upgrade-btn"
+              onClick={onUpgrade}
+            >
+              Hacerse Premium
+            </button>
+          </>
         )}
       </section>
 

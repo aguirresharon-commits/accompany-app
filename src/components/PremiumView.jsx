@@ -53,6 +53,7 @@ const PremiumView = ({ isPremium: isPremiumProp, userPlan, onActivate, onClose }
             </>
           ) : (
             <>
+              <p className="premium-view__hint">Podés usar Control gratis sin cuenta.</p>
               <button
                 type="button"
                 className="premium-view__btn premium-view__btn--primary"
@@ -67,6 +68,7 @@ const PremiumView = ({ isPremium: isPremiumProp, userPlan, onActivate, onClose }
               >
                 Más tarde
               </button>
+              <p className="premium-view__hint premium-view__hint--below">La cuenta es solo para activar y guardar Premium.</p>
             </>
           )}
         </div>

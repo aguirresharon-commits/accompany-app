@@ -144,3 +144,14 @@
   margin: 0;
   padding: var(--spacing-xs) 0;
 }
+
+.premium-view__hint {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.premium-view__hint--below {
+  margin-top: var(--spacing-xs);
+}

@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense, Comp
 import { useAppState } from '../hooks/useAppState'
 import { getRandomAction, getReducedAction, isInstantTask, getSectionLabel, getEnergyLevelInfo } from '../data/actions'
 import { getTodayDate, formatTime } from '../utils/storage'
+import { getDisplayName, setDisplayName } from '../utils/displayName'
 import { playStartSound, initAudioContext } from '../utils/sounds'
 import { getTaskIcon } from '../data/iconMap'
 import TaskIcon from './TaskIcon'
@@ -94,6 +95,11 @@ const ActionScreen = () => {
   const [premiumViewOpen, setPremiumViewOpen] = useState(false)
   const [currentUser, setCurrentUser] = useState(null)
   const [premiumRefresh, setPremiumRefresh] = useState(0)
+  const [showNamePrompt, setShowNamePrompt] = useState(false)
+  const [namePromptUid, setNamePromptUid] = useState(null)
+  const [namePromptValue, setNamePromptValue] = useState('')
+  const [premiumPending, setPremiumPending] = useState(false)
+  const [premiumPendingUid, setPremiumPendingUid] = useState(null)
 
   // Scheduler de recordatorios (notificaciones locales mientras la app está abierta)
   useRemindersScheduler()
@@ -192,10 +198,10 @@ const ActionScreen = () => {
           return
         }
 
-        // Si hay usuario: activar premium solo para ese uid y reflejarlo al instante
-        activatePremium(user.uid)
-        setPremiumRefresh((r) => r + 1)
+        // Si hay usuario: iniciar flujo de pago (por ahora simulado). NO activar Premium hasta confirmación.
         setPremiumViewOpen(false)
+        setPremiumPending(true)
+        setPremiumPendingUid(user.uid)
       })
       .catch(() => {
         // Si auth no está disponible, tratar como no logueado y mostrar login (con fallback a Loader)
@@ -720,6 +726,88 @@ const ActionScreen = () => {
                 }}
               >
                 Ver recordatorios
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {premiumPending && premiumPendingUid && (
+        <div className="action-screen__overlay action-screen__overlay--payment-pending" role="dialog" aria-labelledby="payment-pending-title" aria-modal="true">
+          <div className="action-screen__name-prompt-inner">
+            <p id="payment-pending-title" className="action-screen__name-prompt-title">Flujo de pago (simulado)</p>
+            <p className="action-screen__payment-pending-desc">Solo cuando el pago sea confirmado se activará Premium.</p>
+            <div className="action-screen__name-prompt-actions">
+              <button
+                type="button"
+                className="action-screen__name-prompt-btn action-screen__name-prompt-btn--secondary"
+                onClick={() => {
+                  setPremiumPending(false)
+                  setPremiumPendingUid(null)
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="action-screen__name-prompt-btn action-screen__name-prompt-btn--primary"
+                onClick={() => {
+                  const uid = premiumPendingUid
+                  activatePremium(uid)
+                  setPremiumRefresh((r) => r + 1)
+                  setPremiumPending(false)
+                  setPremiumPendingUid(null)
+                  if (!getDisplayName(uid)) {
+                    setShowNamePrompt(true)
+                    setNamePromptUid(uid)
+                    setNamePromptValue('')
+                  }
+                }}
+              >
+                Confirmar pago
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showNamePrompt && namePromptUid && (
+        <div className="action-screen__overlay action-screen__overlay--name-prompt" role="dialog" aria-labelledby="name-prompt-title" aria-modal="true">
+          <div className="action-screen__name-prompt-inner">
+            <p id="name-prompt-title" className="action-screen__name-prompt-title">¿Cómo te llamás?</p>
+            <input
+              type="text"
+              className="action-screen__name-prompt-input"
+              value={namePromptValue}
+              onChange={(e) => setNamePromptValue(e.target.value)}
+              placeholder="Tu nombre (opcional)"
+              maxLength={60}
+              aria-label="Tu nombre"
+              autoFocus
+            />
+            <div className="action-screen__name-prompt-actions">
+              <button
+                type="button"
+                className="action-screen__name-prompt-btn action-screen__name-prompt-btn--secondary"
+                onClick={() => {
+                  setShowNamePrompt(false)
+                  setNamePromptUid(null)
+                  setNamePromptValue('')
+                }}
+              >
+                Ahora no
+              </button>
+              <button
+                type="button"
+                className="action-screen__name-prompt-btn action-screen__name-prompt-btn--primary"
+                onClick={() => {
+                  if (namePromptValue.trim()) setDisplayName(namePromptUid, namePromptValue.trim())
+                  setShowNamePrompt(false)
+                  setNamePromptUid(null)
+                  setNamePromptValue('')
+                }}
+              >
+                Guardar
               </button>
             </div>
           </div>

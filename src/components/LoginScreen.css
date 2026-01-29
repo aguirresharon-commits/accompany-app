@@ -166,6 +166,14 @@
   transform: scale(0.98);
 }
 
+.login__hint {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin: var(--spacing-sm) 0 0;
+  line-height: 1.4;
+  text-align: center;
+}
+
 .login__loading {
   display: flex;
   align-items: center;

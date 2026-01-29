@@ -24,6 +24,17 @@
   margin-bottom: var(--spacing-sm);
 }
 
+.settings-view__hint {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin: var(--spacing-xs) 0 0;
+  line-height: 1.4;
+}
+
+.settings-view__email {
+  word-break: break-all;
+}
+
 .settings-view__levels {
   display: flex;
   flex-wrap: wrap;
