@@ -267,8 +267,8 @@ const ActionScreen = () => {
   const showConfirmAndClose = useCallback(
     (feelingOption = null) => {
       if (feelingOption) scheduleEnergyForNextDay(feelingOption)
-      setCompletionConfirmMessage(getRandomConfirmMessage())
-      setTimeout(() => closeCompletionAndNext(), 1500)
+      setCompletionConfirmMessage('Gracias por contarlo. Seguimos de a poco.')
+      setTimeout(() => closeCompletionAndNext(), 1800)
     },
     [scheduleEnergyForNextDay, closeCompletionAndNext]
   )
