@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { getTaskIcon } from '../data/iconMap'
 import TaskIcon from './TaskIcon'
+import BackButton from './BackButton'
 import './TimeSelectModal.css'
 
 const PRESETS_FREE = [1, 3, 5, 10]   // minutos
@@ -100,15 +101,8 @@ const TimeSelectModal = ({ action, onSelect, onClose, isPremium = false, onReque
         onClick={onClose}
         aria-label="Cerrar"
       />
-      <button
-        type="button"
-        className="time-select__back"
-        onClick={onClose}
-        aria-label="Volver"
-      >
-        ←
-      </button>
       <div className="time-select__sheet">
+        <BackButton onClick={onClose} />
         <p className="time-select__title">¿Cuánto tiempo?</p>
         {action?.id && getTaskIcon(action.id) && (
           <TaskIcon iconName={getTaskIcon(action.id)} className="time-select__icon" size={32} />
@@ -145,13 +139,15 @@ const TimeSelectModal = ({ action, onSelect, onClose, isPremium = false, onReque
           )}
         </div>
         {!isPremium && onRequestPremium && (
-          <button
-            type="button"
-            className="time-select__premium-hint-btn"
-            onClick={onRequestPremium}
-          >
-            Con Premium podés elegir cualquier duración.
-          </button>
+          <div className="time-select__premium-hint-wrap">
+            <button
+              type="button"
+              className="time-select__premium-hint-btn"
+              onClick={onRequestPremium}
+            >
+              Con Premium podés elegir cualquier duración.
+            </button>
+          </div>
         )}
         {customMode && (
           <div className="time-select__custom">

@@ -1,0 +1,57 @@
+/**
+ * Botones glass / neón – bienestar, modo oscuro.
+ * Glassmorphism, bordes redondeados, glow azul, animación suave al toque.
+ * Efecto glassy sutil: reflejo de luz en la parte superior.
+ */
+
+.btn-glass {
+  border-radius: var(--btn-glass-radius);
+  background: var(--btn-glass-bg);
+  backdrop-filter: blur(var(--btn-glass-blur));
+  -webkit-backdrop-filter: blur(var(--btn-glass-blur));
+  border: 1px solid var(--btn-glass-border);
+  box-shadow: var(--btn-glass-shadow);
+  color: rgba(255, 255, 255, 0.92);
+  transition:
+    color var(--transition-base),
+    transform var(--transition-base),
+    box-shadow var(--transition-base),
+    border-color var(--transition-base);
+}
+
+.btn-glass:hover:not(:disabled) {
+  border-color: var(--color-neon-soft);
+  box-shadow: var(--btn-glass-shadow), 0 0 28px var(--color-neon-glow-hover);
+  color: var(--color-white);
+}
+
+.btn-glass:active:not(:disabled) {
+  transform: scale(0.97);
+  box-shadow: var(--btn-glass-shadow), 0 0 32px var(--color-neon-glow-active);
+}
+
+/* Efecto glassy sutil: reflejo curvo en la parte superior. Solo botones, sin backdrops. */
+button:not([class*="backdrop"]) {
+  position: relative;
+  overflow: hidden;
+}
+
+button:not([class*="backdrop"])::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.06) 0%,
+    rgba(255, 255, 255, 0.02) 28%,
+    transparent 50%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+button:not([class*="backdrop"]) > * {
+  position: relative;
+  z-index: 1;
+}

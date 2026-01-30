@@ -1,0 +1,64 @@
+/**
+ * Luz que recorre el borde: solo "Tomar el control" (WelcomeScreen).
+ * La luz más brillante encabeza el recorrido y se va debilitando en el rastro.
+ */
+
+@property --btn-glow-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes btn-glow-rotate {
+  from {
+    --btn-glow-angle: 360deg;
+  }
+  to {
+    --btn-glow-angle: 0deg;
+  }
+}
+
+/* Solo para welcome CTA: pill, negro, borde con luz que recorre (brillante adelante, rastro atrás). */
+.btn-glowing {
+  --btn-glow-border: 2px;
+  position: relative;
+  border: var(--btn-glow-border) solid transparent !important;
+  border-radius: 9999px !important;
+  background:
+    linear-gradient(var(--color-black), var(--color-black)) padding-box,
+    conic-gradient(
+      from var(--btn-glow-angle) at 50% 50%,
+      var(--color-neon) 0deg,
+      var(--color-neon) 6deg,
+      rgba(0, 175, 255, 0.72) 18deg,
+      rgba(0, 175, 255, 0.28) 38deg,
+      rgba(0, 175, 255, 0.08) 65deg,
+      rgba(0, 175, 255, 0.03) 120deg,
+      rgba(0, 175, 255, 0.02) 360deg
+    ) border-box !important;
+  background-clip: padding-box, border-box;
+  background-origin: padding-box, border-box;
+  color: var(--color-white) !important;
+  box-shadow: none !important;
+  animation: btn-glow-rotate 2.8s linear infinite;
+  transition: transform var(--transition-base), color var(--transition-base);
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.btn-glowing:hover:not(:disabled) {
+  color: var(--color-white) !important;
+  box-shadow: none !important;
+  border-color: transparent !important;
+}
+
+.btn-glowing:active:not(:disabled) {
+  transform: scale(0.97);
+  box-shadow: none !important;
+  border-color: transparent !important;
+}
+
+.btn-glowing:disabled {
+  animation-play-state: paused;
+  opacity: 0.5;
+}

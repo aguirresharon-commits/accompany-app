@@ -46,12 +46,15 @@
 .energy-selector__level-button {
   width: 100%;
   padding: var(--spacing-lg);
-  background: transparent;
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--border-radius-sm);
+  background: var(--btn-glass-bg);
+  border: 1px solid var(--btn-glass-border);
+  border-radius: var(--btn-glass-radius);
   color: var(--color-text-primary);
   cursor: pointer;
-  transition: border-color var(--transition-base), opacity var(--transition-base);
+  backdrop-filter: blur(var(--btn-glass-blur));
+  -webkit-backdrop-filter: blur(var(--btn-glass-blur));
+  box-shadow: var(--btn-glass-shadow);
+  transition: border-color var(--transition-base), transform var(--transition-base), box-shadow var(--transition-base);
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
@@ -60,16 +63,17 @@
 }
 
 .energy-selector__level-button:hover {
-  border-color: var(--color-white);
-  opacity: 1;
+  border-color: var(--color-neon-soft);
+  box-shadow: var(--btn-glass-shadow), 0 0 24px var(--color-neon-glow-hover);
 }
 
 .energy-selector__level-button:active {
-  opacity: 0.9;
+  transform: scale(0.99);
+  box-shadow: var(--btn-glass-shadow), 0 0 28px var(--color-neon-glow-active);
 }
 
 .energy-selector__level-button:focus {
-  outline: 1px solid var(--color-white);
+  outline: 1px solid var(--color-neon);
   outline-offset: 2px;
 }
 
@@ -78,8 +82,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-white);
-  opacity: 0.9;
+  color: var(--color-neon);
+  opacity: 0.95;
 }
 
 .energy-selector__icon svg {
@@ -152,7 +156,7 @@
 /* Estados de hover en móvil (solo si no es touch) */
 @media (hover: none) {
   .energy-selector__level-button:hover {
-    border-color: var(--color-border);
-    opacity: 1;
+    border-color: var(--btn-glass-border);
+    box-shadow: var(--btn-glass-shadow);
   }
 }

@@ -29,18 +29,6 @@ const AppContent = () => {
 const AppWithWelcome = () => {
   const [showWelcome, setShowWelcome] = useState(true)
   const [isLeaving, setIsLeaving] = useState(false)
-  const [currentUser, setCurrentUser] = useState(null)
-
-  useEffect(() => {
-    let unsub = () => {}
-    import('./services/authService')
-      .then(({ getCurrentUser, onAuthChange }) => {
-        setCurrentUser(getCurrentUser())
-        unsub = onAuthChange((u) => setCurrentUser(u))
-      })
-      .catch(() => {})
-    return () => { try { unsub() } catch (_) {} }
-  }, [])
 
   // Desbloquear audio en el primer toque/clic (necesario en móviles para que suene)
   useEffect(() => {
@@ -73,7 +61,6 @@ const AppWithWelcome = () => {
           onEnter={handleEnter}
           isLeaving={isLeaving}
           onLeaveComplete={handleLeaveComplete}
-          currentUser={currentUser}
         />
       )}
       {!showWelcome && (

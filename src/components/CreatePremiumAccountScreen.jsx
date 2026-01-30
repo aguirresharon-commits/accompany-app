@@ -4,6 +4,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import logoHead from '../assets/logo-head.png'
 import StarryBackground from './StarryBackground'
+import BackButton from './BackButton'
 import { createPremiumAccount } from '../services/createPremiumAccountService'
 import './CreatePremiumAccountScreen.css'
 
@@ -89,14 +90,7 @@ const CreatePremiumAccountScreen = ({ onSuccess, onBack }) => {
   return (
     <div className="create-premium" role="region" aria-label="Crear cuenta Premium">
       <StarryBackground />
-      <button
-        type="button"
-        className="create-premium__back"
-        onClick={() => onBack?.()}
-        aria-label="Volver"
-      >
-        ←
-      </button>
+      <BackButton onClick={() => onBack?.()} />
       <div className="create-premium__inner">
         <img src={logoHead} alt="" className="create-premium__logo" aria-hidden="true" />
         <h1 className="create-premium__title">Crear cuenta Premium</h1>

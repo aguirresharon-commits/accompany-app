@@ -42,10 +42,33 @@
   
   /* Sombras muy sutiles */
   --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.12);
+
+  /* Botones glass / neón (bienestar, modo oscuro) */
+  --color-neon: #00AFFF;
+  --color-neon-soft: rgba(0, 175, 255, 0.45);
+  --color-neon-glow: rgba(0, 175, 255, 0.35);
+  --color-neon-glow-hover: rgba(0, 175, 255, 0.5);
+  --color-neon-glow-active: rgba(0, 175, 255, 0.6);
+  --btn-glass-bg: rgba(10, 10, 12, 0.85);
+  --btn-glass-border: rgba(0, 175, 255, 0.06);
+  --btn-glass-border-visible: rgba(0, 175, 255, 0.2);
+  --btn-glass-blur: 12px;
+  --btn-glass-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+  --btn-glass-radius: 12px;
   
   /* Transiciones */
   --transition-fast: 100ms ease;
   --transition-base: 200ms ease;
+
+  /* Mensajes / modales: mismo estilo que barra del menú, fondo más borroso */
+  --msg-bg: rgba(0, 0, 0, 0.75);
+  --msg-blur: 20px;
+  --msg-border: 1px solid rgba(255, 255, 255, 0.06);
+  --msg-radius: 24px;
+  --msg-radius-sheet: 24px 24px 0 0;
+  --msg-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  --msg-backdrop: rgba(0, 0, 0, 0.5);
+  --msg-backdrop-blur: 16px;
 }
 
 /* Reset y estilos base */

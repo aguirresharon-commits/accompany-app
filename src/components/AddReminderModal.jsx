@@ -1,6 +1,7 @@
 // Modal: crear o editar recordatorio (texto, día, hora, alarma)
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { getTodayDate } from '../utils/storage'
+import BackButton from './BackButton'
 import './AddReminderModal.css'
 
 const AddReminderModal = ({ onClose, onCreate, initial }) => {
@@ -61,8 +62,8 @@ const AddReminderModal = ({ onClose, onCreate, initial }) => {
   return (
     <div className="add-reminder" role="dialog" aria-label="Crear recordatorio" aria-modal="true">
       <button type="button" className="add-reminder__backdrop" onClick={onClose} aria-label="Cerrar" />
-      <button type="button" className="add-reminder__back" onClick={onClose} aria-label="Volver">←</button>
       <div className="add-reminder__sheet">
+        <BackButton onClick={onClose} />
         <p className="add-reminder__title">{initial ? 'Editar recordatorio' : 'Nuevo recordatorio'}</p>
 
         <label className="add-reminder__label" htmlFor="reminder-text">Texto</label>

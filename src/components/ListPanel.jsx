@@ -2,6 +2,7 @@
 import { useEffect } from 'react'
 import { getEnergyLevelInfo } from '../data/actions'
 import TaskListView from './TaskListView'
+import BackButton from './BackButton'
 import './ListPanel.css'
 
 const ListPanel = ({
@@ -44,14 +45,7 @@ const ListPanel = ({
         aria-label="Cerrar"
       />
       <div className="list-panel__drawer">
-        <button
-          type="button"
-          className="list-panel__back"
-          onClick={onClose}
-          aria-label="Volver"
-        >
-          ←
-        </button>
+        <BackButton onClick={onClose} />
         <div className="list-panel__handle" aria-hidden="true" />
         <p className="list-panel__title">{title}</p>
         <div className="list-panel__content">

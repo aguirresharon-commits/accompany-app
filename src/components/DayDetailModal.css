@@ -14,7 +14,9 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.6);
+  background: var(--msg-backdrop);
+  backdrop-filter: blur(var(--msg-backdrop-blur));
+  -webkit-backdrop-filter: blur(var(--msg-backdrop-blur));
   border: none;
   cursor: pointer;
   pointer-events: auto;
@@ -31,44 +33,15 @@
   width: 100%;
   max-width: 480px;
   max-height: 70vh;
-  background: var(--color-gray-111);
-  border-radius: 20px 20px 0 0;
+  background: var(--msg-bg);
+  backdrop-filter: blur(var(--msg-blur));
+  -webkit-backdrop-filter: blur(var(--msg-blur));
+  border-radius: var(--msg-radius-sheet);
+  border-top: var(--msg-border);
+  box-shadow: var(--msg-shadow);
   pointer-events: auto;
   animation: day-detail-slide 0.3s ease forwards;
-  border-top: 1px solid var(--color-gray-222);
   overflow: hidden;
-}
-
-.day-detail__back {
-  position: absolute;
-  top: var(--spacing-md);
-  left: var(--spacing-md);
-  z-index: 2;
-  width: 44px;
-  height: 44px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  line-height: 1;
-  font-family: inherit;
-  cursor: pointer;
-  pointer-events: auto;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  color: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-.day-detail__back:hover {
-  border-color: rgba(255, 255, 255, 0.14);
-  color: rgba(255, 255, 255, 0.95);
-}
-
-.day-detail__back:active {
-  transform: scale(0.98);
 }
 
 @keyframes day-detail-slide {
@@ -84,6 +57,7 @@
 
 .day-detail__content {
   padding: var(--spacing-lg);
+  padding-top: 56px;
   padding-bottom: max(env(safe-area-inset-bottom), var(--spacing-lg));
   overflow-y: auto;
   max-height: 70vh;
@@ -194,21 +168,25 @@
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
   font-family: inherit;
-  border-radius: var(--border-radius-sm);
+  border-radius: var(--btn-glass-radius);
   cursor: pointer;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: rgba(255, 255, 255, 0.85);
-  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  background: var(--btn-glass-bg);
+  border: 1px solid var(--btn-glass-border);
+  color: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(var(--btn-glass-blur));
+  -webkit-backdrop-filter: blur(var(--btn-glass-blur));
+  box-shadow: var(--btn-glass-shadow);
+  transition: color var(--transition-base), transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
   margin-top: var(--spacing-md);
 }
 
 .day-detail__close:hover {
   color: var(--color-white);
-  border-color: rgba(255, 255, 255, 0.25);
-  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--color-neon-soft);
+  box-shadow: var(--btn-glass-shadow), 0 0 24px var(--color-neon-glow-hover);
 }
 
 .day-detail__close:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
+  box-shadow: var(--btn-glass-shadow), 0 0 28px var(--color-neon-glow-active);
 }

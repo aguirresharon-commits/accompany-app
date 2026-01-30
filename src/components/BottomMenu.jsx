@@ -5,7 +5,6 @@ import './BottomMenu.css'
 const BottomMenu = ({
   activeTab,
   onTabChange,
-  onMarkComplete,
   listPanelOpen,
   onListPanelToggle,
   onCloseListPanel,
@@ -29,12 +28,8 @@ const BottomMenu = ({
   const handleProgressClick = () => {
     vibrate()
     handleWithSound(() => {
-      if (activeTab === 'progress' && onMarkComplete) {
-        onMarkComplete()
-      } else {
-        onCloseListPanel?.()
-        onTabChange('progress')
-      }
+      onCloseListPanel?.()
+      onTabChange('progress')
     })
   }
 
@@ -74,7 +69,7 @@ const BottomMenu = ({
       <button
         className={`bottom-menu__btn ${activeTab === 'progress' ? 'bottom-menu__btn--active' : ''}`}
         onClick={handleProgressClick}
-        aria-label="Progreso: marcar acción completada"
+        aria-label="Progreso"
         title="Progreso"
       >
         <svg className="bottom-menu__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

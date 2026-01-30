@@ -20,6 +20,7 @@ import TimerEndModal from './TimerEndModal'
 import AddNoteModal from './AddNoteModal'
 import PremiumView from './PremiumView'
 import StarryBackground from './StarryBackground'
+import BackButton from './BackButton'
 import { isPremium as checkIsPremium, activatePremium } from '../services/premiumService'
 import { useRemindersScheduler } from '../hooks/useRemindersScheduler'
 import './ActionScreen.css'
@@ -59,8 +60,10 @@ const ActionScreen = () => {
     setEnergyLevel,
     scheduleEnergyForNextDay,
     resetAllActions,
+    markListPickUsed,
     completedActions,
     allActions,
+    listPickUsedDate,
     addSessionNote,
     sounds,
     setSoundsEnabled,
@@ -79,6 +82,7 @@ const ActionScreen = () => {
   const [completionConfirmMessage, setCompletionConfirmMessage] = useState(null) // "Eso es todo por hoy." etc. después de elegir cómo se sintió
   const [noteSavedOverlay, setNoteSavedOverlay] = useState(null)
   const [reminderOverlay, setReminderOverlay] = useState(null) // { text: string, id: string } | null
+  const [listBlockedToast, setListBlockedToast] = useState(false)
 
   // Flujo Empezar: timeSelect → timer → timerEnd
   const [empezarFlow, setEmpezarFlow] = useState(null)
@@ -392,19 +396,25 @@ const ActionScreen = () => {
     setListPanelOpen(false)
     setActiveTab('progress')
     setInstantTaskResponse(null) // Reset instant task response when selecting new task
+    if (!isPremiumUser) markListPickUsed()
   }
 
   const handleListPanelToggle = () => {
+    if (!listPanelOpen) {
+      if (!isPremiumUser && listPickUsedDate === getTodayDate()) {
+        setListBlockedToast(true)
+        setTimeout(() => setListBlockedToast(false), 7000)
+        return
+      }
+    }
     setListPanelOpen((v) => !v)
   }
 
   const handleRestartDay = () => {
-    if (window.confirm('¿Reiniciar el día? Todas las tareas se marcarán como no completadas.')) {
-      resetAllActions()
-      selectNewAction()
-      setListPanelOpen(false)
-      setActiveTab('progress')
-    }
+    resetAllActions()
+    selectNewAction()
+    setListPanelOpen(false)
+    setActiveTab('progress')
   }
 
   if (!currentEnergyLevel) return null
@@ -627,6 +637,7 @@ const ActionScreen = () => {
           aria-labelledby={completionConfirmMessage ? undefined : 'completion-feeling-title'}
           aria-live="polite"
         >
+          <BackButton onClick={closeCompletionAndNext} />
           <div className="action-screen__completion-inner">
             {completionConfirmMessage ? (
               <p className="action-screen__overlay-text action-screen__overlay-text--completion">
@@ -695,12 +706,37 @@ const ActionScreen = () => {
 
       {noteSavedOverlay && (
         <div className="action-screen__overlay action-screen__overlay--note-saved" role="status" aria-live="polite">
-          <p className="action-screen__overlay-text">{noteSavedOverlay}</p>
+          <BackButton onClick={() => setNoteSavedOverlay(null)} />
+          <div className="action-screen__note-saved-inner">
+            <p className="action-screen__overlay-text">{noteSavedOverlay}</p>
+          </div>
+        </div>
+      )}
+
+      {listBlockedToast && (
+        <div className="action-screen__overlay action-screen__overlay--list-blocked" role="status" aria-live="polite">
+          <BackButton onClick={() => setListBlockedToast(false)} />
+          <div className="action-screen__list-blocked-inner">
+            <p className="action-screen__overlay-text action-screen__overlay-text--list-blocked">
+              Solo podés elegir una tarea desde la lista por día. Activá Premium para elegir libremente.
+            </p>
+            <button
+              type="button"
+              className="action-screen__list-blocked-btn"
+              onClick={() => {
+                setListBlockedToast(false)
+                setPremiumViewOpen(true)
+              }}
+            >
+              Ser Premium
+            </button>
+          </div>
         </div>
       )}
 
       {reminderOverlay && (
         <div className="action-screen__overlay action-screen__overlay--reminder" role="dialog" aria-label="Recordatorio">
+          <BackButton onClick={() => setReminderOverlay(null)} />
           <div className="action-screen__reminder-inner">
             <p className="action-screen__reminder-text">{reminderOverlay.text}</p>
             <p className="action-screen__reminder-motivational">{reminderOverlay.motivational}</p>
@@ -730,6 +766,12 @@ const ActionScreen = () => {
 
       {premiumPending && premiumPendingUid && (
         <div className="action-screen__overlay action-screen__overlay--payment-pending" role="dialog" aria-labelledby="payment-pending-title" aria-modal="true">
+          <BackButton
+            onClick={() => {
+              setPremiumPending(false)
+              setPremiumPendingUid(null)
+            }}
+          />
           <div className="action-screen__name-prompt-inner">
             <p id="payment-pending-title" className="action-screen__name-prompt-title">Flujo de pago (simulado)</p>
             <p className="action-screen__payment-pending-desc">Solo cuando el pago sea confirmado se activará Premium.</p>
@@ -769,6 +811,13 @@ const ActionScreen = () => {
 
       {showNamePrompt && namePromptUid && (
         <div className="action-screen__overlay action-screen__overlay--name-prompt" role="dialog" aria-labelledby="name-prompt-title" aria-modal="true">
+          <BackButton
+            onClick={() => {
+              setShowNamePrompt(false)
+              setNamePromptUid(null)
+              setNamePromptValue('')
+            }}
+          />
           <div className="action-screen__name-prompt-inner">
             <p id="name-prompt-title" className="action-screen__name-prompt-title">¿Cómo te llamás?</p>
             <input
@@ -825,7 +874,6 @@ const ActionScreen = () => {
             setPreviousTab(activeTab)
             setActiveTab(tab)
           }}
-          onMarkComplete={activeTab === 'progress' ? handleMarkComplete : undefined}
           listPanelOpen={listPanelOpen}
           onListPanelToggle={handleListPanelToggle}
           onCloseListPanel={() => setListPanelOpen(false)}

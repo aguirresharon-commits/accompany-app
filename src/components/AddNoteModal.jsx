@@ -1,5 +1,6 @@
 // Modal "Agregar nota" (sesión/timer) sin marcar tarea completada
 import { useState, useRef, useEffect } from 'react'
+import BackButton from './BackButton'
 import './AddNoteModal.css'
 
 const AddNoteModal = ({ action, onConfirm, onSkip }) => {
@@ -83,15 +84,8 @@ const AddNoteModal = ({ action, onConfirm, onSkip }) => {
         onClick={onSkip}
         aria-label="Cerrar"
       />
-      <button
-        type="button"
-        className="add-note-modal__back"
-        onClick={onSkip}
-        aria-label="Volver"
-      >
-        ←
-      </button>
       <div ref={sheetRef} className="add-note-modal__sheet">
+        <BackButton onClick={onSkip} />
         <p className="add-note-modal__title">¿Dejás una nota? (opcional)</p>
         <textarea
           ref={inputRef}

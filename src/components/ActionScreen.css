@@ -96,25 +96,26 @@
   max-width: 320px;
 }
 
-/* Botones flotantes: mismo estilo que barra del menú (transparente, glassmorphism, iluminan hover/click) */
+/* Botones flotantes: misma fila horizontal, bien alineados */
 .action-screen__buttons {
   display: flex;
   flex-direction: row;
-  gap: var(--spacing-md);
+  flex-wrap: nowrap;
+  gap: var(--spacing-sm);
   width: 100%;
+  max-width: 100%;
   justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
+  align-items: stretch;
 }
 
+/* Mismo diseño que "Tomar el control": pill, negro, borde azul. Sin recorrido; glow solo hover/click. */
 .action-screen__button {
-  flex: 1;
-  min-width: 140px;
-  max-width: 200px;
-  padding: var(--spacing-md) var(--spacing-lg);
+  flex: 1 1 0;
+  min-width: 0;
+  padding: var(--spacing-sm) var(--spacing-md);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
-  border-radius: 20px;
+  border-radius: 9999px;
   cursor: pointer;
   font-family: inherit;
   text-align: center;
@@ -122,27 +123,25 @@
   align-items: center;
   justify-content: center;
   gap: var(--spacing-xs);
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-  color: rgba(255, 255, 255, 0.55);
-  transition: color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  background: var(--color-black);
+  border: 2px solid rgba(0, 175, 255, 0.06);
+  box-shadow: none;
+  color: rgba(255, 255, 255, 0.9);
+  transition: color var(--transition-base), transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
   position: relative;
 }
 
 .action-screen__button:hover {
-  color: rgba(255, 255, 255, 0.9);
-  border-color: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.12);
+  color: var(--color-white);
+  border-color: var(--color-neon-soft);
+  box-shadow: 0 0 24px var(--color-neon-glow-hover);
 }
 
 .action-screen__button:active {
-  color: rgba(255, 255, 255, 1);
-  border-color: rgba(255, 255, 255, 0.2);
-  box-shadow: 0 0 24px rgba(255, 255, 255, 0.2);
-  transform: scale(1.02);
+  color: var(--color-white);
+  border-color: var(--color-neon-soft);
+  box-shadow: 0 0 28px var(--color-neon-glow-active);
+  transform: scale(0.97);
 }
 
 .action-screen__button--secondary {
@@ -150,16 +149,16 @@
 }
 
 .action-screen__button--primary {
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .action-screen__button--primary:hover {
-  color: rgba(255, 255, 255, 0.95);
+  color: var(--color-white);
 }
 
 .action-screen__button--primary:active {
-  color: rgba(255, 255, 255, 1);
-  box-shadow: 0 0 28px rgba(255, 255, 255, 0.25);
+  color: var(--color-white);
+  box-shadow: 0 0 28px var(--color-neon-glow-active);
 }
 
 /* Tareas instantáneas: pregunta y opciones */
@@ -188,7 +187,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-black);
+  background: var(--msg-bg);
+  backdrop-filter: blur(var(--msg-blur));
+  -webkit-backdrop-filter: blur(var(--msg-blur));
   pointer-events: none;
   animation: action-overlay-fade 1.2s ease forwards;
 }
@@ -197,9 +198,12 @@
   animation-duration: 1.8s;
 }
 
-/* Completado: fondo bien opaco para que no se mezcle con la pantalla de atrás */
+/* Flecha volver: arriba a la izquierda, alineada con título (overlay = viewport) */
+/* Completado: mismo estilo que barra, más blur */
 .action-screen__overlay--completion {
-  background: rgba(0, 0, 0, 0.96);
+  background: var(--msg-bg);
+  backdrop-filter: blur(var(--msg-blur));
+  -webkit-backdrop-filter: blur(var(--msg-blur));
   pointer-events: auto;
   animation: action-overlay-fade-in-hold 0.6s ease forwards;
   flex-direction: column;
@@ -278,23 +282,31 @@
   width: 100%;
   font-weight: 300;
   font-size: var(--font-size-base);
-  color: rgba(255, 255, 255, 0.85);
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.9);
+  background: var(--btn-glass-bg);
+  border: 1px solid var(--btn-glass-border);
   padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: 12px;
+  border-radius: var(--btn-glass-radius);
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  backdrop-filter: blur(var(--btn-glass-blur));
+  -webkit-backdrop-filter: blur(var(--btn-glass-blur));
+  box-shadow: var(--btn-glass-shadow);
+  transition: color var(--transition-base), transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
 }
 
 .action-screen__completion-feeling-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: var(--color-neon-soft);
   color: var(--color-white);
+  box-shadow: var(--btn-glass-shadow), 0 0 24px var(--color-neon-glow-hover);
+}
+
+.action-screen__completion-feeling-btn:active {
+  transform: scale(0.97);
+  box-shadow: var(--btn-glass-shadow), 0 0 28px var(--color-neon-glow-active);
 }
 
 .action-screen__completion-feeling-btn:focus {
-  outline: 1px solid var(--color-white);
+  outline: 1px solid var(--color-neon);
   outline-offset: 2px;
 }
 
@@ -333,37 +345,106 @@
 .action-screen__completion-done-btn {
   font-weight: 300;
   font-size: var(--font-size-base);
-  color: var(--color-gray-888);
-  background: none;
-  border: none;
+  color: rgba(255, 255, 255, 0.75);
+  background: var(--btn-glass-bg);
+  border: 1px solid var(--btn-glass-border);
   padding: 0.35rem 0.75rem;
+  border-radius: var(--btn-glass-radius);
   cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
-  transition: color 0.15s ease;
+  backdrop-filter: blur(var(--btn-glass-blur));
+  -webkit-backdrop-filter: blur(var(--btn-glass-blur));
+  box-shadow: var(--btn-glass-shadow);
+  transition: color var(--transition-base), transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
 }
 
 .action-screen__completion-done-btn:hover {
   color: var(--color-white);
+  border-color: var(--color-neon-soft);
+  box-shadow: var(--btn-glass-shadow), 0 0 20px var(--color-neon-glow-hover);
+}
+
+.action-screen__completion-done-btn:active {
+  transform: scale(0.97);
 }
 
 .action-screen__completion-done-btn:focus {
-  outline: 1px solid var(--color-white);
+  outline: 1px solid var(--color-neon);
   outline-offset: 2px;
 }
 
 .action-screen__overlay--note-saved {
   animation-duration: 1s;
   z-index: 365;
+  pointer-events: auto;
 }
 
 .action-screen__overlay--note-saved .action-screen__overlay-text {
   animation-duration: 1s;
 }
 
-/* Overlay de recordatorio: fondo opaco, mensaje + motivacional + botones */
+.action-screen__note-saved-inner {
+  padding: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.action-screen__overlay--list-blocked {
+  animation: action-overlay-fade-in-hold 0.4s ease forwards;
+  z-index: 365;
+  pointer-events: auto;
+  flex-direction: column;
+}
+
+.action-screen__list-blocked-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  max-width: 360px;
+}
+
+.action-screen__overlay-text--list-blocked {
+  font-size: var(--font-size-base);
+  max-width: 320px;
+  padding: 0;
+  margin: 0;
+  text-align: center;
+  animation: action-overlay-text-fade-in 0.4s ease forwards;
+}
+
+.action-screen__list-blocked-btn {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  font-family: inherit;
+  border-radius: var(--btn-glass-radius);
+  cursor: pointer;
+  background: var(--btn-glass-bg);
+  border: 1px solid var(--btn-glass-border);
+  color: var(--color-white);
+  backdrop-filter: blur(var(--btn-glass-blur));
+  -webkit-backdrop-filter: blur(var(--btn-glass-blur));
+  box-shadow: var(--btn-glass-shadow);
+  transition: color var(--transition-base), transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
+}
+
+.action-screen__list-blocked-btn:hover {
+  border-color: var(--color-neon-soft);
+  box-shadow: var(--btn-glass-shadow), 0 0 24px var(--color-neon-glow-hover);
+}
+
+.action-screen__list-blocked-btn:active {
+  transform: scale(0.97);
+  box-shadow: var(--btn-glass-shadow), 0 0 28px var(--color-neon-glow-active);
+}
+
+/* Overlay de recordatorio: mismo estilo que barra, más blur */
 .action-screen__overlay--reminder {
-  background: rgba(0, 0, 0, 0.96);
+  background: var(--msg-bg);
+  backdrop-filter: blur(var(--msg-blur));
+  -webkit-backdrop-filter: blur(var(--msg-blur));
   pointer-events: auto;
   animation: action-overlay-fade-in-hold 0.4s ease forwards;
   flex-direction: column;
@@ -410,40 +491,48 @@
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
   font-family: inherit;
-  border-radius: 16px;
+  border-radius: var(--btn-glass-radius);
   cursor: pointer;
-  transition: opacity var(--transition-base), transform var(--transition-fast);
-  border: 1px solid transparent;
+  backdrop-filter: blur(var(--btn-glass-blur));
+  -webkit-backdrop-filter: blur(var(--btn-glass-blur));
+  box-shadow: var(--btn-glass-shadow);
+  transition: color var(--transition-base), transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
 }
 
 .action-screen__reminder-btn:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
+  box-shadow: var(--btn-glass-shadow), 0 0 28px var(--color-neon-glow-active);
 }
 
 .action-screen__reminder-btn--secondary {
-  background: transparent;
-  color: var(--color-text-muted);
-  border-color: var(--color-gray-222);
+  background: var(--btn-glass-bg);
+  color: rgba(255, 255, 255, 0.85);
+  border: 1px solid var(--btn-glass-border);
 }
 
 .action-screen__reminder-btn--secondary:hover {
-  color: var(--color-text-secondary);
-  border-color: var(--color-gray-444);
+  color: var(--color-white);
+  border-color: var(--color-neon-soft);
+  box-shadow: var(--btn-glass-shadow), 0 0 24px var(--color-neon-glow-hover);
 }
 
 .action-screen__reminder-btn--primary {
-  background: var(--color-white);
-  color: var(--color-black);
-  border-color: var(--color-white);
+  background: var(--btn-glass-bg);
+  color: var(--color-white);
+  border: 1px solid var(--btn-glass-border);
+  box-shadow: var(--btn-glass-shadow);
 }
 
 .action-screen__reminder-btn--primary:hover {
-  opacity: 0.95;
+  border-color: var(--color-neon-soft);
+  box-shadow: var(--btn-glass-shadow), 0 0 28px var(--color-neon-glow-hover);
 }
 
-/* Overlay flujo de pago (simulado): Premium solo después de confirmar pago */
+/* Overlay flujo de pago (simulado): mismo estilo que barra, más blur */
 .action-screen__overlay--payment-pending {
-  background: rgba(0, 0, 0, 0.96);
+  background: var(--msg-bg);
+  backdrop-filter: blur(var(--msg-blur));
+  -webkit-backdrop-filter: blur(var(--msg-blur));
   pointer-events: auto;
   animation: action-overlay-fade-in-hold 0.4s ease forwards;
   flex-direction: column;
@@ -460,7 +549,9 @@
 
 /* Overlay nombre opcional (después de activar Premium por primera vez) */
 .action-screen__overlay--name-prompt {
-  background: rgba(0, 0, 0, 0.96);
+  background: var(--msg-bg);
+  backdrop-filter: blur(var(--msg-blur));
+  -webkit-backdrop-filter: blur(var(--msg-blur));
   pointer-events: auto;
   animation: action-overlay-fade-in-hold 0.4s ease forwards;
   flex-direction: column;
@@ -518,35 +609,41 @@
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
   font-family: inherit;
-  border-radius: 12px;
+  border-radius: var(--btn-glass-radius);
   cursor: pointer;
-  border: 1px solid transparent;
-  transition: opacity 0.2s, border-color 0.2s, color 0.2s;
+  backdrop-filter: blur(var(--btn-glass-blur));
+  -webkit-backdrop-filter: blur(var(--btn-glass-blur));
+  box-shadow: var(--btn-glass-shadow);
+  transition: color var(--transition-base), transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
 }
 
 .action-screen__name-prompt-btn:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
+  box-shadow: var(--btn-glass-shadow), 0 0 28px var(--color-neon-glow-active);
 }
 
 .action-screen__name-prompt-btn--secondary {
-  background: transparent;
-  color: var(--color-text-muted);
-  border-color: var(--color-gray-222);
+  background: var(--btn-glass-bg);
+  color: rgba(255, 255, 255, 0.85);
+  border: 1px solid var(--btn-glass-border);
 }
 
 .action-screen__name-prompt-btn--secondary:hover {
-  color: var(--color-text-secondary);
-  border-color: var(--color-gray-444);
+  color: var(--color-white);
+  border-color: var(--color-neon-soft);
+  box-shadow: var(--btn-glass-shadow), 0 0 24px var(--color-neon-glow-hover);
 }
 
 .action-screen__name-prompt-btn--primary {
-  background: var(--color-white);
-  color: var(--color-black);
-  border-color: var(--color-white);
+  background: var(--btn-glass-bg);
+  color: var(--color-white);
+  border: 1px solid var(--btn-glass-border);
+  box-shadow: var(--btn-glass-shadow);
 }
 
 .action-screen__name-prompt-btn--primary:hover {
-  opacity: 0.95;
+  border-color: var(--color-neon-soft);
+  box-shadow: var(--btn-glass-shadow), 0 0 28px var(--color-neon-glow-hover);
 }
 
 @keyframes action-overlay-fade {

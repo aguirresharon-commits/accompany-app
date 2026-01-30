@@ -14,7 +14,9 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--msg-backdrop);
+  backdrop-filter: blur(var(--msg-backdrop-blur));
+  -webkit-backdrop-filter: blur(var(--msg-backdrop-blur));
   border: none;
   cursor: pointer;
   pointer-events: auto;
@@ -31,47 +33,19 @@
   width: 100%;
   max-width: 480px;
   max-height: 90vh;
-  background: var(--color-gray-111);
-  border-radius: 16px 16px 0 0;
+  background: var(--msg-bg);
+  backdrop-filter: blur(var(--msg-blur));
+  -webkit-backdrop-filter: blur(var(--msg-blur));
+  border-radius: var(--msg-radius-sheet);
+  border-top: var(--msg-border);
+  box-shadow: var(--msg-shadow);
   padding: var(--spacing-md);
+  padding-top: 56px;
   padding-bottom: max(env(safe-area-inset-bottom), var(--spacing-lg));
   pointer-events: auto;
   animation: note-prompt-slide 0.3s ease forwards;
-  border-top: 1px solid var(--color-gray-222);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-}
-
-.note-prompt__back {
-  position: absolute;
-  top: var(--spacing-md);
-  left: var(--spacing-md);
-  z-index: 2;
-  width: 44px;
-  height: 44px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  line-height: 1;
-  font-family: inherit;
-  cursor: pointer;
-  pointer-events: auto;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  color: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-.note-prompt__back:hover {
-  border-color: rgba(255, 255, 255, 0.14);
-  color: rgba(255, 255, 255, 0.95);
-}
-
-.note-prompt__back:active {
-  transform: scale(0.98);
 }
 
 @keyframes note-prompt-slide {
@@ -127,32 +101,39 @@
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
   font-family: inherit;
-  border-radius: var(--border-radius-sm);
+  border-radius: var(--btn-glass-radius);
   cursor: pointer;
-  transition: opacity var(--transition-base), transform var(--transition-fast);
+  backdrop-filter: blur(var(--btn-glass-blur));
+  -webkit-backdrop-filter: blur(var(--btn-glass-blur));
+  box-shadow: var(--btn-glass-shadow);
+  transition: color var(--transition-base), transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
 }
 
 .note-prompt__btn:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
+  box-shadow: var(--btn-glass-shadow), 0 0 28px var(--color-neon-glow-active);
 }
 
 .note-prompt__btn--skip {
-  background: transparent;
-  border: 1px solid var(--color-gray-444);
-  color: var(--color-text-secondary);
+  background: var(--btn-glass-bg);
+  border: 1px solid var(--btn-glass-border);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .note-prompt__btn--skip:hover {
   color: var(--color-white);
-  border-color: var(--color-gray-888);
+  border-color: var(--color-neon-soft);
+  box-shadow: var(--btn-glass-shadow), 0 0 24px var(--color-neon-glow-hover);
 }
 
 .note-prompt__btn--confirm {
-  background: var(--color-white);
-  border: 1px solid var(--color-white);
-  color: var(--color-black);
+  background: var(--btn-glass-bg);
+  border: 1px solid var(--btn-glass-border);
+  color: var(--color-white);
+  box-shadow: var(--btn-glass-shadow);
 }
 
 .note-prompt__btn--confirm:hover {
-  opacity: 0.9;
+  border-color: var(--color-neon-soft);
+  box-shadow: var(--btn-glass-shadow), 0 0 28px var(--color-neon-glow-hover);
 }

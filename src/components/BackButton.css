@@ -1,0 +1,54 @@
+/* BackButton: esquina superior izquierda real (como en la referencia).
+   Renderizado en body vía Portal → position:fixed siempre respecto al viewport. */
+
+.back-button {
+  position: fixed !important;
+  top: calc(env(safe-area-inset-top, 0px) + 8px) !important;
+  left: calc(env(safe-area-inset-left, 0px) + 12px) !important;
+  bottom: auto !important;
+  right: auto !important;
+  z-index: 99999;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  background: #121212;
+  color: #ffffff;
+  box-shadow: none;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.back-button:hover {
+  background: #1e1e1e;
+  color: #ffffff;
+}
+
+.back-button:active {
+  transform: scale(0.96);
+}
+
+.back-button__icon {
+  font-size: 26px;
+  line-height: 1;
+  color: inherit;
+  font-family: inherit;
+}
+
+@media (prefers-color-scheme: light) {
+  .back-button {
+    background: #f5f5f5;
+    color: rgba(0, 0, 0, 0.9);
+  }
+  .back-button:hover {
+    background: #e8e8e8;
+    color: #000;
+  }
+}

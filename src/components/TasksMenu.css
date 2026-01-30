@@ -26,37 +26,51 @@
   padding: var(--spacing-xs);
   min-width: 36px;
   min-height: 36px;
-  background: transparent;
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--border-radius-sm);
-  color: var(--color-text-secondary);
+  background: var(--btn-glass-bg);
+  border: 1px solid var(--btn-glass-border);
+  border-radius: var(--btn-glass-radius);
+  color: rgba(255, 255, 255, 0.85);
   cursor: pointer;
-  transition: all var(--transition-base);
+  backdrop-filter: blur(var(--btn-glass-blur));
+  -webkit-backdrop-filter: blur(var(--btn-glass-blur));
+  box-shadow: var(--btn-glass-shadow);
+  transition: color var(--transition-base), transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
   font-family: inherit;
 }
 
 .tasks-menu__filter-btn:hover,
 .tasks-menu__reset-btn:hover {
-  color: var(--color-text-primary);
-  border-color: var(--color-text-primary);
-  background: var(--color-gray-111);
+  color: var(--color-white);
+  border-color: var(--color-neon-soft);
+  box-shadow: var(--btn-glass-shadow), 0 0 20px var(--color-neon-glow-hover);
+}
+
+.tasks-menu__filter-btn:active,
+.tasks-menu__reset-btn:active {
+  transform: scale(0.97);
+  box-shadow: var(--btn-glass-shadow), 0 0 24px var(--color-neon-glow-active);
 }
 
 .tasks-menu__filter-btn--active {
-  color: var(--color-text-primary);
-  border-color: var(--color-text-primary);
-  background: var(--color-gray-111);
+  color: var(--color-white);
+  border-color: var(--btn-glass-border);
+  background: var(--btn-glass-bg);
+  box-shadow: var(--btn-glass-shadow);
+}
+
+.tasks-menu__filter-btn--active:hover {
+  box-shadow: var(--btn-glass-shadow), 0 0 20px var(--color-neon-glow-hover);
 }
 
 .tasks-menu__reset-btn {
-  color: var(--color-text-secondary);
-  border-color: var(--color-gray-444);
+  color: rgba(255, 255, 255, 0.75);
+  border-color: var(--btn-glass-border);
 }
 
 .tasks-menu__reset-btn:hover {
-  color: var(--color-text-primary);
-  border-color: var(--color-text-primary);
-  background: var(--color-gray-111);
+  color: var(--color-white);
+  border-color: var(--color-neon-soft);
+  box-shadow: var(--btn-glass-shadow), 0 0 20px var(--color-neon-glow-hover);
 }
 
 .tasks-menu__icon {

@@ -45,12 +45,15 @@
   min-height: 48px;
   max-width: 48px;
   padding: 0;
-  background: transparent;
-  border: none;
+  background: var(--btn-glass-bg);
+  border: 1px solid var(--btn-glass-border);
   border-radius: 50%;
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--color-white);
   cursor: pointer;
-  transition: color 0.2s ease, transform 0.2s ease;
+  backdrop-filter: blur(var(--btn-glass-blur));
+  -webkit-backdrop-filter: blur(var(--btn-glass-blur));
+  box-shadow: var(--btn-glass-shadow);
+  transition: color var(--transition-base), transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
   position: relative;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
@@ -58,46 +61,29 @@
 }
 
 .bottom-menu__btn:hover {
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--color-white);
+  border-color: var(--color-neon-soft);
+  box-shadow: var(--btn-glass-shadow), 0 0 24px var(--color-neon-glow-hover);
 }
 
 .bottom-menu__btn:active {
-  transform: scale(0.96);
+  transform: scale(0.97);
+  box-shadow: var(--btn-glass-shadow), 0 0 28px var(--color-neon-glow-active);
 }
 
 .bottom-menu__btn--active {
-  color: rgba(255, 255, 255, 1);
+  color: var(--color-white);
+  border-color: var(--color-neon-soft);
+  box-shadow: var(--btn-glass-shadow);
 }
 
-.bottom-menu__btn--active::before {
-  content: '';
-  position: absolute;
-  inset: -4px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.12);
-  box-shadow: 0 0 16px rgba(255, 255, 255, 0.15);
-  z-index: -1;
-  animation: bottom-menu-glow-in 0.25s ease forwards;
-}
-
-@keyframes bottom-menu-glow-in {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+.bottom-menu__btn--active:hover {
+  box-shadow: var(--btn-glass-shadow), 0 0 24px var(--color-neon-glow-hover);
 }
 
 .bottom-menu__btn--active:active {
-  transform: scale(1.06);
-}
-
-.bottom-menu__btn--active:active::before {
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.25);
-  transition: box-shadow 0.15s ease;
+  transform: scale(0.97);
+  box-shadow: var(--btn-glass-shadow), 0 0 28px var(--color-neon-glow-active);
 }
 
 .bottom-menu__icon {

@@ -1,0 +1,4 @@
+/* GlassButton: base ya en buttons-glass.css; aquí solo ajustes del componente si se usa aislado */
+.glass-button {
+  border-radius: var(--btn-glass-radius);
+}

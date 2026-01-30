@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { ENERGY_LEVELS, ENERGY_LEVEL_KEYS } from '../data/actions'
 import { EnergyLevelIcon } from './TaskIcon'
+import BackButton from './BackButton'
 import './SettingsView.css'
 
 const SettingsView = ({
@@ -18,6 +19,7 @@ const SettingsView = ({
   const isPremium = isPremiumProp !== undefined ? isPremiumProp : userPlan === 'premium'
   const [currentUser, setCurrentUser] = useState(null)
   const [confirmLogout, setConfirmLogout] = useState(false)
+  const [confirmRestart, setConfirmRestart] = useState(false)
 
   useEffect(() => {
     let unsubscribe = () => {}
@@ -161,12 +163,51 @@ const SettingsView = ({
         <p className="settings-view__desc">Marcar todas las tareas como no completadas.</p>
         <button
           className="settings-view__restart-btn"
-          onClick={onRestartDay}
+          onClick={() => setConfirmRestart(true)}
           type="button"
         >
           Reiniciar día
         </button>
       </section>
+
+      {confirmRestart && (
+        <div
+          className="settings-view__restart-overlay"
+          role="dialog"
+          aria-labelledby="restart-question"
+          aria-describedby="restart-warning"
+          aria-modal="true"
+        >
+          <BackButton onClick={() => setConfirmRestart(false)} />
+          <div className="settings-view__restart-confirm">
+            <p id="restart-warning" className="settings-view__restart-warning">
+              Si reiniciás el día, todas las tareas de hoy se marcarán como no completadas y volverás a la pantalla para elegir una nueva tarea.
+            </p>
+            <p id="restart-question" className="settings-view__restart-question">
+              ¿Estás seguro de hacerlo?
+            </p>
+            <div className="settings-view__restart-btns">
+              <button
+                type="button"
+                className="settings-view__logout-btn settings-view__logout-btn--no"
+                onClick={() => setConfirmRestart(false)}
+              >
+                No
+              </button>
+              <button
+                type="button"
+                className="settings-view__logout-btn settings-view__logout-btn--yes"
+                onClick={() => {
+                  onRestartDay?.()
+                  setConfirmRestart(false)
+                }}
+              >
+                Sí
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <section className="settings-view__section settings-view__section--help">
         <h2 className="settings-view__title">Sobre Control</h2>

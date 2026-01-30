@@ -30,7 +30,8 @@ const getInitialState = () => ({
     enabled: true,
     volume: 0.3 // Volumen bajo por defecto (0-1)
   },
-  userPlan: 'free' // 'free' | 'premium'; persistido tras pago exitoso
+  userPlan: 'free', // 'free' | 'premium'; persistido tras pago exitoso
+  listPickUsedDate: null // YYYY-MM-DD; solo una elección desde la lista por día para no premium
 })
 
 // Crear contexto
@@ -106,7 +107,8 @@ export const AppProvider = ({ children }) => {
         scheduledEnergyNextDay: effectiveScheduled,
         sessionNotes: savedState.sessionNotes || [],
         sounds: savedState.sounds || { enabled: true, volume: 0.3 },
-        userPlan
+        userPlan,
+        listPickUsedDate: savedState.listPickUsedDate ?? null
       }
     }
     return getInitialState()
@@ -399,7 +401,15 @@ export const AppProvider = ({ children }) => {
         current: 0,
         lastDate: null,
         paused: prev.streak.paused // Mantener el estado de pausa
-      }
+      },
+      listPickUsedDate: null // Reiniciar oportunidad de elegir desde la lista
+    }))
+  }, [])
+
+  const markListPickUsed = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      listPickUsedDate: getTodayDate()
     }))
   }, [])
 
@@ -459,6 +469,7 @@ export const AppProvider = ({ children }) => {
     getTodayActions,
     resetTodayActions,
     resetAllActions,
+    markListPickUsed,
     addSessionNote,
     setSoundsEnabled,
     setSoundsVolume,

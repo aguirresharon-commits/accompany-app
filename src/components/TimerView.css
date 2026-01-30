@@ -19,6 +19,10 @@
   align-items: center;
   gap: var(--spacing-lg);
   text-align: center;
+  background: var(--color-black);
+  border: 1px solid var(--btn-glass-border);
+  border-radius: var(--border-radius-sm);
+  padding: var(--spacing-xl);
 }
 
 .timer-view__icon {
@@ -37,7 +41,7 @@
 
 .timer-view__task {
   font-size: var(--font-size-base);
-  color: var(--color-text-muted);
+  color: var(--color-white);
   margin: 0;
   line-height: 1.4;
 }
@@ -52,7 +56,7 @@
 
 .timer-view__hint {
   font-size: 0.95rem;
-  color: var(--color-text-muted);
+  color: var(--color-white);
   margin: 0;
 }
 
@@ -61,21 +65,25 @@
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
   font-family: inherit;
-  border-radius: 20px;
+  border-radius: var(--btn-glass-radius);
   cursor: pointer;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: rgba(255, 255, 255, 0.7);
-  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  background: var(--btn-glass-bg);
+  border: 1px solid var(--btn-glass-border);
+  color: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(var(--btn-glass-blur));
+  -webkit-backdrop-filter: blur(var(--btn-glass-blur));
+  box-shadow: var(--btn-glass-shadow);
+  transition: color var(--transition-base), transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
   margin-top: var(--spacing-sm);
 }
 
 .timer-view__stop:hover {
-  color: rgba(255, 255, 255, 0.95);
-  border-color: rgba(255, 255, 255, 0.25);
-  background: rgba(255, 255, 255, 0.12);
+  color: var(--color-white);
+  border-color: var(--color-neon-soft);
+  box-shadow: var(--btn-glass-shadow), 0 0 28px var(--color-neon-glow-hover);
 }
 
 .timer-view__stop:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
+  box-shadow: var(--btn-glass-shadow), 0 0 32px var(--color-neon-glow-active);
 }

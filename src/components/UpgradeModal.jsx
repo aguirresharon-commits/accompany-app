@@ -1,6 +1,7 @@
 // Modal para activar Premium: solo se muestra al tocar "Hacerse Premium"
 // No se pide login al iniciar la app
 import { useEffect } from 'react'
+import BackButton from './BackButton'
 import './UpgradeModal.css'
 
 const UpgradeModal = ({ onConfirm, onClose }) => {
@@ -20,15 +21,8 @@ const UpgradeModal = ({ onConfirm, onClose }) => {
         onClick={onClose}
         aria-label="Cerrar"
       />
-      <button
-        type="button"
-        className="upgrade-modal__back"
-        onClick={onClose}
-        aria-label="Volver"
-      >
-        ←
-      </button>
       <div className="upgrade-modal__sheet">
+        <BackButton onClick={onClose} />
         <h2 id="upgrade-modal-title" className="upgrade-modal__title">Premium</h2>
         <p className="upgrade-modal__text">Desbloqueá:</p>
         <ul className="upgrade-modal__list" aria-label="Ventajas Premium">

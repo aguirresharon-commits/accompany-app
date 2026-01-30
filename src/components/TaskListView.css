@@ -1,6 +1,7 @@
 .task-list-view {
   padding: var(--spacing-md);
   padding-bottom: 100px;
+  background: var(--color-black);
 }
 
 .task-list-view__title {
@@ -28,9 +29,15 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-  border: 1px solid var(--color-gray-222);
+  background: var(--color-black);
+  border: 1px solid var(--btn-glass-border);
   border-radius: var(--border-radius-sm);
   overflow: hidden;
+}
+
+.list-panel__content .task-list-view .task-list-view__item {
+  background: rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
 .task-list-view__item-btn {
@@ -50,7 +57,7 @@
 }
 
 .task-list-view__item-btn:hover {
-  background: var(--color-gray-111);
+  background: rgba(0, 175, 255, 0.06);
 }
 
 .task-list-view__icon {
@@ -74,16 +81,23 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
+  background: var(--btn-glass-bg);
   border: none;
-  border-left: 1px solid var(--color-gray-222);
-  color: var(--color-text-muted);
+  border-left: 1px solid var(--btn-glass-border);
+  color: var(--color-neon);
   font-size: 1.25rem;
   cursor: pointer;
-  transition: all var(--transition-base);
+  backdrop-filter: blur(var(--btn-glass-blur));
+  -webkit-backdrop-filter: blur(var(--btn-glass-blur));
+  box-shadow: var(--btn-glass-shadow);
+  transition: color var(--transition-base), transform var(--transition-base), box-shadow var(--transition-base);
 }
 
 .task-list-view__reduce-btn:hover {
-  color: var(--color-white);
-  background: var(--color-gray-111);
+  color: var(--color-neon);
+  box-shadow: var(--btn-glass-shadow), 0 0 24px var(--color-neon-glow-hover);
+}
+
+.task-list-view__reduce-btn:active {
+  transform: scale(0.97);
 }

@@ -14,7 +14,9 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.6);
+  background: var(--msg-backdrop);
+  backdrop-filter: blur(var(--msg-backdrop-blur));
+  -webkit-backdrop-filter: blur(var(--msg-backdrop-blur));
   border: none;
   cursor: pointer;
   pointer-events: auto;
@@ -30,45 +32,17 @@
   position: relative;
   width: 100%;
   max-width: 480px;
-  background: var(--color-gray-111);
-  border-radius: 20px 20px 0 0;
+  background: var(--msg-bg);
+  backdrop-filter: blur(var(--msg-blur));
+  -webkit-backdrop-filter: blur(var(--msg-blur));
+  border-radius: var(--msg-radius-sheet);
+  border-top: var(--msg-border);
+  box-shadow: var(--msg-shadow);
   padding: var(--spacing-lg);
+  padding-top: 56px;
   padding-bottom: max(env(safe-area-inset-bottom), var(--spacing-xl));
   pointer-events: auto;
   animation: timer-end-slide 0.3s ease forwards;
-  border-top: 1px solid var(--color-gray-222);
-}
-
-.timer-end__back {
-  position: absolute;
-  top: var(--spacing-md);
-  left: var(--spacing-md);
-  z-index: 2;
-  width: 44px;
-  height: 44px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  line-height: 1;
-  font-family: inherit;
-  cursor: pointer;
-  pointer-events: auto;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  color: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-.timer-end__back:hover {
-  border-color: rgba(255, 255, 255, 0.14);
-  color: rgba(255, 255, 255, 0.95);
-}
-
-.timer-end__back:active {
-  transform: scale(0.98);
 }
 
 @keyframes timer-end-slide {
@@ -102,54 +76,60 @@
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
   font-family: inherit;
-  border-radius: 16px;
+  border-radius: var(--btn-glass-radius);
   cursor: pointer;
-  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
-  border: 1px solid transparent;
+  backdrop-filter: blur(var(--btn-glass-blur));
+  -webkit-backdrop-filter: blur(var(--btn-glass-blur));
+  box-shadow: var(--btn-glass-shadow);
+  transition: color var(--transition-base), transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
 }
 
 .timer-end__btn:active {
-  transform: scale(0.99);
+  transform: scale(0.97);
+  box-shadow: var(--btn-glass-shadow), 0 0 28px var(--color-neon-glow-active);
 }
 
 .timer-end__btn--primary {
-  background: var(--color-white);
-  color: var(--color-black);
-  border-color: var(--color-white);
+  background: var(--btn-glass-bg);
+  color: var(--color-white);
+  border: 1px solid var(--btn-glass-border);
+  box-shadow: var(--btn-glass-shadow);
 }
 
 .timer-end__btn--primary:hover {
-  opacity: 0.95;
+  border-color: var(--color-neon-soft);
+  box-shadow: var(--btn-glass-shadow), 0 0 28px var(--color-neon-glow-hover);
 }
 
 .timer-end__btn--secondary {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--btn-glass-bg);
   color: rgba(255, 255, 255, 0.85);
-  border-color: rgba(255, 255, 255, 0.15);
+  border: 1px solid var(--btn-glass-border);
 }
 
 .timer-end__btn--secondary:hover {
-  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--color-neon-soft);
   color: var(--color-white);
-  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: var(--btn-glass-shadow), 0 0 24px var(--color-neon-glow-hover);
 }
 
 .timer-end__btn--ghost {
-  background: transparent;
-  color: var(--color-text-muted);
-  border-color: var(--color-gray-222);
+  background: var(--btn-glass-bg);
+  color: rgba(255, 255, 255, 0.75);
+  border: 1px solid var(--btn-glass-border);
   margin-top: var(--spacing-xs);
 }
 
 .timer-end__btn--ghost:hover {
-  color: var(--color-text-secondary);
-  border-color: var(--color-gray-444);
+  color: rgba(255, 255, 255, 0.9);
+  border-color: var(--color-neon-soft);
+  box-shadow: var(--btn-glass-shadow), 0 0 24px var(--color-neon-glow-hover);
 }
 
 .timer-end__premium-hint,
 .timer-end__premium-hint-btn {
   font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
+  color: var(--color-white);
   text-align: center;
   margin: 0;
   padding: var(--spacing-xs) 0;
@@ -167,5 +147,5 @@
 }
 
 .timer-end__premium-hint-btn:hover {
-  color: var(--color-text-secondary);
+  color: rgba(255, 255, 255, 0.85);
 }

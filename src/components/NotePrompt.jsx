@@ -1,5 +1,6 @@
 // Modal opcional al completar: "¿Dejás una nota?" → Listo / Omitir
 import { useState, useRef, useEffect } from 'react'
+import BackButton from './BackButton'
 import './NotePrompt.css'
 
 const NotePrompt = ({ action, onConfirm, onSkip }) => {
@@ -74,15 +75,8 @@ const NotePrompt = ({ action, onConfirm, onSkip }) => {
   return (
     <div className="note-prompt" role="dialog" aria-label="Nota opcional">
       <button type="button" className="note-prompt__backdrop" onClick={onSkip} aria-label="Cerrar" />
-      <button
-        type="button"
-        className="note-prompt__back"
-        onClick={onSkip}
-        aria-label="Volver"
-      >
-        ←
-      </button>
       <div ref={sheetRef} className="note-prompt__sheet">
+        <BackButton onClick={onSkip} />
         <p className="note-prompt__title">¿Dejás una nota? (opcional)</p>
         <textarea
           ref={inputRef}

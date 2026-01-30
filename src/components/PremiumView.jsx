@@ -1,5 +1,6 @@
 // Pantalla dedicada de Premium: beneficios claros y activación
 // Se abre al tocar "Activar Premium" o al intentar usar una función Premium
+import BackButton from './BackButton'
 import './PremiumView.css'
 
 const BENEFITS = [
@@ -16,14 +17,7 @@ const PremiumView = ({ isPremium: isPremiumProp, userPlan, onActivate, onClose }
   return (
     <div className="premium-view">
       <div className="premium-view__inner">
-        <button
-          type="button"
-          className="premium-view__back"
-          onClick={onClose}
-          aria-label="Volver"
-        >
-          ←
-        </button>
+        <BackButton onClick={onClose} />
         <h1 className="premium-view__title">Premium</h1>
         <p className="premium-view__intro">
           {isPremium

@@ -2,6 +2,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import logoHead from '../assets/logo-head.png'
 import StarryBackground from './StarryBackground'
+import BackButton from './BackButton'
 import './LoginScreen.css'
 
 const AUTH_LOAD_TIMEOUT_MS = 8000
@@ -89,14 +90,7 @@ const LoginScreen = ({ onSuccess, onBack, onNavigateToCreatePremium }) => {
   return (
     <div className="login" role="region" aria-label="Iniciar sesión">
       <StarryBackground />
-      <button
-        type="button"
-        className="login__back"
-        onClick={() => onBack?.()}
-        aria-label="Volver"
-      >
-        ←
-      </button>
+      <BackButton onClick={() => onBack?.()} />
       <div className="login__inner">
         <img src={logoHead} alt="" className="login__logo" aria-hidden="true" />
         <h1 className="login__brand">CONTROL</h1>

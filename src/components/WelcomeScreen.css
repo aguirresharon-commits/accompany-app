@@ -65,16 +65,6 @@
   padding: var(--spacing-md) 0;
 }
 
-.welcome__logged-in {
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-regular);
-  color: rgba(255, 255, 255, 0.85);
-  margin: 0;
-  line-height: 1.5;
-  text-align: center;
-  padding: 0 var(--spacing-md);
-}
-
 .welcome__cta {
   width: 100%;
   max-width: 280px;
@@ -84,29 +74,29 @@
   font-family: inherit;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  border-radius: 20px;
+  border-radius: var(--btn-glass-radius);
   cursor: pointer;
-  background: transparent;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  color: rgba(255, 255, 255, 0.85);
-  transition: color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  background: var(--btn-glass-bg);
+  backdrop-filter: blur(var(--btn-glass-blur));
+  -webkit-backdrop-filter: blur(var(--btn-glass-blur));
+  border: 1px solid var(--btn-glass-border);
+  box-shadow: var(--btn-glass-shadow);
+  color: rgba(255, 255, 255, 0.92);
+  transition: color var(--transition-base), border-color var(--transition-base), box-shadow var(--transition-base), transform var(--transition-base);
   position: relative;
 }
 
 .welcome__cta:hover {
-  color: rgba(255, 255, 255, 0.95);
-  border-color: rgba(255, 255, 255, 0.25);
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.12);
+  color: var(--color-white);
+  border-color: var(--color-neon-soft);
+  box-shadow: var(--btn-glass-shadow), 0 0 28px var(--color-neon-glow-hover);
 }
 
 .welcome__cta:active {
   color: var(--color-white);
-  border-color: rgba(255, 255, 255, 0.35);
-  box-shadow: 0 0 24px rgba(255, 255, 255, 0.2);
-  transform: scale(1.02);
+  border-color: var(--color-neon-soft);
+  box-shadow: var(--btn-glass-shadow), 0 0 32px var(--color-neon-glow-active);
+  transform: scale(0.97);
 }
 
 /* Ajustes móvil */

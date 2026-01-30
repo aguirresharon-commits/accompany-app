@@ -1,5 +1,6 @@
 // Al finalizar tiempo (o parar): mensaje humano + Marcar completada | Continuar más | Agregar nota (Premium) | Cerrar
 import { useEffect } from 'react'
+import BackButton from './BackButton'
 import './TimerEndModal.css'
 
 const CLOSE_MESSAGES = ['Listo.', 'Terminaste.', 'Bien.', 'Listo por ahora.', 'Podés seguir cuando quieras.']
@@ -31,15 +32,8 @@ const TimerEndModal = ({
         onClick={onClose}
         aria-label="Cerrar"
       />
-      <button
-        type="button"
-        className="timer-end__back"
-        onClick={onClose}
-        aria-label="Volver"
-      >
-        ←
-      </button>
       <div className="timer-end__sheet">
+        <BackButton onClick={onClose} />
         <p className="timer-end__message">{msg}</p>
         <div className="timer-end__actions">
           <button
