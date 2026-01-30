@@ -86,12 +86,103 @@
 
 .login__input:focus {
   outline: none;
-  border-color: var(--color-white);
+  border-color: var(--color-neon);
+  box-shadow: 0 0 0 1px var(--color-neon);
 }
 
 .login__input:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* Wrapper único: una sola barra con borde y fondo. Input + ícono DENTRO, nada abajo ni afuera. */
+.login__password-wrap {
+  position: relative;
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: visible;
+  background: var(--color-gray-111);
+  border: 1px solid var(--color-gray-444);
+  border-radius: var(--border-radius-sm);
+  transition: border-color var(--transition-base), box-shadow var(--transition-base);
+}
+
+.login__password-wrap:focus-within {
+  border-color: var(--color-neon);
+  box-shadow: 0 0 0 1px var(--color-neon);
+}
+
+/* Input integrado: CERO borde, outline y box-shadow. Borde SOLO en el wrapper. */
+.login__password-wrap input.login__input,
+.login__password-wrap input.login__input--password {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: var(--spacing-sm) var(--spacing-md);
+  padding-right: 44px;
+  margin: 0;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.login__password-wrap input.login__input:focus,
+.login__password-wrap input.login__input--password:focus,
+.login__password-wrap input.login__input:hover,
+.login__password-wrap input.login__input--password:hover,
+.login__password-wrap input.login__input:active,
+.login__password-wrap input.login__input--password:active {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Ícono DENTRO del wrapper: absolute, derecha, centrado vertical. No debajo ni fuera. */
+.login__password-wrap .login__password-toggle {
+  position: absolute;
+  left: auto;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  margin: 0;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: #cccccc;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.login__password-wrap .login__password-toggle:hover,
+.login__password-wrap .login__password-toggle:focus {
+  color: #ffffff;
+  outline: none;
+}
+
+.login__password-wrap .login__password-toggle:focus-visible {
+  outline: none;
+}
+
+.login__password-wrap .login__password-toggle:active {
+  opacity: 0.8;
+}
+
+.login__password-toggle-icon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  pointer-events: none;
+  display: block;
 }
 
 .login__error {

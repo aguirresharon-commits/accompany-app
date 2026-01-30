@@ -10,7 +10,7 @@ import premiumRoutes from './routes/premium.js'
 
 const app = express()
 const PORT = process.env.PORT ?? 4000
-const origins = (process.env.CORS_ORIGIN || 'http://localhost:3000').split(',').map((s) => s.trim()).filter(Boolean)
+const origins = (process.env.CORS_ORIGIN || 'http://localhost:3000,http://localhost:5173').split(',').map((s) => s.trim()).filter(Boolean)
 const corsOrigin = origins.length === 1 ? origins[0] : origins
 
 app.use(cors({ origin: corsOrigin }))
