@@ -6,7 +6,6 @@ export const ENERGY_LEVELS = {
   baja: {
     key: 'baja',
     label: 'Baja',
-    emoji: '🔴',
     description: 'Cansancio, bloqueo, cabeza quemada',
     objective: 'Activar sin exigir',
     messages: ['Solo esto.', 'Nada más.']
@@ -14,7 +13,6 @@ export const ENERGY_LEVELS = {
   media: {
     key: 'media',
     label: 'Media',
-    emoji: '🟡',
     description: 'Funcional, pero sin épica',
     objective: 'Progreso real, corto',
     messages: ['Un paso alcanza.', 'No todo. Esto.', 'Hacelo simple.']
@@ -22,7 +20,6 @@ export const ENERGY_LEVELS = {
   alta: {
     key: 'alta',
     label: 'Alta',
-    emoji: '🟢',
     description: 'Ganas, foco, impulso',
     objective: 'Canalizar sin quemar',
     messages: ['Aprovechá el impulso.', 'Ahora es buen momento.']

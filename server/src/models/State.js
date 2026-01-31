@@ -40,6 +40,4 @@ const stateSchema = new mongoose.Schema(
   { timestamps: true }
 )
 
-stateSchema.index({ userId: 1 }, { unique: true })
-
 export default mongoose.model('State', stateSchema)

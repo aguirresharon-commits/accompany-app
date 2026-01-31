@@ -281,28 +281,24 @@ const TaskIcon = ({ iconName, className = '', size = 24 }) => {
   )
 }
 
-// Componente específico para iconos de niveles de energía
+// Componente específico para iconos de niveles de energía (estilo line-art, como el set adjunto)
 export const EnergyLevelIcon = ({ level, className = '', size = 24 }) => {
   const energyIcons = {
     'baja': (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="8"/>
-        <line x1="8" y1="12" x2="16" y2="12"/>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="5" y1="12" x2="19" y2="12"/>
       </svg>
     ),
     'media': (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="8"/>
-        <line x1="12" y1="8" x2="12" y2="16"/>
-        <line x1="8" y1="12" x2="16" y2="12"/>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="5" y1="9" x2="19" y2="9"/>
+        <line x1="5" y1="15" x2="19" y2="15"/>
       </svg>
     ),
     'alta': (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="8"/>
-        <line x1="12" y1="4" x2="12" y2="12"/>
-        <line x1="8" y1="8" x2="12" y2="12"/>
-        <line x1="16" y1="8" x2="12" y2="12"/>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"/>
+        <line x1="5" y1="12" x2="19" y2="12"/>
       </svg>
     ),
   }

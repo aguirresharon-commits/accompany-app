@@ -140,10 +140,6 @@
     min-height: 44px;
   }
 
-  .energy-selector__emoji {
-    font-size: 1.75rem;
-  }
-
   .energy-selector__level-label {
     font-size: var(--font-size-base);
   }

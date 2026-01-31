@@ -142,7 +142,19 @@
   box-shadow: none !important;
 }
 
-/* Ícono DENTRO del wrapper: absolute, derecha, centrado vertical. No debajo ni fuera. */
+/* Botón del ojo: transparente, integrado al input. CERO borde/fondo/sombra/outline en todos los estados. */
+.login__password-wrap .login__password-toggle,
+.login__password-wrap .login__password-toggle:hover,
+.login__password-wrap .login__password-toggle:focus,
+.login__password-wrap .login__password-toggle:focus-visible,
+.login__password-wrap .login__password-toggle:active {
+  border: none !important;
+  background: none !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
 .login__password-wrap .login__password-toggle {
   position: absolute;
   left: auto;
@@ -156,8 +168,6 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: none;
-  background: none;
   cursor: pointer;
   color: #cccccc;
   -webkit-tap-highlight-color: transparent;
@@ -166,11 +176,6 @@
 .login__password-wrap .login__password-toggle:hover,
 .login__password-wrap .login__password-toggle:focus {
   color: #ffffff;
-  outline: none;
-}
-
-.login__password-wrap .login__password-toggle:focus-visible {
-  outline: none;
 }
 
 .login__password-wrap .login__password-toggle:active {
