@@ -11,6 +11,12 @@
   border-bottom: var(--border-width) solid var(--color-border);
 }
 
+@media (min-width: 768px) {
+  .tasks-menu {
+    max-width: 100%;
+  }
+}
+
 .tasks-menu__filters {
   display: flex;
   align-items: center;

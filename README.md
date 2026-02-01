@@ -113,7 +113,11 @@ Una vez instalada, la app funcionará como una app nativa con:
 
 ### Variables de entorno
 
-No se requieren variables de entorno para esta app (todo funciona en el cliente).
+**Frontend (raíz del proyecto)**  
+- `VITE_API_URL`: URL del backend. En desarrollo, si no se define, se usa `http://localhost:4000`. En producción, configurarla con la URL del backend (ej. `https://api.tudominio.com`). Copiar `.env.example` a `.env` y ajustar si hace falta.
+
+**Backend (carpeta `server/`)**  
+- Ver `server/.env.example`: `MONGODB_URI`, `JWT_SECRET`, `PORT`, `CORS_ORIGIN`. Copiar a `server/.env` y rellenar con valores reales. **No subir `.env` al repositorio** (está en `.gitignore`).
 
 ## Pruebas
 

@@ -84,6 +84,7 @@ html, body {
 }
 
 body {
+  margin: 0;
   font-family: var(--font-family);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-regular);
@@ -96,19 +97,15 @@ body {
 }
 
 #root {
-  min-height: 100vh;
   width: 100%;
+  min-height: 100vh;
   background: var(--color-bg-primary);
 }
 
-/* Estilos base para la app */
+/* Estilos base para la app (sin centrado que restrinja ancho) */
 .app {
   min-height: 100vh;
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
   padding: var(--spacing-md);
 }
 
@@ -162,6 +159,26 @@ button:hover:not(:disabled) {
 
 button:active:not(:disabled) {
   transform: scale(0.98);
+}
+
+/* Contenedor fluido: ancho disponible en desktop, sin encerrar en mobile */
+.app-container {
+  width: 100%;
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: 16px;
+}
+
+.content {
+  max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .app-container {
+    padding: 32px;
+  }
 }
 
 /* Transición entrada: pantalla principal tras bienvenida */

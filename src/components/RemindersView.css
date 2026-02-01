@@ -7,6 +7,12 @@
   padding-bottom: 120px;
 }
 
+@media (min-width: 768px) {
+  .reminders-view {
+    max-width: 100%;
+  }
+}
+
 .reminders-view__header {
   display: flex;
   align-items: center;

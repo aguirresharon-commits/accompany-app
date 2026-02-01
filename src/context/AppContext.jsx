@@ -2,6 +2,9 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { saveState, loadState, getTodayDate } from '../utils/storage'
 import { ENERGY_LEVEL_KEYS } from '../data/actions'
+import { apiFetch } from '../api/client'
+import { onAuthChange, getCurrentUser } from '../services/authService'
+import { activatePremium, deactivatePremium } from '../services/premiumService'
 
 const migrateEnergyLevel = (level) => {
   if (!level) return null
@@ -40,6 +43,7 @@ const AppContext = createContext(undefined)
 // Provider del contexto
 export const AppProvider = ({ children }) => {
   const [isInitialLoading, setIsInitialLoading] = useState(true)
+  const [syncError, setSyncError] = useState(null)
   const [state, setState] = useState(() => {
     // Intentar cargar estado guardado al inicializar
     const savedState = loadState()
@@ -158,6 +162,21 @@ export const AppProvider = ({ children }) => {
   // Guardar estado automáticamente cuando cambia
   useEffect(() => {
     saveState(state)
+  }, [state])
+
+  // Enviar estado al backend cuando cambia (debounce 2 s) si hay usuario logueado
+  useEffect(() => {
+    const user = getCurrentUser()
+    if (!user?.uid) return
+    const timer = setTimeout(() => {
+      apiFetch('/api/state', {
+        method: 'PUT',
+        body: JSON.stringify(state)
+      }).catch(() => {
+        setSyncError('No se pudo sincronizar. Revisá tu conexión.')
+      })
+    }, 2000)
+    return () => clearTimeout(timer)
   }, [state])
 
   // Función para actualizar nivel de energía
@@ -457,6 +476,103 @@ export const AppProvider = ({ children }) => {
     setState(prev => ({ ...prev, userPlan: plan }))
   }, [])
 
+  // Sincronizar userPlan con el backend cuando hay usuario logueado (GET /api/premium)
+  useEffect(() => {
+    const unsubscribe = onAuthChange(async (user) => {
+      if (!user?.uid) {
+        setState(prev => (prev.userPlan === 'free' ? prev : { ...prev, userPlan: 'free' }))
+        return
+      }
+      try {
+        const { ok, data } = await apiFetch('/api/premium')
+        if (!ok) {
+          setUserPlan('free')
+          deactivatePremium(user.uid)
+          return
+        }
+        const isPremium = Boolean(data?.premium)
+        setUserPlan(isPremium ? 'premium' : 'free')
+        if (isPremium) activatePremium(user.uid)
+        else deactivatePremium(user.uid)
+      } catch {
+        setUserPlan('free')
+        deactivatePremium(user.uid)
+      }
+    })
+    return unsubscribe
+  }, [setUserPlan])
+
+  // Cargar estado desde el backend cuando hay usuario logueado (GET /api/state)
+  useEffect(() => {
+    const unsubscribe = onAuthChange(async (user) => {
+      if (!user?.uid) return
+      try {
+        const { ok, status, data } = await apiFetch('/api/state')
+        if (!ok || status === 404 || !data || typeof data !== 'object') {
+          if (!ok && status !== 404) setSyncError('No se pudo sincronizar. Revisá tu conexión.')
+          return
+        }
+        const today = getTodayDate()
+        let allActions = data.allActions || []
+        if (allActions.length === 0 && data.completedActions && data.completedActions.length > 0) {
+          allActions = data.completedActions.map((completed) => ({
+            actionId: completed.actionId,
+            actionText: completed.actionText,
+            emoji: completed.emoji || null,
+            level: completed.level,
+            date: completed.date,
+            shownAt: completed.completedAt || new Date().toISOString(),
+            completed: true,
+            completedAt: completed.completedAt,
+            parentId: completed.parentId || null
+          }))
+        }
+        const completedActions = data.completedActions || []
+        const resetAllActions = (allActions || []).map((action) => {
+          if (action.date !== today) {
+            return { ...action, completed: false, completedAt: undefined }
+          }
+          return action
+        })
+        const cleanedHistory = data.history || {}
+        const energyLevel = migrateEnergyLevel(data.currentEnergyLevel)
+        const scheduled = data.scheduledEnergyNextDay || null
+        let effectiveEnergy = energyLevel
+        let effectiveScheduled = scheduled
+        if (scheduled && scheduled.setOnDate && scheduled.level && today > scheduled.setOnDate) {
+          effectiveEnergy = scheduled.level
+          effectiveScheduled = null
+        }
+        const userPlan = data.userPlan === 'premium' ? 'premium' : 'free'
+        setState({
+          ...getInitialState(),
+          ...data,
+          currentEnergyLevel: effectiveEnergy,
+          completedActions,
+          allActions: resetAllActions,
+          history: cleanedHistory,
+          streak: data.streak || getInitialState().streak,
+          lastResetDate: today,
+          scheduledEnergyNextDay: effectiveScheduled,
+          sessionNotes: data.sessionNotes || [],
+          sounds: data.sounds || { enabled: true, volume: 0.3 },
+          userPlan,
+          listPickUsedDate: data.listPickUsedDate ?? null
+        })
+      } catch {
+        setSyncError('No se pudo sincronizar. Revisá tu conexión.')
+      }
+    })
+    return unsubscribe
+  }, [])
+
+  // Limpiar mensaje de error de sync después de 5 s
+  useEffect(() => {
+    if (!syncError) return
+    const t = setTimeout(() => setSyncError(null), 5000)
+    return () => clearTimeout(t)
+  }, [syncError])
+
   // Valor del contexto
   const value = {
     ...state,
@@ -474,7 +590,9 @@ export const AppProvider = ({ children }) => {
     setSoundsEnabled,
     setSoundsVolume,
     setUserPlan,
-    isInitialLoading
+    isInitialLoading,
+    syncError,
+    clearSyncError: () => setSyncError(null)
   }
 
   return (

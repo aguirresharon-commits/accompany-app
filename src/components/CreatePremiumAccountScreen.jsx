@@ -1,6 +1,5 @@
-// Pantalla única Crear cuenta Premium: formulario (email, contraseña, confirmación),
-// sección de pago y botón "Pagar y crear cuenta Premium".
-// La cuenta solo se crea si el pago es exitoso; si no se completa el pago, no se guarda nada.
+// Pantalla Crear cuenta Premium: email, contraseña, confirmación.
+// Modo demo: el pago es simulado; no se realiza ningún cobro. Los datos de tarjeta son opcionales.
 import { useState, useCallback, useEffect } from 'react'
 import logoHead from '../assets/logo-head.png'
 import StarryBackground from './StarryBackground'
@@ -46,13 +45,6 @@ const CreatePremiumAccountScreen = ({ onSuccess, onBack }) => {
         setError('La contraseña y la confirmación no coinciden.')
         return
       }
-      const cn = (cardNumber || '').trim().replace(/\s/g, '')
-      const ex = (expiry || '').trim()
-      const cv = (cvc || '').trim()
-      if (!cn || !ex || !cv) {
-        setError('Completá los datos de pago para continuar.')
-        return
-      }
       setLoading(true)
       try {
         const result = await createPremiumAccount({ email: trimEmail, password })
@@ -65,7 +57,7 @@ const CreatePremiumAccountScreen = ({ onSuccess, onBack }) => {
         setLoading(false)
       }
     },
-    [email, password, confirm, cardNumber, expiry, cvc, onSuccess]
+    [email, password, confirm, onSuccess]
   )
 
   if (success) {
@@ -94,7 +86,7 @@ const CreatePremiumAccountScreen = ({ onSuccess, onBack }) => {
       <div className="create-premium__inner">
         <img src={logoHead} alt="" className="create-premium__logo" aria-hidden="true" />
         <h1 className="create-premium__title">Crear cuenta Premium</h1>
-        <p className="create-premium__tagline">Completá el formulario y el pago para activar Premium.</p>
+        <p className="create-premium__tagline">Completá el formulario para activar Premium.</p>
 
         <form className="create-premium__form" onSubmit={handleSubmit} noValidate>
           <section className="create-premium__section" aria-labelledby="create-premium-form-heading">
@@ -146,8 +138,8 @@ const CreatePremiumAccountScreen = ({ onSuccess, onBack }) => {
             <h2 id="create-premium-payment-heading" className="create-premium__section-title">
               Pago
             </h2>
-            <p className="create-premium__payment-note">
-              La cuenta solo se crea si el pago se completa correctamente.
+            <p className="create-premium__payment-note create-premium__payment-note--demo" role="status">
+              <strong>Modo demo.</strong> El pago es simulado; no se realiza ningún cobro. Los datos de tarjeta son opcionales.
             </p>
             <label className="create-premium__label" htmlFor="create-premium-card">
               Número de tarjeta
@@ -208,7 +200,7 @@ const CreatePremiumAccountScreen = ({ onSuccess, onBack }) => {
             disabled={loading}
             aria-busy={loading}
           >
-            {loading ? 'Creando cuenta…' : 'Pagar y crear cuenta Premium'}
+            {loading ? 'Creando cuenta…' : 'Crear cuenta Premium'}
           </button>
 
           {loading && (

@@ -101,6 +101,10 @@ export async function loginOrRegister(email, password) {
 
 /**
  * Cerrar sesión.
+ * Solo se limpia la sesión (token, usuario, premium para este uid).
+ * El estado de la app (tareas, racha, etc.) y los recordatorios en localStorage
+ * se mantienen para que el usuario pueda seguir usando la app sin cuenta.
+ * Si vuelve a iniciar sesión, se cargará el estado del backend y reemplazará el local.
  */
 export async function logout() {
   const u = getCurrentUser()

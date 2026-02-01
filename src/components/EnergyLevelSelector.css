@@ -11,6 +11,12 @@
   min-height: 100vh;
 }
 
+@media (min-width: 768px) {
+  .energy-selector {
+    max-width: 100%;
+  }
+}
+
 .energy-selector__header {
   text-align: center;
   margin-bottom: var(--spacing-2xl);

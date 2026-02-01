@@ -1,8 +1,11 @@
 // Vista Recordatorios: lista de tareas puntuales con fecha/hora.
-import { useEffect, useMemo, useState } from 'react'
+// Con usuario logueado → fuente de verdad: backend. Sin usuario → localStorage.
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import AddReminderModal from './AddReminderModal'
 import { addReminder, updateReminder, deleteReminders, listReminders, clearAllReminders } from '../services/remindersService'
 import { getTodayDate } from '../utils/storage'
+import { apiFetch } from '../api/client'
+import { getCurrentUser, onAuthChange } from '../services/authService'
 import './RemindersView.css'
 
 const FREE_REMINDERS_LAST_DAY_KEY = 'control-app-reminders-free-date'
@@ -36,12 +39,26 @@ const RemindersView = ({ isPremium = false, onRequestPremium }) => {
   const [addOpen, setAddOpen] = useState(false)
   const [editingReminder, setEditingReminder] = useState(null)
   const [selectedIds, setSelectedIds] = useState(new Set())
+  const [remindersError, setRemindersError] = useState(null)
 
   const canAddNew = isPremium || items.length < FREE_REMINDERS_LIMIT
 
-  const reload = () => {
-    setItems(listReminders())
-  }
+  // Refrescar lista: con usuario → GET backend; sin usuario → localStorage. No mezclar fuentes.
+  const refreshList = useCallback(() => {
+    const user = getCurrentUser()
+    if (user?.uid) {
+      apiFetch('/api/reminders')
+        .then(({ ok, data }) => {
+          if (ok && Array.isArray(data)) {
+            setItems(data)
+            setRemindersError(null)
+          } else setRemindersError('No se pudo sincronizar. Revisá tu conexión.')
+        })
+        .catch(() => setRemindersError('No se pudo sincronizar. Revisá tu conexión.'))
+    } else {
+      setItems(listReminders())
+    }
+  }, [])
 
   useEffect(() => {
     // Usuarios free: al día siguiente se limpian los recordatorios para poder escribir 2 de nuevo.
@@ -53,13 +70,31 @@ const RemindersView = ({ isPremium = false, onRequestPremium }) => {
         window.localStorage.setItem(FREE_REMINDERS_LAST_DAY_KEY, today)
       }
     }
-    reload()
+    refreshList()
     const onStorage = (e) => {
-      if (e.key === 'control-app-reminders') reload()
+      if (e.key === 'control-app-reminders') refreshList()
     }
     window.addEventListener('storage', onStorage)
     return () => window.removeEventListener('storage', onStorage)
-  }, [isPremium])
+  }, [isPremium, refreshList])
+
+  // Con usuario logueado: cargar desde backend. Sin usuario: desde localStorage.
+  useEffect(() => {
+    const unsubscribe = onAuthChange((user) => {
+      setRemindersError(null)
+      if (user?.uid) {
+        apiFetch('/api/reminders')
+          .then(({ ok, data }) => {
+            if (ok && Array.isArray(data)) setItems(data)
+            else setRemindersError('No se pudo sincronizar. Revisá tu conexión.')
+          })
+          .catch(() => setRemindersError('No se pudo sincronizar. Revisá tu conexión.'))
+      } else {
+        setItems(listReminders())
+      }
+    })
+    return unsubscribe
+  }, [])
 
   const sorted = useMemo(() => {
     const arr = [...items]
@@ -69,6 +104,15 @@ const RemindersView = ({ isPremium = false, onRequestPremium }) => {
 
   return (
     <div className="reminders-view">
+      {remindersError && (
+        <p
+          role="alert"
+          className="reminders-view__error"
+          style={{ padding: '0.5rem 1rem', margin: 0, background: '#3d1a4a', color: '#f0e6f0', fontSize: '0.9rem' }}
+        >
+          {remindersError}
+        </p>
+      )}
       <div className="reminders-view__header">
         <h2 className="reminders-view__title">Recordatorios</h2>
         <div className="reminders-view__actions">
@@ -76,11 +120,25 @@ const RemindersView = ({ isPremium = false, onRequestPremium }) => {
             <button
               type="button"
               className="reminders-view__btn reminders-view__btn--trash"
-              onClick={() => {
+              onClick={async () => {
                 if (selectedIds.size === 0) return
-                deleteReminders([...selectedIds])
-                setSelectedIds(new Set())
-                reload()
+                const ids = [...selectedIds]
+                const user = getCurrentUser()
+                if (user?.uid) {
+                  const { ok } = await apiFetch('/api/reminders', {
+                    method: 'DELETE',
+                    body: JSON.stringify({ ids })
+                  })
+                  if (ok) {
+                    setItems((prev) => prev.filter((r) => !ids.includes(r.id)))
+                    setSelectedIds(new Set())
+                    window.dispatchEvent(new CustomEvent('reminders-updated'))
+                  }
+                } else {
+                  deleteReminders(ids)
+                  setSelectedIds(new Set())
+                  refreshList()
+                }
               }}
               disabled={selectedIds.size === 0}
               aria-label="Borrar seleccionados"
@@ -185,13 +243,51 @@ const RemindersView = ({ isPremium = false, onRequestPremium }) => {
             setEditingReminder(null)
           }}
           initial={editingReminder}
-          onCreate={(data) => {
-            if (data.id) {
-              updateReminder(data.id, { text: data.text, date: data.date, time: data.time, alarmEnabled: data.alarmEnabled })
+          onCreate={async (data) => {
+            const user = getCurrentUser()
+            if (user?.uid) {
+              if (data.id) {
+                const { ok, data: res } = await apiFetch(`/api/reminders/${data.id}`, {
+                  method: 'PATCH',
+                  body: JSON.stringify({
+                    text: data.text,
+                    date: data.date,
+                    time: data.time,
+                    alarmEnabled: data.alarmEnabled
+                  })
+                })
+                if (ok && res) {
+                  setItems((prev) => prev.map((r) => (r.id === res.id ? res : r)))
+                  window.dispatchEvent(new CustomEvent('reminders-updated'))
+                }
+              } else {
+                const { ok, data: res } = await apiFetch('/api/reminders', {
+                  method: 'POST',
+                  body: JSON.stringify({
+                    text: data.text,
+                    date: data.date,
+                    time: data.time,
+                    alarmEnabled: data.alarmEnabled
+                  })
+                })
+                if (ok && res) {
+                  setItems((prev) => [...prev, res])
+                  window.dispatchEvent(new CustomEvent('reminders-updated'))
+                }
+              }
             } else {
-              addReminder(data)
+              if (data.id) {
+                updateReminder(data.id, {
+                  text: data.text,
+                  date: data.date,
+                  time: data.time,
+                  alarmEnabled: data.alarmEnabled
+                })
+              } else {
+                addReminder(data)
+              }
+              refreshList()
             }
-            reload()
             setEditingReminder(null)
           }}
         />

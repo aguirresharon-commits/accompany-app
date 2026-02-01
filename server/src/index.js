@@ -1,5 +1,6 @@
 import 'dotenv/config'
 import express from 'express'
+import helmet from 'helmet'
 import cors from 'cors'
 import { connectDB, isConnected } from './config/db.js'
 import { notFound, errorHandler } from './utils/errors.js'
@@ -13,6 +14,7 @@ const PORT = process.env.PORT ?? 4000
 const origins = (process.env.CORS_ORIGIN || 'http://localhost:3000,http://localhost:5173').split(',').map((s) => s.trim()).filter(Boolean)
 const corsOrigin = origins.length === 1 ? origins[0] : origins
 
+app.use(helmet())
 app.use(cors({ origin: corsOrigin }))
 app.use(express.json())
 

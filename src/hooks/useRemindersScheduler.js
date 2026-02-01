@@ -1,5 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { listReminders, markReminderFired } from '../services/remindersService'
+import { apiFetch } from '../api/client'
+import { onAuthChange } from '../services/authService'
 
 const OPEN_TAB_KEY = 'control-open-tab'
 
@@ -44,6 +46,7 @@ function pickNextDue(nowMs, items) {
 
 export function useRemindersScheduler() {
   const timerRef = useRef(null)
+  const userRef = useRef(null)
 
   useEffect(() => {
     const clear = () => {
@@ -53,25 +56,21 @@ export function useRemindersScheduler() {
       }
     }
 
-    const schedule = () => {
+    const runWithItems = (items) => {
       clear()
       const now = Date.now()
-      const items = listReminders()
       const next = pickNextDue(now, items)
       if (!next) return
       const due = toDueTimeMs(next)
-      // Si ya pasó (hasta 1 hora), disparar inmediatamente (delay 0)
       const delay = Math.max(0, due - now)
 
       timerRef.current = setTimeout(() => {
         try {
-          // Siempre disparar evento personalizado para notificación en pantalla (funciona siempre)
           const event = new CustomEvent('reminder-due', {
             detail: { reminder: next },
           })
           window.dispatchEvent(event)
 
-          // También intentar Notification API del navegador (si tiene permiso)
           if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
             const n = new Notification(next.text || 'Recordatorio', {
               tag: next.id,
@@ -91,30 +90,51 @@ export function useRemindersScheduler() {
             }
           }
         } finally {
-          markReminderFired(next.id)
+          const currentUser = userRef.current
+          if (currentUser?.uid) {
+            apiFetch(`/api/reminders/${next.id}/fired`, { method: 'POST' }).catch(() => {})
+          } else {
+            markReminderFired(next.id)
+          }
           schedule()
         }
       }, delay)
     }
 
-    const onVisibility = () => {
-      // Al volver a foco, re-evaluar próximos recordatorios.
-      schedule()
+    const schedule = () => {
+      clear()
+      const user = userRef.current
+      if (user?.uid) {
+        apiFetch('/api/reminders')
+          .then(({ ok, data }) => {
+            if (ok && Array.isArray(data)) runWithItems(data)
+          })
+          .catch(() => {})
+      } else {
+        const items = listReminders()
+        runWithItems(items)
+      }
     }
 
+    const unsubscribeAuth = onAuthChange((user) => {
+      userRef.current = user
+      schedule()
+    })
+
+    const onVisibility = () => schedule()
     const onStorage = (e) => {
       if (e.key === 'control-app-reminders') schedule()
     }
-
     const onRemindersUpdated = () => schedule()
 
-    schedule()
     document.addEventListener('visibilitychange', onVisibility)
     window.addEventListener('focus', onVisibility)
     window.addEventListener('storage', onStorage)
     window.addEventListener('reminders-updated', onRemindersUpdated)
+
     return () => {
       clear()
+      unsubscribeAuth()
       document.removeEventListener('visibilitychange', onVisibility)
       window.removeEventListener('focus', onVisibility)
       window.removeEventListener('storage', onStorage)

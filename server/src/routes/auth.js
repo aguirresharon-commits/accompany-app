@@ -1,12 +1,27 @@
 import { Router } from 'express'
+import rateLimit from 'express-rate-limit'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import User from '../models/User.js'
 
 const router = Router()
+
+const authLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 10,
+  message: { error: 'Demasiados intentos. Probá en un minuto.' }
+})
+router.use(authLimiter)
+
 const JWT_SECRET = process.env.JWT_SECRET
 const SALT_ROUNDS = 10
 const JWT_EXPIRES = '7d'
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+function isValidEmail(str) {
+  return typeof str === 'string' && EMAIL_REGEX.test(str)
+}
 
 function createToken(userId) {
   if (!JWT_SECRET) throw new Error('JWT_SECRET no definida')
@@ -24,6 +39,9 @@ router.post('/register', async (req, res) => {
     const emailTrim = typeof email === 'string' ? email.trim().toLowerCase() : ''
     if (!emailTrim || !password) {
       return res.status(400).json({ error: 'Email y contraseña son requeridos' })
+    }
+    if (!isValidEmail(emailTrim)) {
+      return res.status(400).json({ error: 'El email no tiene un formato válido' })
     }
     if (password.length < 6) {
       return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres' })
@@ -56,6 +74,9 @@ router.post('/login', async (req, res) => {
     const emailTrim = typeof email === 'string' ? email.trim().toLowerCase() : ''
     if (!emailTrim || !password) {
       return res.status(400).json({ error: 'Email y contraseña son requeridos' })
+    }
+    if (!isValidEmail(emailTrim)) {
+      return res.status(400).json({ error: 'El email no tiene un formato válido' })
     }
     const user = await User.findOne({ email: emailTrim }).select('+password')
     if (!user) {

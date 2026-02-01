@@ -135,6 +135,14 @@
   line-height: 1.4;
 }
 
+.create-premium__payment-note--demo {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
 .create-premium__error {
   font-size: var(--font-size-base);
   color: #e57373;
