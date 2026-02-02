@@ -4,12 +4,13 @@
  */
 import nodemailer from 'nodemailer'
 
-const RESET_LINK_BASE = process.env.RESET_PASSWORD_LINK_BASE || ''
+const RESET_LINK_BASE = (process.env.RESET_PASSWORD_LINK_BASE || '').trim()
 const SMTP_HOST = process.env.SMTP_HOST
 const SMTP_PORT = Number(process.env.SMTP_PORT) || 587
 const SMTP_SECURE = process.env.SMTP_SECURE === 'true'
 const SMTP_USER = process.env.SMTP_USER
-const SMTP_PASS = process.env.SMTP_PASS
+// Gmail app passwords suelen pegarse con espacios; quitar para evitar fallos de auth
+const SMTP_PASS = typeof process.env.SMTP_PASS === 'string' ? process.env.SMTP_PASS.replace(/\s/g, '') : process.env.SMTP_PASS
 
 let transporter = null
 
