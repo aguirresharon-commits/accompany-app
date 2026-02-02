@@ -15,14 +15,26 @@ const authLimiter = rateLimit({
 })
 router.use(authLimiter)
 
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: { error: 'Demasiados intentos de inicio de sesión. Probá en 15 minutos.' }
+})
+
 const JWT_SECRET = process.env.JWT_SECRET
 const SALT_ROUNDS = 10
 const JWT_EXPIRES = '7d'
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const PASSWORD_MIN_LENGTH = 8
 
 function isValidEmail(str) {
   return typeof str === 'string' && EMAIL_REGEX.test(str)
+}
+
+function isPasswordSecure(password) {
+  if (typeof password !== 'string' || password.length < PASSWORD_MIN_LENGTH) return false
+  return /[a-zA-Z]/.test(password) && /\d/.test(password)
 }
 
 function createToken(userId) {
@@ -45,8 +57,8 @@ router.post('/register', async (req, res) => {
     if (!isValidEmail(emailTrim)) {
       return res.status(400).json({ error: 'El email no tiene un formato válido' })
     }
-    if (password.length < 6) {
-      return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres' })
+    if (!isPasswordSecure(password)) {
+      return res.status(400).json({ error: 'La contraseña debe tener al menos 8 caracteres, una letra y un número' })
     }
     const existing = await User.findOne({ email: emailTrim })
     if (existing) {
@@ -70,7 +82,7 @@ router.post('/register', async (req, res) => {
  * Body: { email, password }
  * Devuelve: { user: { id, email }, token }
  */
-router.post('/login', async (req, res) => {
+router.post('/login', loginLimiter, async (req, res) => {
   try {
     const { email, password } = req.body
     const emailTrim = typeof email === 'string' ? email.trim().toLowerCase() : ''
@@ -148,8 +160,8 @@ router.post('/reset-password', async (req, res) => {
     if (!tokenStr || !newPassword) {
       return res.status(400).json({ error: 'Token y nueva contraseña son requeridos' })
     }
-    if (newPassword.length < 6) {
-      return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres' })
+    if (!isPasswordSecure(newPassword)) {
+      return res.status(400).json({ error: 'La contraseña debe tener al menos 8 caracteres, una letra y un número' })
     }
     const resetDoc = await PasswordResetToken.findOne({ token: tokenStr })
     if (!resetDoc || resetDoc.expiresAt < new Date()) {

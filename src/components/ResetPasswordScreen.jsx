@@ -36,8 +36,8 @@ const ResetPasswordScreen = ({ onBack }) => {
         setError('Ingresá el token que recibiste por email.')
         return
       }
-      if (!newPassword || newPassword.length < 6) {
-        setError('La contraseña debe tener al menos 6 caracteres.')
+      if (!newPassword || newPassword.length < 8 || !/[a-zA-Z]/.test(newPassword) || !/\d/.test(newPassword)) {
+        setError('La contraseña debe tener al menos 8 caracteres, una letra y un número.')
         return
       }
       if (newPassword !== confirmPassword) {
@@ -114,7 +114,7 @@ const ResetPasswordScreen = ({ onBack }) => {
               className="reset-password__input reset-password__input--password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="Mínimo 6 caracteres"
+              placeholder="Mín. 8 caracteres, letra y número"
               autoComplete="new-password"
               disabled={loading}
             />

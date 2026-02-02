@@ -20,8 +20,8 @@ export async function createPremiumAccount({ email, password }) {
   if (!trimEmail || !password) {
     throw new Error('Email y contraseña son requeridos.')
   }
-  if (password.length < 6) {
-    throw new Error('La contraseña debe tener al menos 6 caracteres.')
+  if (password.length < 8 || !/[a-zA-Z]/.test(password) || !/\d/.test(password)) {
+    throw new Error('La contraseña debe tener al menos 8 caracteres, una letra y un número.')
   }
 
   const registerRes = await fetch(`${API_BASE}/api/auth/register`, {

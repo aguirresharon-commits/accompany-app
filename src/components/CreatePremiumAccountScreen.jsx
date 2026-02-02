@@ -7,6 +7,12 @@ import BackButton from './BackButton'
 import { createPremiumAccount } from '../services/createPremiumAccountService'
 import './CreatePremiumAccountScreen.css'
 
+const PAYMENT_SIMULATE_MS = 1500
+
+function simulatePayment() {
+  return new Promise((resolve) => setTimeout(resolve, PAYMENT_SIMULATE_MS))
+}
+
 const CreatePremiumAccountScreen = ({ onSuccess, onBack }) => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -15,6 +21,7 @@ const CreatePremiumAccountScreen = ({ onSuccess, onBack }) => {
   const [expiry, setExpiry] = useState('')
   const [cvc, setCvc] = useState('')
   const [loading, setLoading] = useState(false)
+  const [step, setStep] = useState('idle') // 'idle' | 'paying' | 'creating'
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
 
@@ -37,8 +44,8 @@ const CreatePremiumAccountScreen = ({ onSuccess, onBack }) => {
         setError('Ingresá una contraseña.')
         return
       }
-      if (password.length < 6) {
-        setError('La contraseña debe tener al menos 6 caracteres.')
+      if (password.length < 8 || !/[a-zA-Z]/.test(password) || !/\d/.test(password)) {
+        setError('La contraseña debe tener al menos 8 caracteres, una letra y un número.')
         return
       }
       if (password !== confirm) {
@@ -46,13 +53,18 @@ const CreatePremiumAccountScreen = ({ onSuccess, onBack }) => {
         return
       }
       setLoading(true)
+      setError('')
       try {
+        setStep('paying')
+        await simulatePayment()
+        setStep('creating')
         const result = await createPremiumAccount({ email: trimEmail, password })
         const { setSession } = await import('../services/authService')
         setSession({ user: result.user, token: result.token })
         setSuccess(true)
       } catch (err) {
         setError(err?.message || 'Error al crear la cuenta.')
+        setStep('idle')
       } finally {
         setLoading(false)
       }
@@ -65,7 +77,7 @@ const CreatePremiumAccountScreen = ({ onSuccess, onBack }) => {
       <div className="create-premium" role="region" aria-label="Cuenta Premium creada">
         <StarryBackground />
         <div className="create-premium__success-inner">
-          <p className="create-premium__success-message">Ahora sos Premium. Disfrutá Control.</p>
+          <p className="create-premium__success-message">Pago confirmado. Ahora sos Premium. Disfrutá Control.</p>
           <button
             type="button"
             className="create-premium__success-btn"
@@ -200,13 +212,19 @@ const CreatePremiumAccountScreen = ({ onSuccess, onBack }) => {
             disabled={loading}
             aria-busy={loading}
           >
-            {loading ? 'Creando cuenta…' : 'Crear cuenta Premium'}
+            {loading
+              ? step === 'paying'
+                ? 'Procesando pago…'
+                : 'Creando cuenta…'
+              : 'Pagar y crear cuenta Premium'}
           </button>
 
           {loading && (
             <div className="create-premium__loading" role="status" aria-live="polite">
               <span className="create-premium__loading-spinner" aria-hidden="true" />
-              <span className="create-premium__loading-text">Creando cuenta…</span>
+              <span className="create-premium__loading-text">
+                {step === 'paying' ? 'Procesando pago…' : 'Pago completado. Creando cuenta…'}
+              </span>
             </div>
           )}
         </form>

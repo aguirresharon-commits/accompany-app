@@ -20,9 +20,10 @@ function withTimeout(promise, ms) {
 function mapAuthError(err) {
   const msg = err?.message || ''
   if (msg.includes('AUTH_TIMEOUT') || msg.includes('Demasiado lento')) return 'Demasiado lento. Probá de nuevo.'
+  if (msg.includes('15 minutos') || msg.includes('Demasiados intentos de inicio')) return 'Demasiados intentos. Probá en 15 minutos.'
   if (msg.includes('incorrectos')) return 'Email o contraseña incorrectos.'
   if (msg.includes('requeridos')) return 'Ingresá email y contraseña.'
-  if (msg.includes('al menos 6')) return 'La contraseña debe tener al menos 6 caracteres.'
+  if (msg.includes('al menos 8') || msg.includes('letra y un número')) return 'La contraseña debe tener al menos 8 caracteres, una letra y un número.'
   if (msg.includes('formato válido')) return 'El email no tiene un formato válido.'
   if (msg.includes('ya está en uso') || msg.includes('Ya existe')) return 'Ese email ya está registrado. Revisá tu contraseña.'
   if (msg.includes('red') || msg.includes('conexión') || msg.includes('fetch')) return 'Error de conexión.'
