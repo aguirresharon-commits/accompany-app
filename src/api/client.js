@@ -37,6 +37,9 @@ export async function apiFetch(path, options = {}) {
   if (res.status === 401) {
     const { logout } = await import('../services/authService.js')
     await logout()
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('session-expired'))
+    }
   }
   const data = await res.json().catch(() => ({}))
   return { ok: res.ok, status: res.status, data }

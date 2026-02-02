@@ -427,6 +427,7 @@
   font-family: inherit;
   border-radius: var(--btn-glass-radius);
   cursor: pointer;
+  white-space: nowrap;
   background: var(--btn-glass-bg);
   border: 1px solid var(--btn-glass-border);
   color: var(--color-white);
@@ -462,8 +463,8 @@
   flex-direction: column;
   align-items: center;
   gap: var(--spacing-md);
-  padding: var(--spacing-lg);
-  max-width: 400px;
+  padding: var(--spacing-md) var(--spacing-lg);
+  max-width: 420px;
   width: 100%;
 }
 
@@ -489,20 +490,26 @@
   gap: var(--spacing-sm);
   width: 100%;
   margin-top: var(--spacing-sm);
+  justify-content: stretch;
 }
 
 .action-screen__reminder-btn {
-  flex: 1;
-  padding: var(--spacing-md) var(--spacing-lg);
+  flex: 1 1 0%;
+  padding: var(--spacing-md) var(--spacing-sm);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
   font-family: inherit;
   border-radius: var(--btn-glass-radius);
   cursor: pointer;
+  white-space: nowrap;
   backdrop-filter: blur(var(--btn-glass-blur));
   -webkit-backdrop-filter: blur(var(--btn-glass-blur));
   box-shadow: var(--btn-glass-shadow);
   transition: color var(--transition-base), transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
+}
+
+.action-screen__reminder-btn--secondary {
+  flex: 0 0 auto;
 }
 
 .action-screen__reminder-btn:active {
@@ -569,8 +576,8 @@
   flex-direction: column;
   align-items: center;
   gap: var(--spacing-md);
-  padding: var(--spacing-lg);
-  max-width: 320px;
+  padding: var(--spacing-md) var(--spacing-lg);
+  max-width: 360px;
   width: 100%;
 }
 
@@ -607,20 +614,26 @@
   gap: var(--spacing-sm);
   width: 100%;
   margin-top: var(--spacing-xs);
+  justify-content: stretch;
 }
 
 .action-screen__name-prompt-btn {
-  flex: 1;
-  padding: var(--spacing-md) var(--spacing-lg);
+  flex: 1 1 0%;
+  padding: var(--spacing-md) var(--spacing-sm);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
   font-family: inherit;
   border-radius: var(--btn-glass-radius);
   cursor: pointer;
+  white-space: nowrap;
   backdrop-filter: blur(var(--btn-glass-blur));
   -webkit-backdrop-filter: blur(var(--btn-glass-blur));
   box-shadow: var(--btn-glass-shadow);
   transition: color var(--transition-base), transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
+}
+
+.action-screen__name-prompt-btn--secondary {
+  flex: 0 0 auto;
 }
 
 .action-screen__name-prompt-btn:active {

@@ -23,12 +23,13 @@ function mapAuthError(err) {
   if (msg.includes('incorrectos')) return 'Email o contraseña incorrectos.'
   if (msg.includes('requeridos')) return 'Ingresá email y contraseña.'
   if (msg.includes('al menos 6')) return 'La contraseña debe tener al menos 6 caracteres.'
-  if (msg.includes('ya está en uso') || msg.includes('Ya existe')) return 'Ese email ya está en uso.'
+  if (msg.includes('formato válido')) return 'El email no tiene un formato válido.'
+  if (msg.includes('ya está en uso') || msg.includes('Ya existe')) return 'Ese email ya está registrado. Revisá tu contraseña.'
   if (msg.includes('red') || msg.includes('conexión') || msg.includes('fetch')) return 'Error de conexión.'
   return msg || 'Error al ingresar.'
 }
 
-const LoginScreen = ({ onSuccess, onBack, onNavigateToCreatePremium }) => {
+const LoginScreen = ({ onSuccess, onBack, onNavigateToCreatePremium, onNavigateToForgotPassword }) => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
@@ -57,8 +58,8 @@ const LoginScreen = ({ onSuccess, onBack, onNavigateToCreatePremium }) => {
       }
       setLoading(true)
       try {
-        const { login } = await import('../services/authService')
-        await withTimeout(login(trimEmail, password), AUTH_LOAD_TIMEOUT_MS)
+        const { loginOrRegister } = await import('../services/authService')
+        await withTimeout(loginOrRegister(trimEmail, password), AUTH_LOAD_TIMEOUT_MS)
         setSuccess(true)
       } catch (err) {
         setError(mapAuthError(err))
@@ -158,6 +159,19 @@ const LoginScreen = ({ onSuccess, onBack, onNavigateToCreatePremium }) => {
           >
             {loading ? 'Ingresando…' : 'Ingresar'}
           </button>
+
+          {onNavigateToForgotPassword && (
+            <p className="login__create-account">
+              <button
+                type="button"
+                className="login__create-account-link"
+                onClick={onNavigateToForgotPassword}
+                disabled={loading}
+              >
+                Olvidé mi contraseña
+              </button>
+            </p>
+          )}
 
           {onNavigateToCreatePremium && (
             <p className="login__create-account">

@@ -34,7 +34,7 @@ Según `activeTab` se muestra una sola vista:
 - **today** → **CalendarView** (calendario mensual; ver detalle de un día requiere Premium).
 - **reminders** → **RemindersView** (lista de recordatorios, agregar/editar/borrar; free: 2, Premium: ilimitados).
 - **settings** → **SettingsView** (ritmo, sonidos, Premium, reiniciar día, cuenta / Iniciar sesión).
-- **login** → **LoginScreen** (email/contraseña, Firebase Auth). Se llega desde Ajustes (“Iniciar sesión”) o desde Premium (“Activar Premium” sin usuario).
+- **login** → **LoginScreen** (email/contraseña, auth vía backend JWT). Se llega desde Ajustes (“Iniciar sesión”) o desde Premium (“Activar Premium” sin usuario).
 
 Vistas full-screen tipo overlay:
 
@@ -51,7 +51,7 @@ Vistas full-screen tipo overlay:
 - **Tareas instantáneas**: algunas tareas tienen `duration: 0.5` y no usan timer; solo “¿Pudiste hacerlo?” → Sí / No todavía.
 - **Completadas hoy**: lista debajo de la tarjeta con las tareas ya completadas hoy (texto, hora, nota si la tiene).
 
-**Datos**: `completedActions`, `allActions`, `currentAction`, `displayedAction` vienen del **AppContext** y se persisten en **localStorage** (`control-app-state`). Las tareas están definidas en **data/actions.js** por sección (Mente, Cuerpo, Bienestar, etc.) y nivel (baja, media, alta).
+**Datos**: `completedActions`, `allActions`, `currentAction`, `displayedAction` vienen del **AppContext**. Con usuario logueado se sincronizan con el backend (GET/PUT `/api/state`); sin usuario se persisten solo en **localStorage** (`control-app-state`). Las tareas están definidas en **data/actions.js** por sección (Mente, Cuerpo, Bienestar, etc.) y nivel (baja, media, alta).
 
 ---
 
@@ -112,7 +112,7 @@ Los datos vienen de `completedActions` (todas las fechas); el calendario filtra 
 - **AddReminderModal**  
   - Crear: texto, día (date), hora (time), alarma on/off.  
   - Editar: mismo formulario con datos del recordatorio elegido (botón lápiz en cada ítem).  
-  - Al guardar: **authService** no se usa aquí; solo se guarda en **localStorage** (`control-app-reminders`). Si la alarma está on, se puede pedir permiso de **Notification** para notificaciones del sistema.
+  - Al guardar: con usuario logueado se usa el backend (POST/PATCH `/api/reminders`); sin usuario se guarda en **localStorage** (`control-app-reminders`). Si la alarma está on, se puede pedir permiso de **Notification** para notificaciones del sistema.
 
 - **Selección y borrado**  
   - Cada ítem tiene casilla para seleccionar.  
@@ -129,7 +129,7 @@ Los datos vienen de `completedActions` (todas las fechas); el calendario filtra 
   - Recordatorios vencidos hace hasta 24 h se disparan al abrir la app (overlay + opcional Notification).  
   - Al hacer clic en la notificación del sistema se guarda `control-open-tab = 'reminders'` y al volver a foco la app cambia a la pestaña Recordatorios.
 
-**Persistencia**: `remindersService` (listReminders, addReminder, updateReminder, deleteReminders, markReminderFired) en **localStorage** con clave `control-app-reminders`.
+**Persistencia**: Con usuario logueado, los recordatorios se cargan y guardan en el backend (GET/POST/PATCH/DELETE `/api/reminders`). Sin usuario, `remindersService` usa **localStorage** (`control-app-reminders`).
 
 ---
 
@@ -162,14 +162,14 @@ Los datos vienen de `completedActions` (todas las fechas); el calendario filtra 
 
 - **LoginScreen**  
   - Email + contraseña.  
-  - Al enviar se usa **authService** (login con Firebase Auth). Carga diferida para no bloquear si Firebase falla.  
-  - Timeout de carga de auth; si falla, se muestra error (ej. “Demasiado lento. Probá de nuevo.”).  
+  - Al enviar se usa **authService** (login con auth vía backend JWT). Si falla (red, credenciales), se muestra error. Tras login exitoso se cargan estado y recordatorios (GET /api/state, GET /api/reminders) y Premium (GET /api/premium).  
+  - Si falla, se muestra error (ej. “Demasiado lento. Probá de nuevo.”).  
   - `onSuccess` → vuelve a la pestaña anterior (`setActiveTab(previousTab)`).  
   - Botón ← para volver sin iniciar sesión.
 
 - **Premium (estado)**  
-  - **premiumService**: `isPremium(uid)`, `activatePremium(uid)`, `deactivatePremium(uid)`. Persistencia en **localStorage** (`control-app-premium`) por `uid`.  
-  - **authService**: `getCurrentUser()`, `onAuthChange()`, `login()`, `logout()`. Usa Firebase Auth.  
+  - **premiumService**: `isPremium(uid)`, `activatePremium(uid)`, `deactivatePremium(uid)`. Persistencia en **localStorage** (`control-app-premium`) por `uid`; tras login se actualiza desde GET /api/premium.  
+  - **authService**: `getCurrentUser()`, `onAuthChange()`, `login()`, `logout()`. Auth vía backend JWT (token en `control-app-auth`).  
   - En **ActionScreen**, `currentUser` viene de `onAuthChange` (carga diferida) y `isPremiumUser = currentUser ? checkIsPremium(currentUser.uid) : false`.  
   - Ese `isPremiumUser` se pasa a: PremiumView, SettingsView, CalendarView, TimeSelectModal, TimerEndModal, RemindersView, StreakDisplay (donde aplica).
 
@@ -203,14 +203,18 @@ Lógica de racha en **useStreak** y estado en **AppContext** (`streak.current`, 
 
 ## 11. Persistencia y datos
 
-- **localStorage**  
-  - `control-app-state`: estado global (nivel de energía, completedActions, allActions, streak, sounds, userPlan, etc.).  
-  - `control-app-reminders`: array de recordatorios.  
-  - `control-app-premium`: mapa `{ [uid]: boolean }` para Premium por usuario.  
-  - `control-open-tab`: usado por notificaciones para abrir la pestaña Recordatorios al volver a la app.
+- **Backend (API)**  
+  - Auth: POST `/api/auth/login`, POST `/api/auth/register`; JWT en cabecera `Authorization: Bearer` para rutas autenticadas.  
+  - Estado: GET/PUT `/api/state` (con usuario logueado; fuente de verdad en backend).  
+  - Recordatorios: GET/POST/PATCH/DELETE `/api/reminders` (con usuario logueado).  
+  - Premium: GET `/api/premium` para saber si el usuario es premium.
 
-- **Firebase**  
-  - Solo Auth (email/contraseña). No hay Firestore ni Realtime DB en este detalle.
+- **localStorage**  
+  - `control-app-auth`: sesión (token + user) tras login.  
+  - `control-app-state`: estado global; con usuario se sincroniza con backend; sin usuario es la única persistencia.  
+  - `control-app-reminders`: recordatorios; con usuario se sincronizan con backend; sin usuario es la única persistencia.  
+  - `control-app-premium`: mapa `{ [uid]: boolean }` para Premium por usuario (actualizado desde backend tras login).  
+  - `control-open-tab`: usado por notificaciones para abrir la pestaña Recordatorios al volver a la app.
 
 ---
 

@@ -573,6 +573,13 @@ export const AppProvider = ({ children }) => {
     return () => clearTimeout(t)
   }, [syncError])
 
+  // Mostrar "Sesión expirada" cuando el cliente recibe 401
+  useEffect(() => {
+    const onSessionExpired = () => setSyncError('Sesión expirada. Volvé a iniciar sesión.')
+    window.addEventListener('session-expired', onSessionExpired)
+    return () => window.removeEventListener('session-expired', onSessionExpired)
+  }, [])
+
   // Valor del contexto
   const value = {
     ...state,

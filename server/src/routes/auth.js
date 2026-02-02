@@ -3,6 +3,8 @@ import rateLimit from 'express-rate-limit'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import User from '../models/User.js'
+import PasswordResetToken, { createResetToken, getExpiresAt } from '../models/PasswordResetToken.js'
+import { sendPasswordResetEmail } from '../utils/email.js'
 
 const router = Router()
 
@@ -94,6 +96,77 @@ router.post('/login', async (req, res) => {
   } catch (err) {
     console.error('Login error:', err)
     return res.status(500).json({ error: 'Error al iniciar sesión' })
+  }
+})
+
+/**
+ * POST /api/auth/forgot-password
+ * Body: { email }
+ * Siempre responde 200 para no revelar si el email existe.
+ * Si hay SMTP configurado, envía email con link/código para restablecer.
+ */
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body
+    const emailTrim = typeof email === 'string' ? email.trim().toLowerCase() : ''
+    if (!emailTrim || !isValidEmail(emailTrim)) {
+      return res.status(400).json({ error: 'Email inválido' })
+    }
+    const user = await User.findOne({ email: emailTrim })
+    if (user) {
+      const token = createResetToken()
+      await PasswordResetToken.create({
+        email: emailTrim,
+        token,
+        expiresAt: getExpiresAt()
+      })
+      console.log('[forgot-password] Usuario encontrado, enviando email a %s', emailTrim)
+      const sent = await sendPasswordResetEmail(emailTrim, token)
+      if (!sent) {
+        console.warn('[forgot-password] email no enviado (revisar SMTP / RESET_PASSWORD_LINK_BASE). Ver logs [email] arriba.')
+      } else {
+        console.log('[forgot-password] Email enviado correctamente')
+      }
+    }
+    return res.status(200).json({
+      message: 'Si el email existe en nuestra base, recibirás instrucciones para restablecer la contraseña.'
+    })
+  } catch (err) {
+    console.error('Forgot-password error:', err)
+    return res.status(500).json({ error: 'Error al procesar la solicitud' })
+  }
+})
+
+/**
+ * POST /api/auth/reset-password
+ * Body: { token, newPassword }
+ */
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { token, newPassword } = req.body
+    const tokenStr = typeof token === 'string' ? token.trim() : ''
+    if (!tokenStr || !newPassword) {
+      return res.status(400).json({ error: 'Token y nueva contraseña son requeridos' })
+    }
+    if (newPassword.length < 6) {
+      return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres' })
+    }
+    const resetDoc = await PasswordResetToken.findOne({ token: tokenStr })
+    if (!resetDoc || resetDoc.expiresAt < new Date()) {
+      return res.status(400).json({ error: 'El enlace de restablecimiento es inválido o ha expirado' })
+    }
+    const user = await User.findOne({ email: resetDoc.email }).select('+password')
+    if (!user) {
+      return res.status(400).json({ error: 'El enlace de restablecimiento es inválido o ha expirado' })
+    }
+    const hashed = await bcrypt.hash(newPassword, SALT_ROUNDS)
+    user.password = hashed
+    await user.save()
+    await PasswordResetToken.deleteOne({ _id: resetDoc._id })
+    return res.status(200).json({ message: 'Contraseña actualizada. Podés iniciar sesión.' })
+  } catch (err) {
+    console.error('Reset-password error:', err)
+    return res.status(500).json({ error: 'Error al restablecer la contraseña' })
   }
 })
 

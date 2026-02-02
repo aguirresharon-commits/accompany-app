@@ -26,7 +26,8 @@ import { useRemindersScheduler } from '../hooks/useRemindersScheduler'
 import './ActionScreen.css'
 
 const LoginScreen = lazy(() => import('./LoginScreen'))
-
+const ForgotPasswordScreen = lazy(() => import('./ForgotPasswordScreen'))
+const ResetPasswordScreen = lazy(() => import('./ResetPasswordScreen'))
 const CreatePremiumAccountScreen = lazy(() => import('./CreatePremiumAccountScreen'))
 
 class LoginErrorBoundary extends Component {
@@ -99,6 +100,30 @@ const ActionScreen = () => {
   const [namePromptValue, setNamePromptValue] = useState('')
   const [premiumPending, setPremiumPending] = useState(false)
   const [premiumPendingUid, setPremiumPendingUid] = useState(null)
+  const [loginSubView, setLoginSubView] = useState('login') // 'login' | 'forgot' | 'reset'
+
+  // Si la app se abre con ?token= (link del email), ir a login y mostrar pantalla restablecer
+  useEffect(() => {
+    try {
+      const token = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '').get('token')
+      if (token) {
+        setActiveTab('login')
+        setLoginSubView('reset')
+      }
+    } catch (_) {}
+  }, [])
+
+  // Al abrir la pestaña de login: si hay token en URL → restablecer; si no → inicio de sesión
+  useEffect(() => {
+    if (activeTab === 'login') {
+      try {
+        const token = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '').get('token')
+        setLoginSubView(token ? 'reset' : 'login')
+      } catch (_) {
+        setLoginSubView('login')
+      }
+    }
+  }, [activeTab])
 
   // Scheduler de recordatorios (notificaciones locales mientras la app está abierta)
   useRemindersScheduler()
@@ -447,14 +472,24 @@ const ActionScreen = () => {
         ) : activeTab === 'login' ? (
           <LoginErrorBoundary>
             <Suspense fallback={<Loader isLoading={true} />}>
-              <LoginScreen
-                onSuccess={() => setActiveTab(previousTab)}
-                onBack={() => setActiveTab(previousTab)}
-                onNavigateToCreatePremium={() => {
-                  setActiveTab(previousTab)
-                  setCreatePremiumAccountOpen(true)
-                }}
-              />
+              {loginSubView === 'forgot' ? (
+                <ForgotPasswordScreen
+                  onBack={() => setLoginSubView('login')}
+                  onNavigateToReset={() => setLoginSubView('reset')}
+                />
+              ) : loginSubView === 'reset' ? (
+                <ResetPasswordScreen onBack={() => setLoginSubView('login')} />
+              ) : (
+                <LoginScreen
+                  onSuccess={() => { setLoginSubView('login'); setActiveTab(previousTab) }}
+                  onBack={() => { setLoginSubView('login'); setActiveTab(previousTab) }}
+                  onNavigateToForgotPassword={() => setLoginSubView('forgot')}
+                  onNavigateToCreatePremium={() => {
+                    setActiveTab(previousTab)
+                    setCreatePremiumAccountOpen(true)
+                  }}
+                />
+              )}
             </Suspense>
           </LoginErrorBoundary>
         ) : activeTab === 'progress' ? (
