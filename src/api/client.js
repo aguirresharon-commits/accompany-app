@@ -1,23 +1,25 @@
 /**
- * Cliente API backend (sin Firebase).
- * Lee el token de la estructura actual de control-app-auth (sin modificarla) y lo envía en Authorization.
- * En 401, llama al logout existente del authService.
+ * Cliente API backend.
+ * Auth: cookie (credentials: 'include') y/o JWT en Authorization si está guardado (p. ej. tras Google OAuth).
  */
 export const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000'
 
 const AUTH_STORAGE_KEY = 'control-app-auth'
 
-export async function apiFetch(path, options = {}) {
-  let token = null
+function getStoredToken() {
   try {
     const raw = typeof window !== 'undefined' ? window.localStorage?.getItem(AUTH_STORAGE_KEY) : null
-    if (raw) {
-      const p = JSON.parse(raw)
-      if (p?.user && p?.token) token = p.token
-    }
-  } catch {}
+    if (!raw) return null
+    const p = JSON.parse(raw)
+    return p?.token ?? null
+  } catch {
+    return null
+  }
+}
 
+export async function apiFetch(path, options = {}) {
   const headers = { 'Content-Type': 'application/json', ...options.headers }
+  const token = getStoredToken()
   if (token && headers.Authorization === undefined) {
     headers.Authorization = `Bearer ${token}`
   }
@@ -25,6 +27,7 @@ export async function apiFetch(path, options = {}) {
   try {
     res = await fetch(`${API_BASE}${path}`, {
       ...options,
+      credentials: 'include',
       headers
     })
   } catch (err) {

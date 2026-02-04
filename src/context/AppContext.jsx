@@ -3,7 +3,7 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 import { saveState, loadState, getTodayDate } from '../utils/storage'
 import { ENERGY_LEVEL_KEYS } from '../data/actions'
 import { apiFetch } from '../api/client'
-import { onAuthChange, getCurrentUser } from '../services/authService'
+import { onAuthChange, getCurrentUser, refreshSession } from '../services/authService'
 import { activatePremium, deactivatePremium } from '../services/premiumService'
 
 const migrateEnergyLevel = (level) => {
@@ -118,9 +118,15 @@ export const AppProvider = ({ children }) => {
     return getInitialState()
   })
 
+  // Restaurar sesión desde cookie al cargar (backend = fuente de verdad).
+  // Si venimos de Google OAuth (?from=google), no ejecutar aquí: GoogleAuthCallback establecerá la sesión.
+  useEffect(() => {
+    if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('from') === 'google') return
+    refreshSession().finally(() => {})
+  }, [])
+
   // Simular carga inicial y luego ocultar loader
   useEffect(() => {
-    // Pequeño delay para mostrar el loader
     const timer = setTimeout(() => {
       setIsInitialLoading(false)
     }, 500)

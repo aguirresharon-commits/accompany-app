@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import { authMiddleware } from '../middleware/auth.js'
+import User from '../models/User.js'
 import State from '../models/State.js'
 
 const router = Router()
@@ -8,13 +9,12 @@ router.use(authMiddleware)
 
 /**
  * GET /api/premium
- * Devuelve { premium: boolean } según userPlan del estado del usuario.
- * Si no tiene estado, premium = false.
+ * Devuelve { premium: boolean } según userPlan del usuario (User = fuente de verdad).
  */
 router.get('/', async (req, res) => {
   try {
-    const state = await State.findOne({ userId: req.userId }).lean()
-    const premium = state?.userPlan === 'premium'
+    const user = await User.findById(req.userId).select('userPlan').lean()
+    const premium = user?.userPlan === 'premium'
     return res.json({ premium })
   } catch (err) {
     console.error('GET /api/premium error:', err)
@@ -24,11 +24,11 @@ router.get('/', async (req, res) => {
 
 /**
  * POST /api/premium/activate
- * Activa premium: actualiza userPlan a 'premium' en el estado del usuario.
- * Crea estado con userPlan premium si no existe (upsert).
+ * Activa premium: actualiza userPlan a 'premium' en User y en State (compat).
  */
 router.post('/activate', async (req, res) => {
   try {
+    await User.findByIdAndUpdate(req.userId, { $set: { userPlan: 'premium' } })
     await State.findOneAndUpdate(
       { userId: req.userId },
       { $set: { userPlan: 'premium', userId: req.userId } },

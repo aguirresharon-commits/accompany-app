@@ -25,9 +25,20 @@ npm install
 
 ### Ejecutar en desarrollo
 
+Desde la **raíz del proyecto** (donde está `package.json`):
+
 ```bash
+npm install
+cd server && npm install && cd ..
 npm run dev
 ```
+
+Esto levanta **frontend (Vite)** y **backend (Node)** a la vez. En la terminal verás algo como:
+
+- **Frontend:** `Local: http://localhost:3001/` (o 3002 si 3001 está ocupado)
+- **Backend:** `Server running at http://localhost:4001` (o 4002 si 4001 está ocupado)
+
+**Abrí en el navegador la URL del frontend** (la que dice Vite). Si ves "ERR_CONNECTION_REFUSED", es que ningún servidor está escuchando en ese puerto: asegurate de haber ejecutado `npm run dev` y de no haber cerrado la terminal.
 
 ### Build para producción
 
@@ -121,6 +132,12 @@ Una vez instalada, la app funcionará como una app nativa con:
 
 **Envío de email al correo real (Olvidé mi contraseña)**  
 Para que el usuario reciba el mensaje de restablecer contraseña en su correo, configurá en `server/.env` las variables de email (ver bloque "EMAIL" en `server/.env.example`). Necesitás al menos: `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS` y opcionalmente `RESET_PASSWORD_LINK_BASE` (URL de tu app, para que el link del email abra directo la pantalla de nueva contraseña). Con Gmail: usar una [contraseña de aplicación](https://support.google.com/accounts/answer/185833) en `SMTP_PASS`, no la contraseña normal. Reiniciá el servidor después de cambiar `.env`.
+
+## Si ves "La página ha rechazado la conexión" (ERR_CONNECTION_REFUSED)
+
+1. **¿Ejecutaste el proyecto?** En la raíz del proyecto ejecutá `npm run dev`. No cierres esa terminal.
+2. **¿Qué URL abrís?** Tenés que abrir la URL del **frontend** que muestra Vite en la terminal (ej. `http://localhost:3001` o `http://localhost:3002`). No uses solo `http://localhost` sin puerto.
+3. **Si cerraste la terminal:** Volvé a ejecutar `npm run dev` y esperá a que aparezcan las dos líneas (Vite + Server). Luego abrí la URL que indica Vite.
 
 ## Pruebas
 

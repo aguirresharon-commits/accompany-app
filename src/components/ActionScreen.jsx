@@ -21,14 +21,13 @@ import AddNoteModal from './AddNoteModal'
 import PremiumView from './PremiumView'
 import StarryBackground from './StarryBackground'
 import BackButton from './BackButton'
-import { isPremium as checkIsPremium, activatePremium } from '../services/premiumService'
+import { apiFetch } from '../api/client'
 import { useRemindersScheduler } from '../hooks/useRemindersScheduler'
 import './ActionScreen.css'
 
 const LoginScreen = lazy(() => import('./LoginScreen'))
 const ForgotPasswordScreen = lazy(() => import('./ForgotPasswordScreen'))
 const ResetPasswordScreen = lazy(() => import('./ResetPasswordScreen'))
-const CreatePremiumAccountScreen = lazy(() => import('./CreatePremiumAccountScreen'))
 
 class LoginErrorBoundary extends Component {
   state = { hasError: false }
@@ -92,14 +91,13 @@ const ActionScreen = () => {
   const [addNoteOpen, setAddNoteOpen] = useState(false)
   const [instantTaskResponse, setInstantTaskResponse] = useState(null) // 'yes' | 'not-yet' | null
   const [premiumViewOpen, setPremiumViewOpen] = useState(false)
-  const [createPremiumAccountOpen, setCreatePremiumAccountOpen] = useState(false)
+  const [loginForPremium, setLoginForPremium] = useState(false)
   const [currentUser, setCurrentUser] = useState(null)
-  const [premiumRefresh, setPremiumRefresh] = useState(0)
   const [showNamePrompt, setShowNamePrompt] = useState(false)
   const [namePromptUid, setNamePromptUid] = useState(null)
   const [namePromptValue, setNamePromptValue] = useState('')
   const [premiumPending, setPremiumPending] = useState(false)
-  const [premiumPendingUid, setPremiumPendingUid] = useState(null)
+  const [premiumPendingLoading, setPremiumPendingLoading] = useState(false)
   const [loginSubView, setLoginSubView] = useState('login') // 'login' | 'forgot' | 'reset'
 
   // Si la app se abre con ?token= (link del email), ir a login y mostrar pantalla restablecer
@@ -204,7 +202,7 @@ const ActionScreen = () => {
     }
   }, [])
 
-  const isPremiumUser = currentUser ? checkIsPremium(currentUser.uid) : false
+  const isPremiumUser = userPlan === 'premium'
 
   const handleActivatePremium = useCallback(() => {
     import('../services/authService')
@@ -212,16 +210,15 @@ const ActionScreen = () => {
         const user = getCurrentUser()
         if (!user) {
           setPremiumViewOpen(false)
-          setCreatePremiumAccountOpen(true)
+          setLoginForPremium(true)
           return
         }
         setPremiumViewOpen(false)
         setPremiumPending(true)
-        setPremiumPendingUid(user.uid)
       })
       .catch(() => {
         setPremiumViewOpen(false)
-        setCreatePremiumAccountOpen(true)
+        setLoginForPremium(true)
       })
   }, [])
 
@@ -455,11 +452,17 @@ const ActionScreen = () => {
       </header>
 
       <main className="action-screen__main">
-        {createPremiumAccountOpen ? (
+        {loginForPremium ? (
           <Suspense fallback={<Loader isLoading={true} />}>
-            <CreatePremiumAccountScreen
-              onSuccess={() => setCreatePremiumAccountOpen(false)}
-              onBack={() => setCreatePremiumAccountOpen(false)}
+            <LoginScreen
+              title="Iniciá sesión para activar Premium"
+              note="Crear una cuenta no activa ningún pago."
+              createAccountHint
+              onSuccess={(user) => {
+                setLoginForPremium(false)
+                if (user?.uid) setPremiumPending(true)
+              }}
+              onBack={() => setLoginForPremium(false)}
             />
           </Suspense>
         ) : premiumViewOpen ? (
@@ -484,10 +487,7 @@ const ActionScreen = () => {
                   onSuccess={() => { setLoginSubView('login'); setActiveTab(previousTab) }}
                   onBack={() => { setLoginSubView('login'); setActiveTab(previousTab) }}
                   onNavigateToForgotPassword={() => setLoginSubView('forgot')}
-                  onNavigateToCreatePremium={() => {
-                    setActiveTab(previousTab)
-                    setCreatePremiumAccountOpen(true)
-                  }}
+                  createAccountHint
                 />
               )}
             </Suspense>
@@ -799,45 +799,48 @@ const ActionScreen = () => {
         </div>
       )}
 
-      {premiumPending && premiumPendingUid && (
+      {premiumPending && (
         <div className="action-screen__overlay action-screen__overlay--payment-pending" role="dialog" aria-labelledby="payment-pending-title" aria-modal="true">
-          <BackButton
-            onClick={() => {
-              setPremiumPending(false)
-              setPremiumPendingUid(null)
-            }}
-          />
+          <BackButton onClick={() => setPremiumPending(false)} />
           <div className="action-screen__name-prompt-inner">
             <p id="payment-pending-title" className="action-screen__name-prompt-title">Flujo de pago (simulado)</p>
-            <p className="action-screen__payment-pending-desc">Solo cuando el pago sea confirmado se activará Premium.</p>
+            <p className="action-screen__payment-pending-desc">Modo demo: el pago es simulado. Al confirmar se activa Premium en tu cuenta.</p>
             <div className="action-screen__name-prompt-actions">
               <button
                 type="button"
                 className="action-screen__name-prompt-btn action-screen__name-prompt-btn--secondary"
-                onClick={() => {
-                  setPremiumPending(false)
-                  setPremiumPendingUid(null)
-                }}
+                onClick={() => setPremiumPending(false)}
+                disabled={premiumPendingLoading}
               >
                 Cancelar
               </button>
               <button
                 type="button"
                 className="action-screen__name-prompt-btn action-screen__name-prompt-btn--primary"
-                onClick={() => {
-                  const uid = premiumPendingUid
-                  activatePremium(uid)
-                  setPremiumRefresh((r) => r + 1)
-                  setPremiumPending(false)
-                  setPremiumPendingUid(null)
-                  if (!getDisplayName(uid)) {
-                    setShowNamePrompt(true)
-                    setNamePromptUid(uid)
-                    setNamePromptValue('')
+                disabled={premiumPendingLoading}
+                onClick={async () => {
+                  setPremiumPendingLoading(true)
+                  try {
+                    const { ok } = await apiFetch('/api/premium/activate', { method: 'POST' })
+                    if (ok) {
+                      const { setSessionFromCookie } = await import('../services/authService')
+                      await setSessionFromCookie()
+                      setUserPlan('premium')
+                      setPremiumPending(false)
+                      const { getCurrentUser } = await import('../services/authService')
+                      const user = getCurrentUser()
+                      if (user?.uid && !getDisplayName(user.uid)) {
+                        setShowNamePrompt(true)
+                        setNamePromptUid(user.uid)
+                        setNamePromptValue('')
+                      }
+                    }
+                  } finally {
+                    setPremiumPendingLoading(false)
                   }
                 }}
               >
-                Confirmar pago
+                {premiumPendingLoading ? 'Activando…' : 'Confirmar pago'}
               </button>
             </div>
           </div>
@@ -902,7 +905,7 @@ const ActionScreen = () => {
         />
       )}
 
-      {!empezarFlow && !premiumViewOpen && !createPremiumAccountOpen && (
+      {!empezarFlow && !premiumViewOpen && !loginForPremium && (
         <BottomMenu
           activeTab={activeTab}
           onTabChange={(tab) => {

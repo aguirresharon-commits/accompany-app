@@ -22,7 +22,7 @@ const PremiumView = ({ isPremium: isPremiumProp, userPlan, onActivate, onClose }
         <p className="premium-view__intro">
           {isPremium
             ? 'Tenés Premium activo. Acá podés ver todo lo que incluye.'
-            : 'Desbloqueá estas ventajas:'}
+            : 'Podés usar Control gratis. Premium desbloquea estas ventajas cuando quieras.'}
         </p>
 
         <ul className="premium-view__benefits" aria-label="Beneficios de Premium">
@@ -47,7 +47,9 @@ const PremiumView = ({ isPremium: isPremiumProp, userPlan, onActivate, onClose }
             </>
           ) : (
             <>
-              <p className="premium-view__hint">Podés usar Control gratis sin cuenta.</p>
+              <p className="premium-view__hint">
+                Podés usar Control gratis. Premium se activa desde tu cuenta cuando quieras.
+              </p>
               <button
                 type="button"
                 className="premium-view__btn premium-view__btn--primary"
@@ -62,7 +64,6 @@ const PremiumView = ({ isPremium: isPremiumProp, userPlan, onActivate, onClose }
               >
                 Más tarde
               </button>
-              <p className="premium-view__hint premium-view__hint--below">La cuenta es solo para activar y guardar Premium.</p>
             </>
           )}
         </div>

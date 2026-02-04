@@ -11,8 +11,22 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
+      required: false,
       select: false
+    },
+    googleId: {
+      type: String,
+      sparse: true,
+      unique: true
+    },
+    name: {
+      type: String,
+      trim: true
+    },
+    userPlan: {
+      type: String,
+      enum: ['free', 'premium'],
+      default: 'free'
     }
   },
   { timestamps: true }

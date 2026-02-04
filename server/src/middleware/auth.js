@@ -6,15 +6,18 @@ if (!JWT_SECRET) {
 }
 
 /**
- * Middleware de auth: verifica JWT en Authorization: Bearer <token>
- * y asigna req.userId (ObjectId del usuario).
+ * Middleware de auth: verifica JWT en cookie auth_token o Authorization: Bearer <token>.
+ * Asigna req.userId (ObjectId del usuario).
  */
 export function authMiddleware(req, res, next) {
-  const authHeader = req.headers.authorization
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  let token = req.cookies?.auth_token
+  if (!token) {
+    const authHeader = req.headers.authorization
+    if (authHeader?.startsWith('Bearer ')) token = authHeader.slice(7)
+  }
+  if (!token) {
     return res.status(401).json({ error: 'Token no proporcionado' })
   }
-  const token = authHeader.slice(7)
   if (!JWT_SECRET) {
     return res.status(500).json({ error: 'Configuración de auth incorrecta' })
   }

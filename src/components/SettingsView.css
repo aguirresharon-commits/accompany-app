@@ -341,3 +341,55 @@
   gap: var(--spacing-sm);
   justify-content: center;
 }
+
+.settings-view__set-password {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--msg-bg);
+  backdrop-filter: blur(var(--msg-blur));
+  -webkit-backdrop-filter: blur(var(--msg-blur));
+  border: var(--msg-border);
+  border-radius: var(--msg-radius);
+  box-shadow: var(--msg-shadow);
+}
+
+.settings-view__set-password-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
+}
+
+.settings-view__set-password-input {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--font-size-base);
+  font-family: inherit;
+  color: var(--color-text-primary);
+  background: var(--color-gray-111);
+  border: 1px solid var(--color-gray-444);
+  border-radius: var(--border-radius-sm);
+}
+
+.settings-view__set-password-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.settings-view__set-password-input:focus {
+  outline: none;
+  border-color: var(--color-neon);
+}
+
+.settings-view__set-password-error {
+  font-size: var(--font-size-sm);
+  color: #e57373;
+  margin: 0;
+}
+
+.settings-view__set-password-btns {
+  display: flex;
+  flex-direction: row;
+  gap: var(--spacing-sm);
+  justify-content: center;
+  margin-top: var(--spacing-xs);
+}
