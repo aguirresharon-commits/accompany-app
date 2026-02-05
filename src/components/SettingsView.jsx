@@ -1,9 +1,8 @@
 // Ajustes: ritmo, reiniciar día, sonidos, Premium, ayuda
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { ENERGY_LEVELS, ENERGY_LEVEL_KEYS } from '../data/actions'
 import { EnergyLevelIcon } from './TaskIcon'
 import BackButton from './BackButton'
-import { apiFetch } from '../api/client'
 import './SettingsView.css'
 
 const SettingsView = ({
@@ -21,11 +20,7 @@ const SettingsView = ({
   const [currentUser, setCurrentUser] = useState(null)
   const [confirmLogout, setConfirmLogout] = useState(false)
   const [confirmRestart, setConfirmRestart] = useState(false)
-  const [showSetPassword, setShowSetPassword] = useState(false)
-  const [setPasswordNew, setSetPasswordNew] = useState('')
-  const [setPasswordConfirm, setSetPasswordConfirm] = useState('')
-  const [setPasswordLoading, setSetPasswordLoading] = useState(false)
-  const [setPasswordError, setSetPasswordError] = useState('')
+  const [energyFeedback, setEnergyFeedback] = useState('')
 
   useEffect(() => {
     let unsubscribe = () => {}
@@ -45,46 +40,6 @@ const SettingsView = ({
     setConfirmLogout(false)
   }
 
-  const handleSetPassword = useCallback(
-    async (e) => {
-      e.preventDefault()
-      setSetPasswordError('')
-      const p = (setPasswordNew || '').trim()
-      const c = (setPasswordConfirm || '').trim()
-      if (!p) {
-        setSetPasswordError('Ingresá una contraseña.')
-        return
-      }
-      if (p.length < 8 || !/[a-zA-Z]/.test(p) || !/\d/.test(p)) {
-        setSetPasswordError('Al menos 8 caracteres, una letra y un número.')
-        return
-      }
-      if (p !== c) {
-        setSetPasswordError('Las contraseñas no coinciden.')
-        return
-      }
-      setSetPasswordLoading(true)
-      try {
-        const { ok, data } = await apiFetch('/api/auth/set-password', {
-          method: 'POST',
-          body: JSON.stringify({ newPassword: p })
-        })
-        if (!ok) {
-          setSetPasswordError(data?.error || 'No se pudo crear la contraseña.')
-          return
-        }
-        setSetPasswordNew('')
-        setSetPasswordConfirm('')
-        setShowSetPassword(false)
-      } catch (err) {
-        setSetPasswordError(err?.message || 'Error de conexión.')
-      } finally {
-        setSetPasswordLoading(false)
-      }
-    },
-    [setPasswordNew, setPasswordConfirm]
-  )
-
   return (
     <div className="settings-view">
       <section className="settings-view__section">
@@ -92,6 +47,7 @@ const SettingsView = ({
         {currentUser ? (
           <>
             <p className="settings-view__desc settings-view__email" aria-label="Email">{currentUser.email || 'Sin email'}</p>
+            <p className="settings-view__desc settings-view__login-method">Método de acceso: Google</p>
             {confirmLogout ? (
               <div className="settings-view__logout-confirm" role="dialog" aria-labelledby="logout-question">
                 <p id="logout-question" className="settings-view__logout-question">
@@ -115,84 +71,19 @@ const SettingsView = ({
                 </div>
               </div>
             ) : (
-              <>
+              <div className="settings-view__logout-wrap">
                 <button
                   type="button"
-                  className="settings-view__upgrade-btn"
+                  className="settings-view__logout-btn-secondary"
                   onClick={() => setConfirmLogout(true)}
                 >
                   Cerrar sesión
                 </button>
-                <button
-                  type="button"
-                  className="settings-view__upgrade-btn settings-view__upgrade-btn--link"
-                  onClick={() => setShowSetPassword(true)}
-                >
-                  Crear contraseña interna
-                </button>
-                <p className="settings-view__hint">
-                  Crear una contraseña te permite iniciar sesión con email sin usar Google. Esto no modifica tu cuenta de Google.
-                </p>
-                {showSetPassword && (
-                  <div className="settings-view__set-password" role="dialog" aria-labelledby="set-password-title">
-                    <p id="set-password-title" className="settings-view__desc">
-                      Creá una contraseña para iniciar sesión con email sin Google.
-                    </p>
-                    <form onSubmit={handleSetPassword} className="settings-view__set-password-form">
-                      <input
-                        type="password"
-                        className="settings-view__set-password-input"
-                        placeholder="Nueva contraseña"
-                        value={setPasswordNew}
-                        onChange={(e) => setSetPasswordNew(e.target.value)}
-                        disabled={setPasswordLoading}
-                        autoComplete="new-password"
-                      />
-                      <input
-                        type="password"
-                        className="settings-view__set-password-input"
-                        placeholder="Confirmar contraseña"
-                        value={setPasswordConfirm}
-                        onChange={(e) => setSetPasswordConfirm(e.target.value)}
-                        disabled={setPasswordLoading}
-                        autoComplete="new-password"
-                      />
-                      {setPasswordError && (
-                        <p className="settings-view__set-password-error" role="alert">
-                          {setPasswordError}
-                        </p>
-                      )}
-                      <div className="settings-view__set-password-btns">
-                        <button
-                          type="button"
-                          className="settings-view__logout-btn settings-view__logout-btn--no"
-                          onClick={() => {
-                            setShowSetPassword(false)
-                            setSetPasswordError('')
-                            setSetPasswordNew('')
-                            setSetPasswordConfirm('')
-                          }}
-                          disabled={setPasswordLoading}
-                        >
-                          Cancelar
-                        </button>
-                        <button
-                          type="submit"
-                          className="settings-view__logout-btn settings-view__logout-btn--yes"
-                          disabled={setPasswordLoading}
-                        >
-                          {setPasswordLoading ? 'Guardando…' : 'Crear contraseña'}
-                        </button>
-                      </div>
-                    </form>
-                  </div>
-                )}
-              </>
+              </div>
             )}
           </>
         ) : (
           <>
-            <p className="settings-view__desc">Podés usar Control gratis sin cuenta.</p>
             {onOpenLogin && (
               <button
                 type="button"
@@ -239,6 +130,11 @@ const SettingsView = ({
       <section className="settings-view__section">
         <h2 className="settings-view__title">Ritmo</h2>
         <p className="settings-view__desc">Nivel de exigencia de las acciones.</p>
+        {energyFeedback && (
+          <p className="settings-view__feedback" role="status" aria-live="polite">
+            ✓ {energyFeedback}
+          </p>
+        )}
         <div className="settings-view__levels">
           {ENERGY_LEVEL_KEYS.map((key) => {
             const level = ENERGY_LEVELS[key]
@@ -247,7 +143,11 @@ const SettingsView = ({
               <button
                 key={key}
                 className={`settings-view__level-btn ${isActive ? 'settings-view__level-btn--active' : ''}`}
-                onClick={() => onEnergyLevelChange(key)}
+                onClick={() => {
+                  onEnergyLevelChange(key)
+                  setEnergyFeedback('Ritmo guardado')
+                  setTimeout(() => setEnergyFeedback(''), 2000)
+                }}
                 type="button"
               >
                 <EnergyLevelIcon level={key} className="settings-view__level-icon" size={24} />

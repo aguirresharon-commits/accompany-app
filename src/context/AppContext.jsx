@@ -1,5 +1,5 @@
 // Context API para estado global de la app
-import { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react'
 import { saveState, loadState, getTodayDate } from '../utils/storage'
 import { ENERGY_LEVEL_KEYS } from '../data/actions'
 import { apiFetch } from '../api/client'
@@ -578,6 +578,19 @@ export const AppProvider = ({ children }) => {
     const t = setTimeout(() => setSyncError(null), 5000)
     return () => clearTimeout(t)
   }, [syncError])
+
+  // Al cerrar sesión o 401: limpiar estado del contexto para no mezclar datos de otro usuario ni dejar semi-logueado
+  const hadUserRef = useRef(!!getCurrentUser()?.uid)
+  useEffect(() => {
+    const unsubscribe = onAuthChange((user) => {
+      const hasUser = !!user?.uid
+      if (hadUserRef.current && !hasUser) {
+        setState(getInitialState())
+      }
+      hadUserRef.current = hasUser
+    })
+    return unsubscribe
+  }, [])
 
   // Mostrar "Sesión expirada" cuando el cliente recibe 401
   useEffect(() => {

@@ -12,18 +12,36 @@ function safeParse(json) {
   }
 }
 
+function normalizePostponed(items) {
+  const now = Date.now()
+  let changed = false
+  const out = items.map((r) => {
+    if (r.status === 'pospuesto' && r.postponedUntil) {
+      const until = new Date(r.postponedUntil).getTime()
+      if (until < now) {
+        changed = true
+        return { ...r, status: 'pending', postponedUntil: null }
+      }
+    }
+    return r
+  })
+  return { items: out, changed }
+}
+
 function readAll() {
   if (typeof window === 'undefined' || !window.localStorage) return []
   const raw = window.localStorage.getItem(STORAGE_KEY)
   if (!raw) return []
   const parsed = safeParse(raw)
-  // Evitar duplicados por id (p. ej. por doble clic o datos corruptos)
   const seen = new Set()
-  return parsed.filter((r) => {
+  const filtered = parsed.filter((r) => {
     if (!r || seen.has(r.id)) return false
     seen.add(r.id)
     return true
   })
+  const { items, changed } = normalizePostponed(filtered)
+  if (changed) writeAll(items)
+  return items
 }
 
 function writeAll(items) {
@@ -55,6 +73,7 @@ export function addReminder({ text, date, time, alarmEnabled }) {
     alarmEnabled: Boolean(alarmEnabled),
     createdAt: nowIso,
     firedAt: null,
+    status: 'pending',
   }
   const items = readAll()
   items.push(reminder)
@@ -62,18 +81,33 @@ export function addReminder({ text, date, time, alarmEnabled }) {
   return reminder
 }
 
-export function updateReminder(id, { text, date, time, alarmEnabled }) {
+export function updateReminder(id, { text, date, time, alarmEnabled, firedAt, status, postponedUntil }) {
   if (!id) return null
   const items = readAll()
   const idx = items.findIndex((r) => r.id === id)
   if (idx === -1) return null
-  items[idx] = {
-    ...items[idx],
+  const updates = {
     text: String(text ?? items[idx].text ?? '').trim(),
     date: date ?? items[idx].date,
     time: time ?? items[idx].time,
     alarmEnabled: alarmEnabled !== undefined ? Boolean(alarmEnabled) : items[idx].alarmEnabled,
   }
+  if (firedAt === null) updates.firedAt = null
+  if (status !== undefined && ['pending', 'hecho', 'pospuesto'].includes(status)) {
+    updates.status = status
+    if (status === 'hecho') updates.firedAt = new Date().toISOString()
+    if (status === 'pending') updates.postponedUntil = null
+  }
+  if (postponedUntil !== undefined) updates.postponedUntil = postponedUntil || null
+  const updated = { ...items[idx], ...updates }
+  if (updated.status === 'pospuesto' && updated.postponedUntil) {
+    const now = Date.now()
+    if (new Date(updated.postponedUntil).getTime() < now) {
+      updated.status = 'pending'
+      updated.postponedUntil = null
+    }
+  }
+  items[idx] = updated
   writeAll(items)
   return items[idx]
 }
@@ -90,7 +124,12 @@ export function markReminderFired(id) {
   const items = readAll()
   const idx = items.findIndex((r) => r.id === id)
   if (idx === -1) return
-  items[idx] = { ...items[idx], firedAt: new Date().toISOString() }
+  const r = items[idx]
+  items[idx] = {
+    ...r,
+    firedAt: new Date().toISOString(),
+    status: r.status || 'pending',
+  }
   writeAll(items)
 }
 

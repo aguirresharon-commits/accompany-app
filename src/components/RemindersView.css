@@ -99,6 +99,35 @@
   text-align: center;
 }
 
+.reminders-view__premium-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.reminders-view__premium-block .reminders-view__hint {
+  margin: 0;
+}
+
+.reminders-view__premium-cta {
+  padding: var(--spacing-xs) var(--spacing-md);
+  font-size: var(--font-size-sm);
+  font-family: inherit;
+  cursor: pointer;
+  background: var(--btn-glass-bg);
+  border: 1px solid var(--btn-glass-border);
+  border-radius: var(--btn-glass-radius);
+  color: var(--color-neon-soft);
+  transition: color var(--transition-base), border-color var(--transition-base);
+}
+
+.reminders-view__premium-cta:hover {
+  border-color: var(--color-neon-soft);
+  color: var(--color-white);
+}
+
 .reminders-view__list {
   list-style: none;
   margin: 0;
@@ -121,6 +150,80 @@
 .reminders-view__item--selected {
   border-color: rgba(255, 255, 255, 0.15);
   background: rgba(255, 255, 255, 0.05);
+}
+
+.reminders-view__section {
+  margin-bottom: var(--spacing-lg);
+}
+
+.reminders-view__section:last-child {
+  margin-bottom: 0;
+}
+
+.reminders-view__section-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 var(--spacing-sm);
+}
+
+.reminders-view__item--hecho .reminders-view__text {
+  color: var(--color-gray-888);
+  text-decoration: line-through;
+}
+
+.reminders-view__item--pospuesto {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.reminders-view__item--pospuesto .reminders-view__text {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.reminders-view__item--pospuesto .reminders-view__text {
+  text-decoration: none;
+}
+
+.reminders-view__clock {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
+}
+
+.reminders-view__clock svg {
+  width: 18px;
+  height: 18px;
+}
+
+.reminders-view__meta--postponed {
+  color: var(--color-text-muted);
+}
+
+.reminders-view__done-icon {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-gray-888);
+  font-size: 14px;
+}
+
+.reminders-view__status {
+  color: var(--color-text-muted);
+  font-size: inherit;
 }
 
 .reminders-view__check {

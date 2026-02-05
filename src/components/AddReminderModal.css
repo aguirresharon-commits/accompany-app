@@ -9,6 +9,10 @@
   pointer-events: none;
 }
 
+.add-reminder--on-top {
+  z-index: 400;
+}
+
 .add-reminder__backdrop {
   position: absolute;
   inset: 0;
@@ -94,6 +98,12 @@
 .add-reminder__toggle input {
   width: 18px;
   height: 18px;
+}
+
+.add-reminder__error {
+  font-size: var(--font-size-sm);
+  color: #e57373;
+  margin: var(--spacing-sm) 0 0;
 }
 
 .add-reminder__actions {

@@ -126,6 +126,14 @@
   box-shadow: var(--btn-glass-shadow), 0 0 24px var(--color-neon-glow-hover);
 }
 
+.timer-end__premium-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin: 0;
+  padding: var(--spacing-xs) 0;
+  text-align: center;
+}
+
 .timer-end__premium-hint,
 .timer-end__premium-hint-btn {
   font-size: var(--font-size-sm);

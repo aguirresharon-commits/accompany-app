@@ -19,7 +19,9 @@ const reminderSchema = new mongoose.Schema(
     time: { type: String, required: true },
     alarmEnabled: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now },
-    firedAt: { type: Date, default: null }
+    firedAt: { type: Date, default: null },
+    status: { type: String, enum: ['pending', 'hecho', 'pospuesto'], default: 'pending' },
+    postponedUntil: { type: Date, default: null }
   },
   { timestamps: true }
 )

@@ -33,7 +33,6 @@ const UpgradeModal = ({ onConfirm, onClose }) => {
           <li>Recordatorios ilimitados y poder borrarlos</li>
         </ul>
         <p className="upgrade-modal__text upgrade-modal__text--small">Iniciá sesión y activá Premium.</p>
-        <p className="upgrade-modal__hint">Podés usar Control gratis sin cuenta.</p>
         <div className="upgrade-modal__actions">
           <button
             type="button"

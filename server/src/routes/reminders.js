@@ -20,9 +20,15 @@ function toResponse(doc) {
 /**
  * GET /api/reminders
  * Lista los recordatorios del usuario.
+ * Auto-actualiza pospuestos cuyo postponedUntil ya pasó → status=pending, postponedUntil=null.
  */
 router.get('/', async (req, res) => {
   try {
+    const now = new Date()
+    await Reminder.updateMany(
+      { userId: req.userId, status: 'pospuesto', postponedUntil: { $lte: now } },
+      { $set: { status: 'pending', postponedUntil: null } }
+    )
     const list = await Reminder.find({ userId: req.userId }).lean()
     const payload = list.map((r) => {
       const { _id, userId, __v, updatedAt, ...rest } = r
@@ -51,7 +57,8 @@ router.post('/', async (req, res) => {
       time: time ?? '',
       alarmEnabled: Boolean(alarmEnabled),
       createdAt: new Date(),
-      firedAt: null
+      firedAt: null,
+      status: 'pending'
     })
     return res.status(201).json(toResponse(reminder))
   } catch (err) {
@@ -65,18 +72,26 @@ router.post('/', async (req, res) => {
 
 /**
  * PATCH /api/reminders/:id
- * Body: { text?, date?, time?, alarmEnabled? }
+ * Body: { text?, date?, time?, alarmEnabled?, firedAt? }
  * Actualiza el recordatorio. 404 si no existe o no es del usuario.
+ * firedAt: null para posponer (permite que vuelva a dispararse).
  */
 router.patch('/:id', async (req, res) => {
   try {
     const { id } = req.params
-    const { text, date, time, alarmEnabled } = req.body || {}
+    const { text, date, time, alarmEnabled, firedAt, status, postponedUntil } = req.body || {}
     const updates = {}
     if (text !== undefined) updates.text = String(text).trim()
     if (date !== undefined) updates.date = date
     if (time !== undefined) updates.time = time
     if (alarmEnabled !== undefined) updates.alarmEnabled = Boolean(alarmEnabled)
+    if (firedAt === null) updates.firedAt = null
+    if (status !== undefined && ['pending', 'hecho', 'pospuesto'].includes(status)) {
+      updates.status = status
+      if (status === 'hecho') updates.firedAt = new Date()
+      if (status === 'pending') updates.postponedUntil = null
+    }
+    if (postponedUntil !== undefined) updates.postponedUntil = postponedUntil ? new Date(postponedUntil) : null
     if (Object.keys(updates).length === 0) {
       const r = await Reminder.findOne({ userId: req.userId, id }).lean()
       if (!r) return res.status(404).json({ error: 'Recordatorio no encontrado' })

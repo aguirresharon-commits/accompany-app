@@ -18,10 +18,13 @@ import TimeSelectModal from './TimeSelectModal'
 import TimerView from './TimerView'
 import TimerEndModal from './TimerEndModal'
 import AddNoteModal from './AddNoteModal'
+import AddReminderModal from './AddReminderModal'
 import PremiumView from './PremiumView'
 import StarryBackground from './StarryBackground'
 import BackButton from './BackButton'
 import { apiFetch } from '../api/client'
+import { getCurrentUser } from '../services/authService'
+import { updateReminder } from '../services/remindersService'
 import { useRemindersScheduler } from '../hooks/useRemindersScheduler'
 import './ActionScreen.css'
 
@@ -81,8 +84,10 @@ const ActionScreen = () => {
   const [completionFeelingText, setCompletionFeelingText] = useState('')
   const [completionConfirmMessage, setCompletionConfirmMessage] = useState(null) // "Eso es todo por hoy." etc. después de elegir cómo se sintió
   const [noteSavedOverlay, setNoteSavedOverlay] = useState(null)
-  const [reminderOverlay, setReminderOverlay] = useState(null) // { text: string, id: string } | null
+  const [reminderOverlay, setReminderOverlay] = useState(null) // { text, id, date, time, status?: 'pending'|'pospuesto'|'hecho' } | null
+  const [reminderPostponeOpen, setReminderPostponeOpen] = useState(false)
   const [listBlockedToast, setListBlockedToast] = useState(false)
+  const [postponedFeedbackToast, setPostponedFeedbackToast] = useState(null) // "✓ Tarea pospuesta para DD/MM · HH:mm" | null
 
   // Flujo Empezar: timeSelect → timer → timerEnd
   const [empezarFlow, setEmpezarFlow] = useState(null)
@@ -99,6 +104,16 @@ const ActionScreen = () => {
   const [premiumPending, setPremiumPending] = useState(false)
   const [premiumPendingLoading, setPremiumPendingLoading] = useState(false)
   const [loginSubView, setLoginSubView] = useState('login') // 'login' | 'forgot' | 'reset'
+  const [showContinueDecision, setShowContinueDecision] = useState(false) // Pantalla "¿Continuar con otra?" tras completar
+  const [taskClearedByUser, setTaskClearedByUser] = useState(false) // "Continuar con otra" → pantalla "Elegí una tarea del menú inferior"
+  const [displayedActionCompleted, setDisplayedActionCompleted] = useState(false) // "Volver al inicio" → mostrar la tarea recién completada en la card
+  const lastCompletedActionRef = useRef(null) // Tarea recién completada, para mostrar en inicio
+  const [showSetPasswordModal, setShowSetPasswordModal] = useState(false)
+  const [setPasswordNew, setSetPasswordNew] = useState('')
+  const [setPasswordConfirm, setSetPasswordConfirm] = useState('')
+  const [setPasswordLoading, setSetPasswordLoading] = useState(false)
+  const [setPasswordError, setSetPasswordError] = useState('')
+  const [setPasswordSuccess, setSetPasswordSuccess] = useState(false)
 
   // Si la app se abre con ?token= (link del email), ir a login y mostrar pantalla restablecer
   useEffect(() => {
@@ -110,6 +125,70 @@ const ActionScreen = () => {
       }
     } catch (_) {}
   }, [])
+
+  // 401: sesión expirada → redirigir a login de forma controlada (el contexto ya muestra "Sesión expirada")
+  useEffect(() => {
+    const onSessionExpired = () => {
+      setPreviousTab(activeTab)
+      setActiveTab('login')
+    }
+    window.addEventListener('session-expired', onSessionExpired)
+    return () => window.removeEventListener('session-expired', onSessionExpired)
+  }, [activeTab])
+
+  // Tras volver de Google con intención de crear contraseña, mostrar modal
+  useEffect(() => {
+    if (!currentUser?.uid) return
+    try {
+      if (window.localStorage?.getItem('control-want-set-password') === '1') {
+        setShowSetPasswordModal(true)
+      }
+    } catch (_) {}
+  }, [currentUser?.uid])
+
+  const handleSetPasswordSubmit = useCallback(async (e) => {
+    e.preventDefault()
+    setSetPasswordError('')
+    const p = (setPasswordNew || '').trim()
+    const c = (setPasswordConfirm || '').trim()
+    if (!p) {
+      setSetPasswordError('Ingresá una contraseña.')
+      return
+    }
+    if (p.length < 8 || !/[a-zA-Z]/.test(p) || !/\d/.test(p)) {
+      setSetPasswordError('Al menos 8 caracteres, una letra y un número.')
+      return
+    }
+    if (p !== c) {
+      setSetPasswordError('Las contraseñas no coinciden.')
+      return
+    }
+    setSetPasswordLoading(true)
+    try {
+      const { ok, data } = await apiFetch('/api/auth/set-password', {
+        method: 'POST',
+        body: JSON.stringify({ newPassword: p })
+      })
+      if (!ok) {
+        setSetPasswordError(data?.error || 'No se pudo crear la contraseña.')
+        return
+      }
+      setSetPasswordSuccess(true)
+      try {
+        window.localStorage?.removeItem('control-want-set-password')
+      } catch (_) {}
+      setTimeout(() => {
+        setShowSetPasswordModal(false)
+        setSetPasswordSuccess(false)
+        setSetPasswordNew('')
+        setSetPasswordConfirm('')
+      }, 2000)
+    } catch (err) {
+      setSetPasswordError(err?.message || 'Error de conexión.')
+    } finally {
+      setSetPasswordLoading(false)
+    }
+  }, [setPasswordNew, setPasswordConfirm])
 
   // Al abrir la pestaña de login: si hay token en URL → restablecer; si no → inicio de sesión
   useEffect(() => {
@@ -128,22 +207,15 @@ const ActionScreen = () => {
 
   // Escuchar eventos de recordatorios y mostrar overlay en pantalla (siempre funciona)
   useEffect(() => {
-    const MOTIVATIONAL_MESSAGES = [
-      '¿Podés hacerlo ahora?',
-      'Es momento de avanzar.',
-      '¿Te animás?',
-      'Vamos, podés hacerlo.',
-      'Es tu momento.',
-    ]
-    const getRandomMessage = () => MOTIVATIONAL_MESSAGES[Math.floor(Math.random() * MOTIVATIONAL_MESSAGES.length)]
-
     const handleReminderDue = (e) => {
       const { reminder } = e.detail
       if (!reminder || !reminder.text) return
       setReminderOverlay({
         text: reminder.text,
         id: reminder.id,
-        motivational: getRandomMessage(),
+        date: reminder.date,
+        time: reminder.time,
+        status: 'pending',
       })
     }
 
@@ -187,6 +259,20 @@ const ActionScreen = () => {
         setCurrentUser(getCurrentUser())
         unsubscribe = onAuthChange((u) => {
           if (!cancelled) setCurrentUser(u)
+          // Al cerrar sesión o 401: limpiar estado de pantalla para no dejar nada "vivo"
+          if (!cancelled && !u?.uid) {
+            setDisplayedAction(null)
+            setReminderOverlay(null)
+            setReminderPostponeOpen(false)
+            setTaskClearedByUser(false)
+            setDisplayedActionCompleted(false)
+            setCompletionOverlay(null)
+            setShowContinueDecision(false)
+            setNotePromptAction(null)
+            setEmpezarFlow(null)
+            setEmpezarAction(null)
+            setPostponedFeedbackToast(null)
+          }
         })
       })
       .catch(() => {
@@ -205,6 +291,7 @@ const ActionScreen = () => {
   const isPremiumUser = userPlan === 'premium'
 
   const handleActivatePremium = useCallback(() => {
+    // Modo demo: no activar pago real. Premium se muestra como "Próximamente" en PremiumView.
     import('../services/authService')
       .then(({ getCurrentUser }) => {
         const user = getCurrentUser()
@@ -213,8 +300,7 @@ const ActionScreen = () => {
           setLoginForPremium(true)
           return
         }
-        setPremiumViewOpen(false)
-        setPremiumPending(true)
+        // No abrir flujo de pago simulado; el usuario ve "Próximamente" en PremiumView
       })
       .catch(() => {
         setPremiumViewOpen(false)
@@ -224,6 +310,7 @@ const ActionScreen = () => {
 
   const selectNewAction = useCallback(() => {
     if (!currentEnergyLevel) return
+    setDisplayedActionCompleted(false)
     const today = getTodayDate()
     const completedIds = [
       ...completedActions.filter((ca) => ca.date === today).map((ca) => ca.actionId),
@@ -237,11 +324,12 @@ const ActionScreen = () => {
     }
   }, [currentEnergyLevel, completedActions, allActions, setCurrentAction])
 
+  // Mostrar una tarea en pantalla principal al cargar y cuando no hay tarea (salvo si el usuario eligió "Volver al inicio")
   useEffect(() => {
-    if (currentEnergyLevel && !displayedAction) {
+    if (currentEnergyLevel && !displayedAction && !taskClearedByUser) {
       selectNewAction()
     }
-  }, [currentEnergyLevel, displayedAction, selectNewAction])
+  }, [currentEnergyLevel, displayedAction, taskClearedByUser, selectNewAction])
 
   // Al cambiar el nivel de energía (p. ej. en Ajustes), actualizar la tarea sugerida al nuevo nivel
   const prevEnergyLevelRef = useRef(currentEnergyLevel)
@@ -285,21 +373,50 @@ const ActionScreen = () => {
     }
   }, [completionOverlay?.message, completionOverlay?.showQuestion])
 
+  const closeCompletionAndShowDecision = useCallback(() => {
+    setCompletionConfirmMessage(null)
+    setShowContinueDecision(true)
+  }, [])
+
+  // "Continuar con otra" → pantalla "Elegí una tarea del menú inferior" (el usuario elige desde la barra)
   const closeCompletionAndNext = useCallback(() => {
     setCompletionOverlay(null)
     setCompletionFeelingWriting(false)
     setCompletionFeelingText('')
     setCompletionConfirmMessage(null)
-    selectNewAction()
-  }, [selectNewAction])
+    setShowContinueDecision(false)
+    setDisplayedAction(null)
+    setCurrentAction(null)
+    setTaskClearedByUser(true)
+    setDisplayedActionCompleted(false)
+  }, [])
+
+  // "Volver al inicio" → pantalla de inicio mostrando la tarea que acaba de completar
+  const closeCompletionAndStay = useCallback(() => {
+    setCompletionOverlay(null)
+    setCompletionFeelingWriting(false)
+    setCompletionFeelingText('')
+    setCompletionConfirmMessage(null)
+    setShowContinueDecision(false)
+    const lastAction = lastCompletedActionRef.current
+    if (lastAction) {
+      setDisplayedAction(lastAction)
+      setDisplayedActionCompleted(true)
+      setCurrentAction(lastAction)
+    } else {
+      setDisplayedAction(null)
+      setDisplayedActionCompleted(false)
+    }
+    setTaskClearedByUser(false)
+  }, [setCurrentAction])
 
   const showConfirmAndClose = useCallback(
     (feelingOption = null) => {
       if (feelingOption) scheduleEnergyForNextDay(feelingOption)
       setCompletionConfirmMessage('Gracias por contarlo. Seguimos de a poco.')
-      setTimeout(() => closeCompletionAndNext(), 1800)
+      setTimeout(() => closeCompletionAndShowDecision(), 1800)
     },
-    [scheduleEnergyForNextDay, closeCompletionAndNext]
+    [scheduleEnergyForNextDay, closeCompletionAndShowDecision]
   )
 
   const handleEmpezar = async () => {
@@ -333,8 +450,10 @@ const ActionScreen = () => {
   const handleTimerEndMarkComplete = () => {
     if (!empezarAction) return
     const actionToComplete = empezarAction
+    lastCompletedActionRef.current = actionToComplete
     setEmpezarFlow(null)
     setEmpezarAction(null)
+    setDisplayedAction(null)
     completeAction(actionToComplete)
     setCompletionOverlay({ message: getRandomCompletionMessage() })
   }
@@ -383,8 +502,10 @@ const ActionScreen = () => {
   const handleNoteConfirm = (note) => {
     if (!notePromptAction) return
     const actionToComplete = notePromptAction
+    lastCompletedActionRef.current = actionToComplete
     setNotePromptAction(null)
     setInstantTaskResponse(null)
+    setDisplayedAction(null)
     completeAction(actionToComplete, note)
     setCompletionOverlay({ message: getRandomCompletionMessage() })
   }
@@ -392,8 +513,10 @@ const ActionScreen = () => {
   const handleNoteSkip = () => {
     if (!notePromptAction) return
     const actionToComplete = notePromptAction
+    lastCompletedActionRef.current = actionToComplete
     setNotePromptAction(null)
     setInstantTaskResponse(null)
+    setDisplayedAction(null)
     completeAction(actionToComplete)
     setCompletionOverlay({ message: getRandomCompletionMessage() })
   }
@@ -401,7 +524,9 @@ const ActionScreen = () => {
   // Handlers para tareas instantáneas: solo mostrar "¿Cómo te sentís?", sin nota
   const handleInstantYes = () => {
     if (!displayedAction) return
+    lastCompletedActionRef.current = displayedAction
     setInstantTaskResponse('yes')
+    setDisplayedAction(null)
     completeAction(displayedAction)
     setCompletionOverlay({ message: getRandomCompletionMessage() })
   }
@@ -413,11 +538,13 @@ const ActionScreen = () => {
   }
 
   const handleSelectTask = (action) => {
+    setTaskClearedByUser(false)
+    setDisplayedActionCompleted(false)
     setDisplayedAction(action)
     setCurrentAction(action)
     setListPanelOpen(false)
     setActiveTab('progress')
-    setInstantTaskResponse(null) // Reset instant task response when selecting new task
+    setInstantTaskResponse(null)
     if (!isPremiumUser) markListPickUsed()
   }
 
@@ -433,6 +560,8 @@ const ActionScreen = () => {
   }
 
   const handleRestartDay = () => {
+    setTaskClearedByUser(false)
+    setDisplayedActionCompleted(false)
     resetAllActions()
     selectNewAction()
     setListPanelOpen(false)
@@ -460,7 +589,7 @@ const ActionScreen = () => {
               createAccountHint
               onSuccess={(user) => {
                 setLoginForPremium(false)
-                if (user?.uid) setPremiumPending(true)
+                if (user?.uid) setPremiumViewOpen(true)
               }}
               onBack={() => setLoginForPremium(false)}
             />
@@ -507,7 +636,9 @@ const ActionScreen = () => {
                 )}
                 <p className="action-screen__action-text">{displayedAction?.text}</p>
               </div>
-              {isInstant ? (
+              {displayedActionCompleted ? (
+                <p className="action-screen__completed-badge" aria-live="polite">✓ Completada</p>
+              ) : isInstant ? (
                 // UI para tareas instantáneas: pregunta y dos opciones
                 <div className="action-screen__instant">
                   <p className="action-screen__instant-question">¿Pudiste hacerlo?</p>
@@ -576,6 +707,10 @@ const ActionScreen = () => {
               </section>
             )}
           </div>
+          ) : taskClearedByUser ? (
+            <div className="action-screen__progress action-screen__progress--empty">
+              <p className="action-screen__empty-label">Elegí una tarea del menú inferior</p>
+            </div>
           ) : (
             <Loader isLoading={true} />
           )
@@ -585,10 +720,17 @@ const ActionScreen = () => {
             onRequestPremium={() => setPremiumViewOpen(true)}
           />
         ) : activeTab === 'reminders' ? (
-          <RemindersView
-            isPremium={isPremiumUser}
-            onRequestPremium={() => setPremiumViewOpen(true)}
-          />
+          <>
+            {postponedFeedbackToast && (
+              <div className="action-screen__toast action-screen__toast--postponed" role="status" aria-live="polite">
+                {postponedFeedbackToast}
+              </div>
+            )}
+            <RemindersView
+              isPremium={isPremiumUser}
+              onRequestPremium={() => setPremiumViewOpen(true)}
+            />
+          </>
         ) : activeTab === 'settings' ? (
           <SettingsView
             currentEnergyLevel={currentEnergyLevel}
@@ -665,25 +807,49 @@ const ActionScreen = () => {
         />
       )}
 
-      {completionOverlay?.message && (
+      {(completionOverlay?.message || showContinueDecision) && (
         <div
           className="action-screen__overlay action-screen__overlay--completion"
           role="dialog"
-          aria-labelledby={completionConfirmMessage ? undefined : 'completion-feeling-title'}
+          aria-labelledby={showContinueDecision ? 'completion-decision-title' : (completionConfirmMessage ? undefined : 'completion-feeling-title')}
           aria-live="polite"
         >
-          <BackButton onClick={closeCompletionAndNext} />
+          {!showContinueDecision && <BackButton onClick={closeCompletionAndStay} />}
           <div className="action-screen__completion-inner">
-            {completionConfirmMessage ? (
+            {showContinueDecision ? (
+              <>
+                <p id="completion-decision-title" className="action-screen__completion-decision-label">
+                  ¿Querés continuar con las demás?
+                </p>
+                <div className="action-screen__completion-decision-btns">
+                  <button
+                    type="button"
+                    className="action-screen__completion-feeling-btn"
+                    onClick={closeCompletionAndStay}
+                    aria-label="Volver al inicio"
+                  >
+                    Volver al inicio
+                  </button>
+                  <button
+                    type="button"
+                    className="action-screen__completion-feeling-btn action-screen__completion-feeling-btn--secondary"
+                    onClick={closeCompletionAndNext}
+                    aria-label="Continuar con otra tarea"
+                  >
+                    Continuar con otra
+                  </button>
+                </div>
+              </>
+            ) : completionConfirmMessage ? (
               <p className="action-screen__overlay-text action-screen__overlay-text--completion">
                 {completionConfirmMessage}
               </p>
             ) : (
               <>
                 <p className="action-screen__overlay-text action-screen__overlay-text--completion">
-                  {completionOverlay.message}
+                  {completionOverlay?.message}
                 </p>
-                {completionOverlay.showQuestion !== false && (
+                {completionOverlay?.showQuestion !== false && (
                   <>
                     <p id="completion-feeling-title" className="action-screen__completion-feeling-label">
                       ¿Cómo te sentís?
@@ -769,34 +935,113 @@ const ActionScreen = () => {
         </div>
       )}
 
-      {reminderOverlay && (
-        <div className="action-screen__overlay action-screen__overlay--reminder" role="dialog" aria-label="Recordatorio">
-          <BackButton onClick={() => setReminderOverlay(null)} />
+      {reminderOverlay && (reminderOverlay.status || 'pending') === 'pending' && (
+        <div
+          className="action-screen__overlay action-screen__overlay--reminder"
+          role="dialog"
+          aria-label="Recordatorio"
+        >
+          <BackButton onClick={() => {
+            setReminderOverlay(null)
+            setCurrentAction(null)
+            setDisplayedAction(null)
+          }} />
           <div className="action-screen__reminder-inner">
             <p className="action-screen__reminder-text">{reminderOverlay.text}</p>
-            <p className="action-screen__reminder-motivational">{reminderOverlay.motivational}</p>
+            <p className="action-screen__reminder-motivational">Es momento de hacerlo</p>
             <div className="action-screen__reminder-actions">
               <button
                 type="button"
                 className="action-screen__reminder-btn action-screen__reminder-btn--secondary"
-                onClick={() => setReminderOverlay(null)}
+                onClick={() => setReminderPostponeOpen(true)}
               >
-                Más tarde
+                Posponer
               </button>
               <button
                 type="button"
                 className="action-screen__reminder-btn action-screen__reminder-btn--primary"
-                onClick={() => {
-                  setPreviousTab(activeTab)
-                  setActiveTab('reminders')
+                onClick={async () => {
+                  const rid = reminderOverlay.id
+                  const user = getCurrentUser()
+                  if (user?.uid) {
+                    const { ok } = await apiFetch(`/api/reminders/${rid}`, {
+                      method: 'PATCH',
+                      body: JSON.stringify({ status: 'hecho' }),
+                    })
+                    if (ok) window.dispatchEvent(new CustomEvent('reminders-updated'))
+                  } else {
+                    updateReminder(rid, { status: 'hecho' })
+                    window.dispatchEvent(new CustomEvent('reminders-updated'))
+                  }
                   setReminderOverlay(null)
+                  setCurrentAction(null)
+                  setDisplayedAction(null)
+                  setActiveTab('reminders')
                 }}
               >
-                Ver recordatorios
+                Hecho
               </button>
             </div>
           </div>
         </div>
+      )}
+
+      {reminderPostponeOpen && reminderOverlay && (
+        <AddReminderModal
+          onTop
+          initial={{
+            id: reminderOverlay.id,
+            date: reminderOverlay.date,
+            time: reminderOverlay.time,
+            alarmEnabled: true,
+          }}
+          postponeOnly
+          onClose={() => setReminderPostponeOpen(false)}
+          onCreate={async (data) => {
+            const user = getCurrentUser()
+            const [y, m, d] = String(data.date).split('-').map(Number)
+            const [hh, mm] = String(data.time || '09:00').split(':').map(Number)
+            const postponedUntil = new Date(y, (m || 1) - 1, d || 1, hh || 0, mm || 0, 0, 0).toISOString()
+            if (user?.uid) {
+              const { ok } = await apiFetch(`/api/reminders/${data.id}`, {
+                method: 'PATCH',
+                body: JSON.stringify({
+                  date: data.date,
+                  time: data.time,
+                  firedAt: null,
+                  status: 'pospuesto',
+                  postponedUntil
+                }),
+              })
+              if (ok) {
+                window.dispatchEvent(new CustomEvent('reminders-updated', { detail: { justPostponedId: data.id } }))
+              }
+            } else {
+              updateReminder(data.id, {
+                date: data.date,
+                time: data.time,
+                firedAt: null,
+                status: 'pospuesto',
+                postponedUntil
+              })
+              window.dispatchEvent(new CustomEvent('reminders-updated', { detail: { justPostponedId: data.id } }))
+            }
+            setReminderPostponeOpen(false)
+            setReminderOverlay(null)
+            setCurrentAction(null)
+            setDisplayedAction(null)
+            setActiveTab('reminders')
+            const time = data.time || '09:00'
+            try {
+              const dt = new Date(y, (m || 1) - 1, d || 1)
+              const ddmm = dt.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' })
+              setPostponedFeedbackToast(`✓ Tarea pospuesta para ${ddmm} · ${time}`)
+            } catch {
+              setPostponedFeedbackToast('✓ Tarea pospuesta')
+            }
+            setTimeout(() => setPostponedFeedbackToast(null), 3000)
+          }}
+        />
       )}
 
       {premiumPending && (
@@ -893,6 +1138,88 @@ const ActionScreen = () => {
                 Guardar
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {showSetPasswordModal && (
+        <div className="action-screen__overlay action-screen__overlay--name-prompt" role="dialog" aria-labelledby="set-password-modal-title" aria-modal="true">
+          <BackButton
+            onClick={() => {
+              if (!setPasswordLoading) {
+                setShowSetPasswordModal(false)
+                setSetPasswordNew('')
+                setSetPasswordConfirm('')
+                setSetPasswordError('')
+                setSetPasswordSuccess(false)
+                try { window.localStorage?.removeItem('control-want-set-password') } catch (_) {}
+              }
+            }}
+          />
+          <div className="action-screen__name-prompt-inner">
+            {setPasswordSuccess ? (
+              <div className="action-screen__set-password-success">
+                <p className="action-screen__overlay-text action-screen__overlay-text--completion" role="status">
+                  ✓ Contraseña creada
+                </p>
+                <p className="action-screen__name-prompt-desc">Ahora podés entrar con email cuando quieras.</p>
+              </div>
+            ) : (
+              <>
+                <p id="set-password-modal-title" className="action-screen__name-prompt-title">¿Crear contraseña para entrar con email?</p>
+                <p className="action-screen__name-prompt-desc">No modifica tu acceso con Google. Solo suma otra forma de entrar.</p>
+                <form onSubmit={handleSetPasswordSubmit} className="action-screen__set-password-form">
+                  <input
+                    type="password"
+                    className="action-screen__name-prompt-input"
+                    placeholder="Nueva contraseña"
+                    value={setPasswordNew}
+                    onChange={(e) => setSetPasswordNew(e.target.value)}
+                    disabled={setPasswordLoading}
+                    autoComplete="new-password"
+                    aria-label="Nueva contraseña"
+                  />
+                  <input
+                    type="password"
+                    className="action-screen__name-prompt-input"
+                    placeholder="Confirmar contraseña"
+                    value={setPasswordConfirm}
+                    onChange={(e) => setSetPasswordConfirm(e.target.value)}
+                    disabled={setPasswordLoading}
+                    autoComplete="new-password"
+                    aria-label="Confirmar contraseña"
+                  />
+                  {setPasswordError && (
+                    <p className="action-screen__set-password-error" role="alert">{setPasswordError}</p>
+                  )}
+                  <div className="action-screen__name-prompt-actions">
+                    <button
+                      type="button"
+                      className="action-screen__name-prompt-btn action-screen__name-prompt-btn--secondary"
+                      onClick={() => {
+                        if (!setPasswordLoading) {
+                          setShowSetPasswordModal(false)
+                          setSetPasswordNew('')
+                          setSetPasswordConfirm('')
+                          setSetPasswordError('')
+                          try { window.localStorage?.removeItem('control-want-set-password') } catch (_) {}
+                        }
+                      }}
+                      disabled={setPasswordLoading}
+                    >
+                      Más tarde
+                    </button>
+                    <button
+                      type="submit"
+                      className="action-screen__name-prompt-btn action-screen__name-prompt-btn--primary"
+                      disabled={setPasswordLoading}
+                    >
+                      {setPasswordLoading ? 'Guardando…' : 'Crear contraseña'}
+                    </button>
+                  </div>
+                </form>
+              </>
+            )}
           </div>
         </div>
       )}

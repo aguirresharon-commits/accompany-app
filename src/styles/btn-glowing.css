@@ -30,11 +30,11 @@
       from var(--btn-glow-angle) at 50% 50%,
       var(--color-neon) 0deg,
       var(--color-neon) 6deg,
-      rgba(0, 175, 255, 0.72) 18deg,
-      rgba(0, 175, 255, 0.28) 38deg,
-      rgba(0, 175, 255, 0.08) 65deg,
-      rgba(0, 175, 255, 0.03) 120deg,
-      rgba(0, 175, 255, 0.02) 360deg
+      rgba(255, 255, 255, 0.72) 18deg,
+      rgba(255, 255, 255, 0.28) 38deg,
+      rgba(255, 255, 255, 0.08) 65deg,
+      rgba(255, 255, 255, 0.03) 120deg,
+      rgba(255, 255, 255, 0.02) 360deg
     ) border-box !important;
   background-clip: padding-box, border-box;
   background-origin: padding-box, border-box;

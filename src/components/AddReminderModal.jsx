@@ -4,7 +4,7 @@ import { getTodayDate } from '../utils/storage'
 import BackButton from './BackButton'
 import './AddReminderModal.css'
 
-const AddReminderModal = ({ onClose, onCreate, initial }) => {
+const AddReminderModal = ({ onClose, onCreate, initial, postponeOnly = false, onTop = false }) => {
   const today = useMemo(() => getTodayDate(), [])
   const [text, setText] = useState(initial?.text ?? '')
   const [date, setDate] = useState(initial?.date ?? today)
@@ -29,16 +29,33 @@ const AddReminderModal = ({ onClose, onCreate, initial }) => {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [onClose])
 
-  const canSave = (text || '').trim().length > 0 && Boolean(date) && Boolean(time)
+  const canSave = postponeOnly
+    ? Boolean(date) && Boolean(time)
+    : (text || '').trim().length > 0 && Boolean(date) && Boolean(time)
+
+  const getPostponeValidationError = () => {
+    if (!postponeOnly || !date || !time) return null
+    try {
+      const [y, m, d] = String(date).split('-').map(Number)
+      const [hh, mm] = String(time).split(':').map(Number)
+      const selected = new Date(y, (m || 1) - 1, d || 1, hh || 0, mm || 0, 0, 0).getTime()
+      if (selected <= Date.now() + 60000) return 'La fecha y hora deben ser en el futuro.'
+    } catch {}
+    return null
+  }
+
+  const postponeError = postponeOnly ? getPostponeValidationError() : null
+  const canSavePostpone = canSave && !postponeError
 
   const handleSave = async () => {
     if (!canSave) return
+    if (postponeOnly && postponeError) return
     if (submittingRef.current) return
     submittingRef.current = true
 
     try {
-      // Pedir permiso solo si el usuario quiere alarma.
-      if (alarmEnabled && typeof Notification !== 'undefined' && Notification.permission === 'default') {
+      // Pedir permiso solo si el usuario quiere alarma (no en modo posponer).
+      if (!postponeOnly && alarmEnabled && typeof Notification !== 'undefined' && Notification.permission === 'default') {
         try {
           await Notification.requestPermission()
         } catch {
@@ -51,7 +68,7 @@ const AddReminderModal = ({ onClose, onCreate, initial }) => {
         text: (text || '').trim(),
         date,
         time,
-        alarmEnabled,
+        alarmEnabled: postponeOnly ? (initial?.alarmEnabled ?? true) : alarmEnabled,
       })
       onClose?.()
     } finally {
@@ -60,21 +77,27 @@ const AddReminderModal = ({ onClose, onCreate, initial }) => {
   }
 
   return (
-    <div className="add-reminder" role="dialog" aria-label="Crear recordatorio" aria-modal="true">
+    <div className={`add-reminder ${onTop ? 'add-reminder--on-top' : ''}`} role="dialog" aria-label="Crear recordatorio" aria-modal="true">
       <button type="button" className="add-reminder__backdrop" onClick={onClose} aria-label="Cerrar" />
       <div className="add-reminder__sheet">
         <BackButton onClick={onClose} />
-        <p className="add-reminder__title">{initial ? 'Editar recordatorio' : 'Nuevo recordatorio'}</p>
+        <p className="add-reminder__title">
+          {postponeOnly ? 'Posponer' : initial ? 'Editar recordatorio' : 'Nuevo recordatorio'}
+        </p>
 
-        <label className="add-reminder__label" htmlFor="reminder-text">Texto</label>
-        <input
-          id="reminder-text"
-          className="add-reminder__input"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Ej: Tenés que ir al gym"
-          maxLength={120}
-        />
+        {!postponeOnly && (
+          <>
+            <label className="add-reminder__label" htmlFor="reminder-text">Texto</label>
+            <input
+              id="reminder-text"
+              className="add-reminder__input"
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder="Ej: Tenés que ir al gym"
+              maxLength={120}
+            />
+          </>
+        )}
 
         <div className="add-reminder__row">
           <div className="add-reminder__col">
@@ -99,15 +122,20 @@ const AddReminderModal = ({ onClose, onCreate, initial }) => {
           </div>
         </div>
 
-        <label className="add-reminder__toggle">
-          <input
-            type="checkbox"
-            checked={alarmEnabled}
-            onChange={(e) => setAlarmEnabled(e.target.checked)}
-          />
-          <span className="add-reminder__toggle-text">Alarma</span>
-        </label>
+        {!postponeOnly && (
+          <label className="add-reminder__toggle">
+            <input
+              type="checkbox"
+              checked={alarmEnabled}
+              onChange={(e) => setAlarmEnabled(e.target.checked)}
+            />
+            <span className="add-reminder__toggle-text">Alarma</span>
+          </label>
+        )}
 
+        {postponeError && (
+          <p className="add-reminder__error" role="alert">{postponeError}</p>
+        )}
         <div className="add-reminder__actions">
           <button type="button" className="add-reminder__btn add-reminder__btn--secondary" onClick={onClose}>
             Cancelar
@@ -116,9 +144,9 @@ const AddReminderModal = ({ onClose, onCreate, initial }) => {
             type="button"
             className="add-reminder__btn add-reminder__btn--primary"
             onClick={handleSave}
-            disabled={!canSave}
+            disabled={!canSavePostpone}
           >
-            Guardar
+            {postponeOnly ? 'Posponer' : 'Guardar'}
           </button>
         </div>
       </div>

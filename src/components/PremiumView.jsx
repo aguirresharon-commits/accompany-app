@@ -48,21 +48,17 @@ const PremiumView = ({ isPremium: isPremiumProp, userPlan, onActivate, onClose }
           ) : (
             <>
               <p className="premium-view__hint">
-                Podés usar Control gratis. Premium se activa desde tu cuenta cuando quieras.
+                Podés usar Control gratis. La activación de Premium estará disponible pronto.
               </p>
-              <button
-                type="button"
-                className="premium-view__btn premium-view__btn--primary"
-                onClick={onActivate}
-              >
-                Activar Premium
-              </button>
+              <span className="premium-view__coming-soon" aria-live="polite">
+                Próximamente
+              </span>
               <button
                 type="button"
                 className="premium-view__btn premium-view__btn--ghost"
                 onClick={onClose}
               >
-                Más tarde
+                Cerrar
               </button>
             </>
           )}

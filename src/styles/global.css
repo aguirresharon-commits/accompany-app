@@ -43,15 +43,15 @@
   /* Sombras muy sutiles */
   --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.12);
 
-  /* Botones glass / neón (bienestar, modo oscuro) */
-  --color-neon: #00AFFF;
-  --color-neon-soft: rgba(0, 175, 255, 0.45);
-  --color-neon-glow: rgba(0, 175, 255, 0.35);
-  --color-neon-glow-hover: rgba(0, 175, 255, 0.5);
-  --color-neon-glow-active: rgba(0, 175, 255, 0.6);
+  /* Botones glass / neón blanco */
+  --color-neon: #FFFFFF;
+  --color-neon-soft: rgba(255, 255, 255, 0.45);
+  --color-neon-glow: rgba(255, 255, 255, 0.35);
+  --color-neon-glow-hover: rgba(255, 255, 255, 0.5);
+  --color-neon-glow-active: rgba(255, 255, 255, 0.6);
   --btn-glass-bg: rgba(10, 10, 12, 0.85);
-  --btn-glass-border: rgba(0, 175, 255, 0.06);
-  --btn-glass-border-visible: rgba(0, 175, 255, 0.2);
+  --btn-glass-border: rgba(255, 255, 255, 0.06);
+  --btn-glass-border-visible: rgba(255, 255, 255, 0.2);
   --btn-glass-blur: 12px;
   --btn-glass-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
   --btn-glass-radius: 12px;

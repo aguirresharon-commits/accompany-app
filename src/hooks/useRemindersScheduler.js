@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { listReminders, markReminderFired } from '../services/remindersService'
+import { listReminders, updateReminder } from '../services/remindersService'
 import { apiFetch } from '../api/client'
 import { onAuthChange } from '../services/authService'
 
@@ -7,6 +7,10 @@ const OPEN_TAB_KEY = 'control-open-tab'
 
 function toDueTimeMs(r) {
   try {
+    if (r.status === 'pospuesto' && r.postponedUntil) {
+      const dt = new Date(r.postponedUntil)
+      return isNaN(dt.getTime()) ? 0 : dt.getTime()
+    }
     const [y, m, d] = String(r.date).split('-').map(Number)
     const [hh, mm] = String(r.time).split(':').map(Number)
     const dt = new Date(y, (m || 1) - 1, d || 1, hh || 0, mm || 0, 0, 0)
@@ -16,14 +20,15 @@ function toDueTimeMs(r) {
   }
 }
 
-function pickNextDue(nowMs, items) {
+function pickNextDue(nowMs, items, skipIds = new Set()) {
   let best = null
   let bestMs = Infinity
   let overdue = null
   let overdueMs = -Infinity
   for (const r of items) {
     if (!r || !r.alarmEnabled) continue
-    if (r.firedAt) continue
+    if (r.status === 'hecho' || r.firedAt) continue
+    if (skipIds && skipIds.has(r.id)) continue
     const due = toDueTimeMs(r)
     if (!due) continue
     // Si ya pasó (hasta 24 h atrás), disparar al abrir la app
@@ -47,6 +52,7 @@ function pickNextDue(nowMs, items) {
 export function useRemindersScheduler() {
   const timerRef = useRef(null)
   const userRef = useRef(null)
+  const skipIdsRef = useRef(new Set())
 
   useEffect(() => {
     const clear = () => {
@@ -59,21 +65,36 @@ export function useRemindersScheduler() {
     const runWithItems = (items) => {
       clear()
       const now = Date.now()
-      const next = pickNextDue(now, items)
+      const skipIds = skipIdsRef.current
+      const next = pickNextDue(now, items, skipIds)
       if (!next) return
       const due = toDueTimeMs(next)
       const delay = Math.max(0, due - now)
 
-      timerRef.current = setTimeout(() => {
+      timerRef.current = setTimeout(async () => {
         try {
+          skipIds.add(next.id)
+          const currentUser = userRef.current
+          if (next.status === 'pospuesto' && next.postponedUntil) {
+            if (currentUser?.uid) {
+              await apiFetch(`/api/reminders/${next.id}`, {
+                method: 'PATCH',
+                body: JSON.stringify({ status: 'pending', postponedUntil: null }),
+              }).catch(() => {})
+            } else {
+              const { updateReminder } = await import('../services/remindersService')
+              updateReminder(next.id, { status: 'pending', postponedUntil: null })
+            }
+          }
+          const reminderToShow = { ...next, status: 'pending', postponedUntil: null }
           const event = new CustomEvent('reminder-due', {
-            detail: { reminder: next },
+            detail: { reminder: reminderToShow },
           })
           window.dispatchEvent(event)
 
           if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-            const n = new Notification(next.text || 'Recordatorio', {
-              tag: next.id,
+            const n = new Notification(reminderToShow.text || 'Recordatorio', {
+              tag: reminderToShow.id,
               data: { tab: 'reminders' },
             })
             n.onclick = () => {
@@ -90,12 +111,6 @@ export function useRemindersScheduler() {
             }
           }
         } finally {
-          const currentUser = userRef.current
-          if (currentUser?.uid) {
-            apiFetch(`/api/reminders/${next.id}/fired`, { method: 'POST' }).catch(() => {})
-          } else {
-            markReminderFired(next.id)
-          }
           schedule()
         }
       }, delay)
@@ -111,7 +126,17 @@ export function useRemindersScheduler() {
           })
           .catch(() => {})
       } else {
-        const items = listReminders()
+        let items = listReminders()
+        const now = Date.now()
+        for (const r of items) {
+          if (r.status === 'pospuesto' && r.postponedUntil) {
+            const due = new Date(r.postponedUntil).getTime()
+            if (!isNaN(due) && due <= now) {
+              updateReminder(r.id, { status: 'pending', postponedUntil: null })
+            }
+          }
+        }
+        items = listReminders()
         runWithItems(items)
       }
     }
@@ -125,7 +150,12 @@ export function useRemindersScheduler() {
     const onStorage = (e) => {
       if (e.key === 'control-app-reminders') schedule()
     }
-    const onRemindersUpdated = () => schedule()
+    const onRemindersUpdated = (e) => {
+      skipIdsRef.current.clear()
+      const justPostponed = e?.detail?.justPostponedId
+      if (justPostponed) skipIdsRef.current.add(justPostponed)
+      schedule()
+    }
 
     document.addEventListener('visibilitychange', onVisibility)
     window.addEventListener('focus', onVisibility)

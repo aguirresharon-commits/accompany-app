@@ -140,12 +140,13 @@ const TimeSelectModal = ({ action, onSelect, onClose, isPremium = false, onReque
         </div>
         {!isPremium && onRequestPremium && (
           <div className="time-select__premium-hint-wrap">
+            <p className="time-select__premium-label">Función Premium</p>
             <button
               type="button"
               className="time-select__premium-hint-btn"
               onClick={onRequestPremium}
             >
-              Con Premium podés elegir cualquier duración.
+              Ver Premium
             </button>
           </div>
         )}

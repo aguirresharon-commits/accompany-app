@@ -35,6 +35,12 @@
   word-break: break-all;
 }
 
+.settings-view__login-method {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin: 0 0 var(--spacing-sm);
+}
+
 .settings-view__levels {
   display: flex;
   flex-wrap: wrap;
@@ -89,6 +95,12 @@
 .settings-view__toggle--active:active {
   transform: scale(0.97);
   box-shadow: var(--btn-glass-shadow), 0 0 28px var(--color-neon-glow-active);
+}
+
+.settings-view__feedback {
+  font-size: var(--font-size-sm);
+  color: var(--color-neon-soft);
+  margin: 0 0 var(--spacing-sm);
 }
 
 .settings-view__level-icon {
@@ -283,6 +295,31 @@
 .settings-view__logout-btn:active {
   transform: scale(0.97);
   box-shadow: var(--btn-glass-shadow), 0 0 28px var(--color-neon-glow-active);
+}
+
+/* Cerrar sesión: separado del bloque Cuenta, estilo secundario */
+.settings-view__logout-wrap {
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.settings-view__logout-btn-secondary {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-size-sm);
+  font-family: inherit;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--color-text-muted);
+  border-radius: var(--btn-glass-radius);
+  transition: color var(--transition-base), border-color var(--transition-base);
+  width: auto;
+}
+
+.settings-view__logout-btn-secondary:hover {
+  color: rgba(255, 255, 255, 0.8);
+  border-color: rgba(255, 255, 255, 0.35);
 }
 
 /* Confirmación reiniciar día: overlay centrado, mismo estilo que barra, más blur */

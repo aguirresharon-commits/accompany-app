@@ -43,6 +43,7 @@ export async function apiFetch(path, options = {}) {
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('session-expired'))
     }
+    return { ok: false, status: 401, data: {} }
   }
   const data = await res.json().catch(() => ({}))
   return { ok: res.ok, status: res.status, data }
