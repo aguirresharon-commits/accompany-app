@@ -81,7 +81,7 @@ const ResetPasswordStandalone = () => {
 }
 
 const AppContent = () => {
-  const { currentEnergyLevel, isInitialLoading, syncError, clearSyncError } = useAppState()
+  const { currentEnergyLevel, isInitialLoading, syncError, clearSyncError, refreshPremium } = useAppState()
   const [onboardingDone, setOnboardingDone] = useState(() => {
     try {
       return typeof window !== 'undefined' && window.localStorage?.getItem(ONBOARDING_SEEN_KEY) === '1'
@@ -98,6 +98,20 @@ const AppContent = () => {
     } catch {}
     setOnboardingDone(true)
   }, [])
+
+  // Al volver de Stripe Checkout (?premium=success o ?premium=canceled), limpiar URL y refrescar Premium si fue success
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    const premium = params.get('premium')
+    if (premium === 'success' || premium === 'canceled') {
+      const url = new URL(window.location.href)
+      url.searchParams.delete('premium')
+      url.searchParams.delete('session_id')
+      window.history.replaceState({}, '', url.pathname + (url.search || ''))
+      if (premium === 'success') refreshPremium?.()
+    }
+  }, [refreshPremium])
 
   const syncBanner = syncError ? (
     <div

@@ -31,6 +31,10 @@
   line-height: 1.4;
 }
 
+.settings-view__hint--account {
+  margin-bottom: var(--spacing-sm);
+}
+
 .settings-view__email {
   word-break: break-all;
 }

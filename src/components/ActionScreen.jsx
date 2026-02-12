@@ -72,6 +72,7 @@ const ActionScreen = () => {
     setSoundsEnabled,
     userPlan,
     setUserPlan,
+    refreshPremium,
   } = useAppState()
 
   const [displayedAction, setDisplayedAction] = useState(null)
@@ -101,8 +102,6 @@ const ActionScreen = () => {
   const [showNamePrompt, setShowNamePrompt] = useState(false)
   const [namePromptUid, setNamePromptUid] = useState(null)
   const [namePromptValue, setNamePromptValue] = useState('')
-  const [premiumPending, setPremiumPending] = useState(false)
-  const [premiumPendingLoading, setPremiumPendingLoading] = useState(false)
   const [loginSubView, setLoginSubView] = useState('login') // 'login' | 'forgot' | 'reset'
   const [showContinueDecision, setShowContinueDecision] = useState(false) // Pantalla "¿Continuar con otra?" tras completar
   const [taskClearedByUser, setTaskClearedByUser] = useState(false) // "Continuar con otra" → pantalla "Elegí una tarea del menú inferior"
@@ -290,22 +289,24 @@ const ActionScreen = () => {
 
   const isPremiumUser = userPlan === 'premium'
 
-  const handleActivatePremium = useCallback(() => {
-    // Modo demo: no activar pago real. Premium se muestra como "Próximamente" en PremiumView.
-    import('../services/authService')
-      .then(({ getCurrentUser }) => {
-        const user = getCurrentUser()
-        if (!user) {
-          setPremiumViewOpen(false)
-          setLoginForPremium(true)
-          return
-        }
-        // No abrir flujo de pago simulado; el usuario ve "Próximamente" en PremiumView
-      })
-      .catch(() => {
-        setPremiumViewOpen(false)
-        setLoginForPremium(true)
-      })
+  const handleActivatePremium = useCallback(async (plan) => {
+    const user = getCurrentUser()
+    if (!user) {
+      setPremiumViewOpen(false)
+      setLoginForPremium(true)
+      throw new Error('Iniciá sesión para activar Premium.')
+    }
+    if (!plan || !['weekly', 'monthly', 'annual'].includes(plan)) {
+      throw new Error('Elegí un plan (semanal o mensual).')
+    }
+    const { ok, data } = await apiFetch('/api/premium/create-subscription', {
+      method: 'POST',
+      body: JSON.stringify({ planType: plan })
+    })
+    if (!ok || !data?.init_point) {
+      throw new Error(data?.error || 'No se pudo iniciar el pago.')
+    }
+    window.location.href = data.init_point
   }, [])
 
   const selectNewAction = useCallback(() => {
@@ -600,6 +601,7 @@ const ActionScreen = () => {
             userPlan={userPlan || 'free'}
             onActivate={handleActivatePremium}
             onClose={() => setPremiumViewOpen(false)}
+            onRefreshPremium={refreshPremium}
           />
         ) : activeTab === 'login' ? (
           <LoginErrorBoundary>
@@ -710,6 +712,33 @@ const ActionScreen = () => {
           ) : taskClearedByUser ? (
             <div className="action-screen__progress action-screen__progress--empty">
               <p className="action-screen__empty-label">Elegí una tarea del menú inferior</p>
+              {completedActionsToday.length > 0 && (
+                <section className="action-screen__today" aria-label="Completadas hoy">
+                  <h2 className="action-screen__today-title">Completadas hoy</h2>
+                  <ul className="action-screen__today-list">
+                    {completedActionsToday.map((c) => (
+                      <li key={`${c.actionId}-${c.completedAt}`} className="action-screen__today-item">
+                        <span className="action-screen__today-check" aria-hidden="true">✓</span>
+                        {c.actionId && getTaskIcon(c.actionId) && (
+                          <TaskIcon iconName={getTaskIcon(c.actionId)} className="action-screen__today-icon" size={20} />
+                        )}
+                        <div className="action-screen__today-content">
+                          {(c.actionId || c.level) && (
+                            <span className="action-screen__today-meta">
+                              {[getSectionLabel((c.actionId || '').split('-')[0]), getEnergyLevelInfo(c.level)?.label].filter(Boolean).join(' · ')}
+                            </span>
+                          )}
+                          <span className="action-screen__today-text">{c.actionText}</span>
+                          <span className="action-screen__today-time">{formatTime(c.completedAt)}</span>
+                          {c.note && (
+                            <p className="action-screen__today-note">{c.note}</p>
+                          )}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              )}
             </div>
           ) : (
             <Loader isLoading={true} />
@@ -1042,54 +1071,6 @@ const ActionScreen = () => {
             setTimeout(() => setPostponedFeedbackToast(null), 3000)
           }}
         />
-      )}
-
-      {premiumPending && (
-        <div className="action-screen__overlay action-screen__overlay--payment-pending" role="dialog" aria-labelledby="payment-pending-title" aria-modal="true">
-          <BackButton onClick={() => setPremiumPending(false)} />
-          <div className="action-screen__name-prompt-inner">
-            <p id="payment-pending-title" className="action-screen__name-prompt-title">Flujo de pago (simulado)</p>
-            <p className="action-screen__payment-pending-desc">Modo demo: el pago es simulado. Al confirmar se activa Premium en tu cuenta.</p>
-            <div className="action-screen__name-prompt-actions">
-              <button
-                type="button"
-                className="action-screen__name-prompt-btn action-screen__name-prompt-btn--secondary"
-                onClick={() => setPremiumPending(false)}
-                disabled={premiumPendingLoading}
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                className="action-screen__name-prompt-btn action-screen__name-prompt-btn--primary"
-                disabled={premiumPendingLoading}
-                onClick={async () => {
-                  setPremiumPendingLoading(true)
-                  try {
-                    const { ok } = await apiFetch('/api/premium/activate', { method: 'POST' })
-                    if (ok) {
-                      const { setSessionFromCookie } = await import('../services/authService')
-                      await setSessionFromCookie()
-                      setUserPlan('premium')
-                      setPremiumPending(false)
-                      const { getCurrentUser } = await import('../services/authService')
-                      const user = getCurrentUser()
-                      if (user?.uid && !getDisplayName(user.uid)) {
-                        setShowNamePrompt(true)
-                        setNamePromptUid(user.uid)
-                        setNamePromptValue('')
-                      }
-                    }
-                  } finally {
-                    setPremiumPendingLoading(false)
-                  }
-                }}
-              >
-                {premiumPendingLoading ? 'Activando…' : 'Confirmar pago'}
-              </button>
-            </div>
-          </div>
-        </div>
       )}
 
       {showNamePrompt && namePromptUid && (

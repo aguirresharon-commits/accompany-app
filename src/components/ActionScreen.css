@@ -50,6 +50,11 @@
   flex-direction: column;
   align-items: center;
   gap: var(--spacing-xl);
+  padding-bottom: var(--spacing-lg);
+}
+
+.action-screen__progress--empty .action-screen__today {
+  margin-top: var(--spacing-lg);
 }
 
 .action-screen__card {
@@ -633,7 +638,7 @@
   box-shadow: var(--btn-glass-shadow), 0 0 28px var(--color-neon-glow-hover);
 }
 
-/* Overlay flujo de pago (simulado): mismo estilo que barra, más blur */
+/* Overlay modales (mismo estilo que barra, más blur) */
 .action-screen__overlay--payment-pending {
   background: var(--msg-bg);
   backdrop-filter: blur(var(--msg-blur));

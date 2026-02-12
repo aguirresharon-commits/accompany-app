@@ -84,6 +84,9 @@ const SettingsView = ({
           </>
         ) : (
           <>
+            <p className="settings-view__hint settings-view__hint--account">
+              Conectá tu cuenta para no perder tu progreso en otro dispositivo y activar Premium.
+            </p>
             {onOpenLogin && (
               <button
                 type="button"

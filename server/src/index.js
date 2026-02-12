@@ -9,7 +9,7 @@ import { notFound, errorHandler } from './utils/errors.js'
 import authRoutes from './routes/auth.js'
 import stateRoutes from './routes/state.js'
 import remindersRoutes from './routes/reminders.js'
-import premiumRoutes from './routes/premium.js'
+import premiumRoutes, { mercadopagoWebhookHandler } from './routes/premium.js'
 
 // Diagnóstico SMTP al arranque (solo para verificar que env está cargado)
 const smtpHost = process.env.SMTP_HOST
@@ -46,6 +46,13 @@ const corsOrigin = origins.length === 1 ? origins[0] : origins
 app.use(helmet())
 app.use(cors({ origin: corsOrigin, credentials: true }))
 app.use(cookieParser())
+// Webhook de Mercado Pago (body raw para verificar firma x-signature)
+app.post('/api/premium/webhook', express.raw({ type: 'application/json' }), (req, res, next) => {
+  if (req.body && Buffer.isBuffer(req.body)) {
+    try { req.body = JSON.parse(req.body.toString()) } catch (_) {}
+  }
+  mercadopagoWebhookHandler(req, res, next)
+})
 app.use(express.json({ limit: '256kb' }))
 
 app.get('/', (req, res) => {

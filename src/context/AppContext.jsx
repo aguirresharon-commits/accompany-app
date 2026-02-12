@@ -579,15 +579,12 @@ export const AppProvider = ({ children }) => {
     return () => clearTimeout(t)
   }, [syncError])
 
-  // Al cerrar sesión o 401: limpiar estado del contexto para no mezclar datos de otro usuario ni dejar semi-logueado
+  // Al cerrar sesión: no borrar estado local (copia anónima). El usuario puede seguir usando la app;
+  // si vuelve a iniciar sesión, se carga el estado del backend. Solo actualizamos la ref.
   const hadUserRef = useRef(!!getCurrentUser()?.uid)
   useEffect(() => {
     const unsubscribe = onAuthChange((user) => {
-      const hasUser = !!user?.uid
-      if (hadUserRef.current && !hasUser) {
-        setState(getInitialState())
-      }
-      hadUserRef.current = hasUser
+      hadUserRef.current = !!user?.uid
     })
     return unsubscribe
   }, [])
@@ -598,6 +595,31 @@ export const AppProvider = ({ children }) => {
     window.addEventListener('session-expired', onSessionExpired)
     return () => window.removeEventListener('session-expired', onSessionExpired)
   }, [])
+
+  // Refrescar Premium cuando el usuario vuelve de Stripe Checkout (?premium=success)
+  const refreshPremium = useCallback(async () => {
+    const user = getCurrentUser()
+    if (!user?.uid) return
+    try {
+      const { ok, data } = await apiFetch('/api/premium')
+      if (!ok) return
+      const isPremium = Boolean(data?.premium)
+      setUserPlan(isPremium ? 'premium' : 'free')
+      if (isPremium) activatePremium(user.uid)
+      else deactivatePremium(user.uid)
+    } catch {
+      // ignore
+    }
+  }, [setUserPlan])
+
+  // Escuchar evento premium-refresh (p. ej. tras volver de Stripe)
+  useEffect(() => {
+    const onRefresh = () => {
+      if (getCurrentUser()?.uid) refreshPremium()
+    }
+    window.addEventListener('premium-refresh', onRefresh)
+    return () => window.removeEventListener('premium-refresh', onRefresh)
+  }, [refreshPremium])
 
   // Valor del contexto
   const value = {
@@ -616,6 +638,7 @@ export const AppProvider = ({ children }) => {
     setSoundsEnabled,
     setSoundsVolume,
     setUserPlan,
+    refreshPremium,
     isInitialLoading,
     syncError,
     clearSyncError: () => setSyncError(null)

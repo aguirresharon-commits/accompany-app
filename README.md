@@ -86,6 +86,8 @@ Una vez instalada, la app funcionará como una app nativa con:
 
 ## Deploy
 
+Para una checklist completa de variables de entorno, backend, frontend y Stripe, ver **[DEPLOY.md](./DEPLOY.md)**.
+
 ### Vercel (Recomendado)
 
 1. **Instalar Vercel CLI** (opcional):
@@ -129,6 +131,9 @@ Una vez instalada, la app funcionará como una app nativa con:
 
 **Backend (carpeta `server/`)**  
 - Ver `server/.env.example`: `MONGODB_URI`, `JWT_SECRET`, `PORT`, `CORS_ORIGIN`. Copiar a `server/.env` y rellenar con valores reales. **No subir `.env` al repositorio** (está en `.gitignore`).
+
+**Stripe (Premium por suscripción)**  
+Planes semanal y mensual con renovación automática. Crear dos productos/precios recurrentes en [Stripe Dashboard](https://dashboard.stripe.com/products). Configurar `STRIPE_SECRET_KEY`, `STRIPE_PRICE_WEEKLY`, `STRIPE_PRICE_MONTHLY` y `STRIPE_WEBHOOK_SECRET` en `server/.env`. Eventos del webhook: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`.
 
 **Envío de email al correo real (Olvidé mi contraseña)**  
 Para que el usuario reciba el mensaje de restablecer contraseña en su correo, configurá en `server/.env` las variables de email (ver bloque "EMAIL" en `server/.env.example`). Necesitás al menos: `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS` y opcionalmente `RESET_PASSWORD_LINK_BASE` (URL de tu app, para que el link del email abra directo la pantalla de nueva contraseña). Con Gmail: usar una [contraseña de aplicación](https://support.google.com/accounts/answer/185833) en `SMTP_PASS`, no la contraseña normal. Reiniciá el servidor después de cambiar `.env`.
