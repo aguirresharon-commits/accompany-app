@@ -297,16 +297,20 @@ const ActionScreen = () => {
       throw new Error('Iniciá sesión para activar Premium.')
     }
     if (!plan || !['weekly', 'monthly', 'annual'].includes(plan)) {
-      throw new Error('Elegí un plan (semanal o mensual).')
+      throw new Error('Elegí un plan (semanal, mensual o anual).')
     }
     const { ok, data } = await apiFetch('/api/premium/create-subscription', {
       method: 'POST',
       body: JSON.stringify({ planType: plan })
     })
-    if (!ok || !data?.init_point) {
+    if (!ok) {
       throw new Error(data?.error || 'No se pudo iniciar el pago.')
     }
-    window.location.href = data.init_point
+    if (data?.init_point) {
+      window.location.href = data.init_point
+      return
+    }
+    throw new Error(data?.error || 'No se pudo iniciar el pago.')
   }, [])
 
   const selectNewAction = useCallback(() => {

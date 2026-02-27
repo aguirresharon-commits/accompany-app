@@ -1,7 +1,8 @@
 import mongoose from 'mongoose'
 
 /**
- * Suscripción Premium por usuario (Mercado Pago Preapproval).
+ * Suscripción Premium por usuario.
+ * Proveedor: Mercado Pago (mpSubscriptionId) o Stripe (stripeSubscriptionId).
  * Fuente de verdad: status authorized + currentPeriodEnd > now = Premium activo.
  */
 const subscriptionSchema = new mongoose.Schema(
@@ -14,8 +15,17 @@ const subscriptionSchema = new mongoose.Schema(
     },
     mpSubscriptionId: {
       type: String,
-      required: true,
-      unique: true
+      default: null,
+      sparse: true
+    },
+    stripeSubscriptionId: {
+      type: String,
+      default: null,
+      sparse: true
+    },
+    stripeCustomerId: {
+      type: String,
+      default: null
     },
     planType: {
       type: String,

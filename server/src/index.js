@@ -9,7 +9,7 @@ import { notFound, errorHandler } from './utils/errors.js'
 import authRoutes from './routes/auth.js'
 import stateRoutes from './routes/state.js'
 import remindersRoutes from './routes/reminders.js'
-import premiumRoutes, { mercadopagoWebhookHandler } from './routes/premium.js'
+import premiumRoutes, { mercadopagoWebhookHandler, mercadopagoWebhookMpHandler } from './routes/premium.js'
 
 // Diagnóstico SMTP al arranque (solo para verificar que env está cargado)
 const smtpHost = process.env.SMTP_HOST
@@ -53,6 +53,13 @@ app.post('/api/premium/webhook', express.raw({ type: 'application/json' }), (req
   }
   mercadopagoWebhookHandler(req, res, next)
 })
+// Webhook MP suscripciones (Preapproval) - POST /api/premium/webhook/mp, sin JWT
+app.post('/api/premium/webhook/mp', express.raw({ type: 'application/json' }), (req, res, next) => {
+  if (req.body && Buffer.isBuffer(req.body)) {
+    try { req.body = JSON.parse(req.body.toString()) } catch (_) {}
+  }
+  mercadopagoWebhookMpHandler(req, res, next)
+})
 app.use(express.json({ limit: '256kb' }))
 
 app.get('/', (req, res) => {
@@ -79,20 +86,15 @@ function tryListen(port, onSuccess) {
   const server = http.createServer(app)
   server.on('error', (err) => {
     if (err.code === 'EADDRINUSE') {
-      const fallback = port === 4001 ? 4000 : Number(port) + 1
-      console.warn(`[startup] Puerto ${port} en uso. Usando http://localhost:${fallback} (cerrá el otro proceso o cambiá PORT en server/.env)`)
-      console.warn(`[startup] Para Google OAuth, agregá en la consola de Google esta URI de redirección: http://localhost:${fallback}/api/auth/google/callback`)
-      process.env.PORT = String(fallback)
-      tryListen(fallback, onSuccess)
+      console.error(`[startup] Puerto ${port} en uso. Cerrá el otro proceso o cambiá PORT en server/.env`)
+      process.exit(1)
     } else {
       console.error('Failed to start:', err.message)
       process.exit(1)
     }
   })
   server.listen(port, () => {
-    const actualPort = server.address().port
-    if (actualPort !== port) process.env.PORT = String(actualPort)
-    console.log(`Server running at http://localhost:${actualPort}`)
+    console.log(`Server running at http://localhost:${port}`)
     onSuccess?.()
   })
 }

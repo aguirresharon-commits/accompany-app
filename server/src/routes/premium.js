@@ -5,7 +5,6 @@ import { authMiddleware } from '../middleware/auth.js'
 import User from '../models/User.js'
 import State from '../models/State.js'
 import Subscription from '../models/Subscription.js'
-
 const router = Router()
 
 const mpAccessToken = process.env.MP_ACCESS_TOKEN?.trim()
@@ -16,11 +15,12 @@ const frontendUrl = process.env.FRONTEND_URL?.trim() || 'http://localhost:5173'
 const MP_PRICE_WEEKLY_ARS = Number(process.env.MP_PRICE_WEEKLY_ARS) || 299
 const MP_PRICE_MONTHLY_ARS = Number(process.env.MP_PRICE_MONTHLY_ARS) || 999
 const MP_PRICE_ANNUAL_ARS = Number(process.env.MP_PRICE_ANNUAL_ARS) || 7999
+const MP_PRICE_MONTHLY_USD = Number(process.env.MP_PRICE_MONTHLY_USD) || 4.99
 
 const PLAN_CONFIG = {
-  weekly: { frequency: 7, frequency_type: 'days', amount: MP_PRICE_WEEKLY_ARS, reason: 'Control Premium Semanal' },
-  monthly: { frequency: 1, frequency_type: 'months', amount: MP_PRICE_MONTHLY_ARS, reason: 'Control Premium Mensual' },
-  annual: { frequency: 12, frequency_type: 'months', amount: MP_PRICE_ANNUAL_ARS, reason: 'Control Premium Anual' }
+  weekly: { frequency: 7, frequency_type: 'days', amount: MP_PRICE_WEEKLY_ARS, currency_id: 'ARS', reason: 'Control Premium Semanal' },
+  monthly: { frequency: 1, frequency_type: 'months', amount: MP_PRICE_MONTHLY_USD, currency_id: 'USD', reason: 'Control Premium Mensual' },
+  annual: { frequency: 12, frequency_type: 'months', amount: MP_PRICE_ANNUAL_ARS, currency_id: 'ARS', reason: 'Control Premium Anual' }
 }
 
 const VALID_PLAN_TYPES = ['weekly', 'monthly', 'annual']
@@ -84,6 +84,9 @@ router.get('/', authMiddleware, async (req, res) => {
  */
 router.post('/create-subscription', authMiddleware, async (req, res) => {
   try {
+    if (!mpAccessToken || !mpAccessToken.length) {
+      return res.status(503).json({ error: 'MP_ACCESS_TOKEN no configurado. Contactá soporte.' })
+    }
     if (!preApprovalApi) {
       return res.status(503).json({ error: 'El pago no está configurado. Contactá soporte.' })
     }
@@ -130,9 +133,8 @@ router.post('/create-subscription', authMiddleware, async (req, res) => {
         frequency: config.frequency,
         frequency_type: config.frequency_type,
         transaction_amount: config.amount,
-        currency_id: 'ARS',
-        start_date: startDate.toISOString(),
-        free_trial: { frequency: 2, frequency_type: 'days' }
+        currency_id: config.currency_id || 'USD',
+        start_date: startDate.toISOString()
       },
       back_url: backUrl
     }
@@ -172,10 +174,91 @@ router.post('/create-subscription', authMiddleware, async (req, res) => {
     return res.json({ init_point: initPoint })
   } catch (err) {
     console.error('POST /api/premium/create-subscription error:', err)
-    const message = err?.message || err?.cause?.message || 'Error al crear suscripción.'
-    return res.status(500).json({ error: message })
+    const message = err?.message || err?.cause?.message || (typeof err === 'string' ? err : 'Error al crear suscripción.')
+    const status = typeof err?.status === 'number' && err.status >= 400 && err.status < 600 ? err.status : 500
+    return res.status(status).json({ error: message })
   }
 })
+
+/**
+ * POST /api/premium/webhook/mp
+ * Webhook de Mercado Pago para suscripciones (Preapproval).
+ * Tipo esperado: subscription_preapproval (también acepta preapproval).
+ * NO requiere JWT. Usa MP_ACCESS_TOKEN para consultar el estado en la API de MP.
+ */
+export async function mercadopagoWebhookMpHandler(req, res) {
+  try {
+    const body = req.body
+    if (!body || typeof body !== 'object') {
+      return res.status(400).json({ error: 'Body inválido' })
+    }
+
+    const type = body.type
+    const acceptedTypes = ['subscription_preapproval', 'preapproval']
+    if (!type || !acceptedTypes.includes(type)) {
+      return res.status(200).json({ received: true })
+    }
+
+    const dataId = body.data?.id ?? req.query?.['data.id']
+    if (!dataId) {
+      console.warn('[premium/webhook/mp] Notificación sin data.id')
+      return res.status(400).json({ error: 'Falta data.id' })
+    }
+
+    if (!mpAccessToken || !preApprovalApi) {
+      console.warn('[premium/webhook/mp] MP_ACCESS_TOKEN o PreApproval no configurado')
+      return res.status(200).json({ received: true })
+    }
+
+    let mpSub
+    try {
+      mpSub = await preApprovalApi.get({ id: dataId })
+    } catch (apiErr) {
+      console.error('[premium/webhook/mp] Error al consultar MP API:', apiErr?.message || apiErr)
+      return res.status(200).json({ received: true })
+    }
+
+    if (!mpSub || !mpSub.id) {
+      return res.status(200).json({ received: true })
+    }
+
+    const status = (mpSub.status || '').toLowerCase()
+    const nextPayment = mpSub.next_payment_date
+    const currentPeriodEnd = nextPayment ? new Date(nextPayment) : new Date()
+    const externalRef = mpSub.external_reference || ''
+    const userId = externalRef.toString()
+
+    const existing = await Subscription.findOne({ mpSubscriptionId: mpSub.id }).lean()
+    const planType = existing?.planType || 'monthly'
+
+    await Subscription.findOneAndUpdate(
+      { mpSubscriptionId: mpSub.id },
+      {
+        $set: {
+          userId: existing?.userId || userId,
+          mpSubscriptionId: mpSub.id,
+          planType,
+          status: ['pending', 'authorized', 'paused', 'cancelled', 'past_due'].includes(status) ? status : 'pending',
+          currentPeriodEnd
+        }
+      },
+      { upsert: true, new: true }
+    )
+
+    if (status === MP_ACTIVE_STATUS) {
+      await setUserPremium(userId, true)
+      console.log('[premium/webhook/mp] Usuario', userId, 'Premium activado (authorized)')
+    } else if (['cancelled', 'paused', 'past_due'].includes(status)) {
+      await setUserPremium(userId, false)
+      console.log('[premium/webhook/mp] Usuario', userId, 'Premium desactivado (' + status + ')')
+    }
+
+    return res.status(200).json({ received: true })
+  } catch (err) {
+    console.error('[premium/webhook/mp] Error:', err?.message || err)
+    return res.status(200).json({ received: true })
+  }
+}
 
 /**
  * POST /api/premium/webhook

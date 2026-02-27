@@ -162,7 +162,7 @@ const PremiumView = ({ isPremium: isPremiumProp, userPlan, onActivate, onClose, 
                 La suscripción se renueva automáticamente. Podés cancelar cuando quieras y seguís teniendo Premium hasta el final del período.
               </p>
               <p className="premium-view__payment-info">
-                Pago seguro con tarjeta a través de Stripe. Serás redirigido a la pasarela de pago.
+                Pago seguro con tarjeta a través de Mercado Pago. Serás redirigido a la pasarela de pago.
               </p>
               <div className="premium-view__plans">
                 <button
