@@ -29,6 +29,46 @@
   margin: 0;
 }
 
+/* Modal mensaje early: foco en el mensaje, fondo borroso */
+.premium-view__early-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-lg);
+}
+
+.premium-view__early-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.premium-view__early-modal {
+  position: relative;
+  width: 100%;
+  max-width: 360px;
+  padding: var(--spacing-lg);
+  background: var(--color-black);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.premium-view__early-message {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--color-text-primary, #fff);
+  margin: 0;
+}
+
 .premium-view__benefits {
   list-style: none;
   margin: 0;

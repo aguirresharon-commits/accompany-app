@@ -73,7 +73,7 @@ const BottomMenu = ({
         title="Progreso"
       >
         <svg className="bottom-menu__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <path d="M19 7l-10 10-5-5" />
+          <path d="M12 4L4 12v8h16v-8L12 4z" />
         </svg>
       </button>
       <button

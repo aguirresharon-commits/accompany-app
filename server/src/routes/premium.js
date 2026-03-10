@@ -11,6 +11,8 @@ const mpAccessToken = process.env.MP_ACCESS_TOKEN?.trim()
 const mpWebhookBaseUrl = process.env.MP_WEBHOOK_BASE_URL?.trim()
 const mpWebhookSecret = process.env.MP_WEBHOOK_SECRET?.trim()
 const frontendUrl = process.env.FRONTEND_URL?.trim() || 'http://localhost:5173'
+/** URL pública para back_url de Mercado Pago (no acepta localhost). Preferir https://. */
+const mpBackUrl = process.env.MP_BACK_URL?.trim()
 
 const MP_PRICE_WEEKLY_ARS = Number(process.env.MP_PRICE_WEEKLY_ARS) || 299
 const MP_PRICE_MONTHLY_ARS = Number(process.env.MP_PRICE_MONTHLY_ARS) || 999
@@ -117,14 +119,24 @@ router.post('/create-subscription', authMiddleware, async (req, res) => {
       return res.status(400).json({ error: 'Ya tenés Premium activo. No podés iniciar otra suscripción.' })
     }
 
-    const baseUrl = frontendUrl.replace(/\/$/, '')
+    // back_url debe ser una URL pública absoluta; Mercado Pago no acepta localhost
+    const baseForBack = (mpBackUrl || frontendUrl).replace(/\/$/, '')
+    const isLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?(\/|$)/i.test(baseForBack)
+    if (isLocalhost) {
+      return res.status(503).json({
+        error: 'Para suscripciones con Mercado Pago configurá MP_BACK_URL en el servidor con una URL pública (ej. https://tu-tunel.ngrok.io). localhost no está permitido.'
+      })
+    }
+    // Asegurar https para cumplir con requisitos de MP
+    const baseUrl = baseForBack.replace(/^http:\/\//i, 'https://')
     const backUrl = `${baseUrl}/?premium=success`
     const notificationUrl = mpWebhookBaseUrl
       ? `${mpWebhookBaseUrl.replace(/\/$/, '')}/api/premium/webhook`
       : undefined
 
     const startDate = new Date()
-    startDate.setMinutes(startDate.getMinutes() - startDate.getTimezoneOffset())
+    startDate.setMinutes(startDate.getMinutes() + 10)
+    const formattedStartDate = startDate.toISOString().replace('Z', '-03:00')
     const body = {
       reason: config.reason,
       external_reference: req.userId.toString(),
@@ -134,7 +146,7 @@ router.post('/create-subscription', authMiddleware, async (req, res) => {
         frequency_type: config.frequency_type,
         transaction_amount: config.amount,
         currency_id: config.currency_id || 'USD',
-        start_date: startDate.toISOString()
+        start_date: formattedStartDate
       },
       back_url: backUrl
     }

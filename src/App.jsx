@@ -3,6 +3,7 @@ import { AppProvider, useAppState } from './context/AppContext'
 import EnergyLevelSelector from './components/EnergyLevelSelector'
 import ActionScreen from './components/ActionScreen'
 import Loader from './components/Loader'
+import IntroScreen from './components/IntroScreen'
 import WelcomeScreen from './components/WelcomeScreen'
 import ResetPasswordScreen from './components/ResetPasswordScreen'
 import { initAudioContext } from './utils/sounds'
@@ -196,6 +197,7 @@ const AppContent = () => {
 }
 
 const AppWithWelcome = () => {
+  const [showIntro, setShowIntro] = useState(true)
   const [showWelcome, setShowWelcome] = useState(true)
   const [isLeaving, setIsLeaving] = useState(false)
 
@@ -225,14 +227,17 @@ const AppWithWelcome = () => {
 
   return (
     <>
-      {(showWelcome || isLeaving) && (
+      {showIntro && (
+        <IntroScreen onContinue={() => setShowIntro(false)} />
+      )}
+      {!showIntro && (showWelcome || isLeaving) && (
         <WelcomeScreen
           onEnter={handleEnter}
           isLeaving={isLeaving}
           onLeaveComplete={handleLeaveComplete}
         />
       )}
-      {!showWelcome && (
+      {!showIntro && !showWelcome && (
         <div className="app-container">
           <div className="content">
             <div className="app-main" role="main">

@@ -6,6 +6,7 @@ import { addReminder, updateReminder, deleteReminders, listReminders, clearAllRe
 import { getTodayDate } from '../utils/storage'
 import { apiFetch } from '../api/client'
 import { getCurrentUser, onAuthChange } from '../services/authService'
+import { FREE_REMINDERS_LIMIT } from '../constants/limits'
 import './RemindersView.css'
 
 const FREE_REMINDERS_LAST_DAY_KEY = 'control-app-reminders-free-date'
@@ -31,8 +32,6 @@ const toTimestamp = (r) => {
     return 0
   }
 }
-
-const FREE_REMINDERS_LIMIT = 2
 
 const RemindersView = ({ isPremium = false, onRequestPremium }) => {
   const [items, setItems] = useState([])

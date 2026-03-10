@@ -26,6 +26,7 @@ import { apiFetch } from '../api/client'
 import { getCurrentUser } from '../services/authService'
 import { updateReminder } from '../services/remindersService'
 import { useRemindersScheduler } from '../hooks/useRemindersScheduler'
+import { FREE_TASKS_LIMIT } from '../constants/limits'
 import './ActionScreen.css'
 
 const LoginScreen = lazy(() => import('./LoginScreen'))
@@ -67,6 +68,7 @@ const ActionScreen = () => {
     completedActions,
     allActions,
     listPickUsedDate,
+    listPickCountToday,
     addSessionNote,
     sounds,
     setSoundsEnabled,
@@ -383,7 +385,7 @@ const ActionScreen = () => {
     setShowContinueDecision(true)
   }, [])
 
-  // "Continuar con otra" → pantalla "Elegí una tarea del menú inferior" (el usuario elige desde la barra)
+  // "Continuar con otra" → abrir directamente el panel de tareas (solo tareas no completadas hoy)
   const closeCompletionAndNext = useCallback(() => {
     setCompletionOverlay(null)
     setCompletionFeelingWriting(false)
@@ -394,6 +396,7 @@ const ActionScreen = () => {
     setCurrentAction(null)
     setTaskClearedByUser(true)
     setDisplayedActionCompleted(false)
+    setListPanelOpen(true)
   }, [])
 
   // "Volver al inicio" → pantalla de inicio mostrando la tarea que acaba de completar
@@ -555,7 +558,9 @@ const ActionScreen = () => {
 
   const handleListPanelToggle = () => {
     if (!listPanelOpen) {
-      if (!isPremiumUser && listPickUsedDate === getTodayDate()) {
+      const today = getTodayDate()
+      const atLimit = !isPremiumUser && listPickUsedDate === today && (listPickCountToday ?? 0) >= FREE_TASKS_LIMIT
+      if (atLimit) {
         setListBlockedToast(true)
         setTimeout(() => setListBlockedToast(false), 7000)
         return

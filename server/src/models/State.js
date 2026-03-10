@@ -36,7 +36,8 @@ const stateSchema = new mongoose.Schema(
       default: () => ({ enabled: true, volume: 0.3 })
     },
     userPlan: { type: String, enum: ['free', 'premium'], default: 'free' },
-    listPickUsedDate: { type: String, default: null }
+    listPickUsedDate: { type: String, default: null },
+    listPickCountToday: { type: Number, default: 0 }
   },
   { timestamps: true }
 )

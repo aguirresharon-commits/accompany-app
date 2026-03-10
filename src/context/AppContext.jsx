@@ -5,6 +5,7 @@ import { ENERGY_LEVEL_KEYS } from '../data/actions'
 import { apiFetch } from '../api/client'
 import { onAuthChange, getCurrentUser, refreshSession } from '../services/authService'
 import { activatePremium, deactivatePremium } from '../services/premiumService'
+import { FREE_TASKS_LIMIT } from '../constants/limits'
 
 const migrateEnergyLevel = (level) => {
   if (!level) return null
@@ -34,7 +35,8 @@ const getInitialState = () => ({
     volume: 0.3 // Volumen bajo por defecto (0-1)
   },
   userPlan: 'free', // 'free' | 'premium'; persistido tras pago exitoso
-  listPickUsedDate: null // YYYY-MM-DD; solo una elección desde la lista por día para no premium
+  listPickUsedDate: null, // YYYY-MM-DD; día en que se usaron elecciones desde la lista
+  listPickCountToday: 0 // Cuántas veces eligió desde la lista hoy (límite FREE_TASKS_LIMIT para no premium)
 })
 
 // Crear contexto
@@ -112,7 +114,8 @@ export const AppProvider = ({ children }) => {
         sessionNotes: savedState.sessionNotes || [],
         sounds: savedState.sounds || { enabled: true, volume: 0.3 },
         userPlan,
-        listPickUsedDate: savedState.listPickUsedDate ?? null
+        listPickUsedDate: savedState.listPickUsedDate ?? null,
+        listPickCountToday: savedState.listPickUsedDate === today ? (savedState.listPickCountToday ?? 0) : 0
       }
     }
     return getInitialState()
@@ -427,15 +430,21 @@ export const AppProvider = ({ children }) => {
         lastDate: null,
         paused: prev.streak.paused // Mantener el estado de pausa
       },
-      listPickUsedDate: null // Reiniciar oportunidad de elegir desde la lista
+      listPickUsedDate: null,
+      listPickCountToday: 0
     }))
   }, [])
 
   const markListPickUsed = useCallback(() => {
-    setState(prev => ({
-      ...prev,
-      listPickUsedDate: getTodayDate()
-    }))
+    const today = getTodayDate()
+    setState(prev => {
+      const prevDate = prev.listPickUsedDate
+      const prevCount = prev.listPickCountToday ?? 0
+      if (prevDate !== today) {
+        return { ...prev, listPickUsedDate: today, listPickCountToday: 1 }
+      }
+      return { ...prev, listPickCountToday: prevCount + 1 }
+    })
   }, [])
 
   // Nota de sesión (timer) sin completar tarea
@@ -563,7 +572,8 @@ export const AppProvider = ({ children }) => {
           sessionNotes: data.sessionNotes || [],
           sounds: data.sounds || { enabled: true, volume: 0.3 },
           userPlan,
-          listPickUsedDate: data.listPickUsedDate ?? null
+          listPickUsedDate: data.listPickUsedDate ?? null,
+          listPickCountToday: data.listPickUsedDate === today ? (data.listPickCountToday ?? 0) : 0
         })
       } catch {
         setSyncError('No se pudo sincronizar. Revisá tu conexión.')

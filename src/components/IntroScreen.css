@@ -1,0 +1,106 @@
+/* Pantalla de introducción - misma estética que bienvenida, sin logo */
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 600;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-black);
+  isolation: isolate;
+  padding: var(--spacing-md);
+  padding-bottom: max(env(safe-area-inset-bottom), var(--spacing-xl));
+}
+
+.intro__inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-lg);
+  text-align: center;
+}
+
+.intro__brand {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-white);
+  letter-spacing: 0.08em;
+  margin: 0;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+.intro__tagline {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-regular);
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.intro__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+  margin: 0;
+  padding: var(--spacing-sm) 0;
+}
+
+.intro__body p {
+  margin: 0;
+}
+
+.intro__cta {
+  width: 100%;
+  max-width: 280px;
+  padding: var(--spacing-md) var(--spacing-xl);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  font-family: inherit;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: 9999px;
+  cursor: pointer;
+  background: var(--btn-glass-bg);
+  backdrop-filter: blur(var(--btn-glass-blur));
+  -webkit-backdrop-filter: blur(var(--btn-glass-blur));
+  border: 1px solid var(--btn-glass-border);
+  box-shadow: var(--btn-glass-shadow);
+  color: rgba(255, 255, 255, 0.92);
+  transition: color var(--transition-base), border-color var(--transition-base), box-shadow var(--transition-base), transform var(--transition-base);
+}
+
+.intro__cta:hover {
+  color: var(--color-white);
+  border-color: var(--color-neon-soft);
+  box-shadow: var(--btn-glass-shadow), 0 0 28px var(--color-neon-glow-hover);
+}
+
+.intro__cta:active {
+  color: var(--color-white);
+  border-color: var(--color-neon-soft);
+  box-shadow: var(--btn-glass-shadow), 0 0 32px var(--color-neon-glow-active);
+  transform: scale(0.97);
+}
+
+@media (max-width: 480px) {
+  .intro__inner {
+    gap: var(--spacing-md);
+  }
+
+  .intro__body {
+    padding: 0;
+  }
+
+  .intro__cta {
+    max-width: none;
+  }
+}

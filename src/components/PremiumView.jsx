@@ -28,6 +28,8 @@ const formatDate = (iso) => {
 const PLAN_LABELS = { weekly: 'Semanal', monthly: 'Mensual', annual: 'Anual' }
 const PLAN_PRICES = { weekly: '$2.99', monthly: '$9.99', annual: '$79.99' }
 
+const EARLY_MESSAGE = 'Estás usando una versión inicial de la app. Algunas funciones premium están desbloqueadas temporalmente mientras terminamos de lanzar el plan premium.'
+
 const PremiumView = ({ isPremium: isPremiumProp, userPlan, onActivate, onClose, onRefreshPremium }) => {
   const [loading, setLoading] = useState(false)
   const [loadingPlan, setLoadingPlan] = useState(null)
@@ -35,6 +37,7 @@ const PremiumView = ({ isPremium: isPremiumProp, userPlan, onActivate, onClose, 
   const [details, setDetails] = useState(null)
   const [canceling, setCanceling] = useState(false)
   const [trialConfirmPlan, setTrialConfirmPlan] = useState(null)
+  const [showEarlyModal, setShowEarlyModal] = useState(true)
   const isPremium = isPremiumProp !== undefined ? isPremiumProp : userPlan === 'premium'
 
   const fetchDetails = useCallback(async () => {
@@ -98,6 +101,19 @@ const PremiumView = ({ isPremium: isPremiumProp, userPlan, onActivate, onClose, 
 
   return (
     <div className="premium-view">
+      {showEarlyModal && (
+        <div className="premium-view__early-overlay" role="dialog" aria-modal="true" aria-labelledby="early-message-title">
+          <div className="premium-view__early-backdrop" onClick={onClose} aria-hidden="true" />
+          <div className="premium-view__early-modal">
+            <p id="early-message-title" className="premium-view__early-message" role="status">
+              {EARLY_MESSAGE}
+            </p>
+            <button type="button" className="premium-view__btn premium-view__btn--primary" onClick={onClose}>
+              Entendido
+            </button>
+          </div>
+        </div>
+      )}
       <div className="premium-view__inner">
         <BackButton onClick={onClose} />
         <h1 className="premium-view__title">Premium</h1>

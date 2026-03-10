@@ -70,8 +70,9 @@ const CalendarView = ({ isPremium: isPremiumProp, onRequestPremium }) => {
   const handleDayClick = (day) => {
     if (!day) return
     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-    // El calendario (días) es visible para todos, pero ver el detalle del día requiere Premium.
-    if (!isPremium) {
+    // Premium: acceso normal. No premium: temporalmente permitido (early version).
+    const canAccessDayDetail = isPremium || true
+    if (!canAccessDayDetail) {
       onRequestPremium?.()
       return
     }
@@ -79,7 +80,8 @@ const CalendarView = ({ isPremium: isPremiumProp, onRequestPremium }) => {
   }
 
   const handlePrevMonth = () => {
-    if (!isPremium) {
+    const canAccessDayDetail = isPremium || true
+    if (!canAccessDayDetail) {
       onRequestPremium?.()
       return
     }
