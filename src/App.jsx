@@ -7,6 +7,7 @@ import IntroScreen from './components/IntroScreen'
 import WelcomeScreen from './components/WelcomeScreen'
 import ResetPasswordScreen from './components/ResetPasswordScreen'
 import { initAudioContext } from './utils/sounds'
+import * as ambientSound from './utils/ambientSound'
 import { setSessionFromCookie } from './services/authService'
 
 const ONBOARDING_SEEN_KEY = 'control-app-onboarding-energy-seen'
@@ -75,6 +76,68 @@ const ResetPasswordStandalone = () => {
       <div className="content">
         <div className="app-main" role="main">
           <ResetPasswordScreen onBack={handleBack} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Botón minimalista para activar/desactivar sonido ambiental (esquina superior derecha)
+const AmbientSoundButton = ({ fixed = false }) => {
+  const [enabled, setEnabled] = useState(() => ambientSound.getEnabled())
+
+  const handleToggle = useCallback(() => {
+    ambientSound.toggle()
+    setEnabled(ambientSound.getEnabled())
+  }, [])
+
+  return (
+    <button
+      type="button"
+      onClick={handleToggle}
+      aria-label={enabled ? 'Desactivar sonido ambiental' : 'Activar sonido ambiental'}
+      className="ambient-sound-btn"
+      style={{
+        position: fixed ? 'fixed' : 'absolute',
+        top: 16,
+        right: 16,
+        width: 36,
+        height: 36,
+        padding: 0,
+        border: 'none',
+        borderRadius: '50%',
+        background: 'rgba(255,255,255,0.06)',
+        color: '#888',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '1.1rem',
+        opacity: 0.85,
+        transition: 'opacity 0.2s, color 0.2s',
+        zIndex: 1000
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.opacity = '1'
+        e.currentTarget.style.color = '#aaa'
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.opacity = '0.85'
+        e.currentTarget.style.color = '#888'
+      }}
+    >
+      {enabled ? '🔊' : '🔇'}
+    </button>
+  )
+}
+
+// Layout principal (sonido ya se inicia en el primer toque en la primera pantalla)
+const MainAppLayout = () => {
+  return (
+    <div className="app-container">
+      <div className="content">
+        <div className="app-main" role="main">
+          <AppContent />
         </div>
       </div>
     </div>
@@ -201,12 +264,14 @@ const AppWithWelcome = () => {
   const [showWelcome, setShowWelcome] = useState(true)
   const [isLeaving, setIsLeaving] = useState(false)
 
-  // Desbloquear audio en el primer toque/clic (necesario en móviles para que suene)
+  // Desbloquear audio en el primer toque/clic; luego iniciar sonido ambiental (misma API = mismo desbloqueo)
   useEffect(() => {
     const unlock = () => {
-      initAudioContext().catch(() => {})
       document.removeEventListener('touchend', unlock, true)
       document.removeEventListener('click', unlock, true)
+      initAudioContext()
+        .then(() => ambientSound.start())
+        .catch(() => {})
     }
     document.addEventListener('touchend', unlock, { capture: true, passive: true })
     document.addEventListener('click', unlock, { capture: true })
@@ -227,6 +292,8 @@ const AppWithWelcome = () => {
 
   return (
     <>
+      {/* Botón de sonido ambiental visible desde la primera pantalla (posición fija) */}
+      <AmbientSoundButton fixed />
       {showIntro && (
         <IntroScreen onContinue={() => setShowIntro(false)} />
       )}
@@ -238,13 +305,7 @@ const AppWithWelcome = () => {
         />
       )}
       {!showIntro && !showWelcome && (
-        <div className="app-container">
-          <div className="content">
-            <div className="app-main" role="main">
-              <AppContent />
-            </div>
-          </div>
-        </div>
+        <MainAppLayout />
       )}
     </>
   )

@@ -21,7 +21,7 @@ const IntroScreen = ({ onContinue }) => {
         <div className="intro__body">
           <p>Pequeñas acciones diarias crean grandes cambios.</p>
           <p>
-            Esta app te ayuda a mantener disciplina con hábitos simples para tu mente, tu cuerpo y tu día.
+            Control te ayuda a mantener disciplina con hábitos simples para tu mente, tu cuerpo y tu día.
           </p>
           <p>
             No se trata de hacer mucho.<br />

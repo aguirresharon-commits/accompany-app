@@ -4,7 +4,7 @@
 
 let audioContext = null
 
-const getAudioContext = async () => {
+export const getAudioContext = async () => {
   const createContext = () => {
     try {
       return new (window.AudioContext || window.webkitAudioContext)()

@@ -15,6 +15,7 @@ const SettingsView = ({
   userPlan,
   onUpgrade,
   onOpenLogin,
+  onOpenYouView,
 }) => {
   const isPremium = isPremiumProp !== undefined ? isPremiumProp : userPlan === 'premium'
   const [currentUser, setCurrentUser] = useState(null)
@@ -47,7 +48,6 @@ const SettingsView = ({
         {currentUser ? (
           <>
             <p className="settings-view__desc settings-view__email" aria-label="Email">{currentUser.email || 'Sin email'}</p>
-            <p className="settings-view__desc settings-view__login-method">Método de acceso: Google</p>
             {confirmLogout ? (
               <div className="settings-view__logout-confirm" role="dialog" aria-labelledby="logout-question">
                 <p id="logout-question" className="settings-view__logout-question">
@@ -127,6 +127,20 @@ const SettingsView = ({
               Hacerse Premium
             </button>
           </>
+        )}
+      </section>
+
+      <section className="settings-view__section">
+        <h2 className="settings-view__title">YOU</h2>
+        <p className="settings-view__desc">Tu progreso.</p>
+        {onOpenYouView && (
+          <button
+            type="button"
+            className="settings-view__upgrade-btn"
+            onClick={onOpenYouView}
+          >
+            Ver tu avance
+          </button>
         )}
       </section>
 

@@ -11,6 +11,7 @@ import Loader from './Loader'
 import BottomMenu from './BottomMenu'
 import ListPanel from './ListPanel'
 import SettingsView from './SettingsView'
+import YouView from './YouView'
 import CalendarView from './CalendarView'
 import RemindersView from './RemindersView'
 import NotePrompt from './NotePrompt'
@@ -115,6 +116,7 @@ const ActionScreen = () => {
   const [setPasswordLoading, setSetPasswordLoading] = useState(false)
   const [setPasswordError, setSetPasswordError] = useState('')
   const [setPasswordSuccess, setSetPasswordSuccess] = useState(false)
+  const [settingsSubView, setSettingsSubView] = useState(null) // null | 'you'
 
   // Si la app se abre con ?token= (link del email), ir a login y mostrar pantalla restablecer
   useEffect(() => {
@@ -135,6 +137,11 @@ const ActionScreen = () => {
     }
     window.addEventListener('session-expired', onSessionExpired)
     return () => window.removeEventListener('session-expired', onSessionExpired)
+  }, [activeTab])
+
+  // Al salir de configuración, volver a la vista principal de settings
+  useEffect(() => {
+    if (activeTab !== 'settings') setSettingsSubView(null)
   }, [activeTab])
 
   // Tras volver de Google con intención de crear contraseña, mostrar modal
@@ -770,20 +777,25 @@ const ActionScreen = () => {
             />
           </>
         ) : activeTab === 'settings' ? (
-          <SettingsView
-            currentEnergyLevel={currentEnergyLevel}
-            onEnergyLevelChange={setEnergyLevel}
-            onRestartDay={handleRestartDay}
-            soundsEnabled={soundsConfig.enabled}
-            onSoundsEnabledChange={setSoundsEnabled}
-            isPremium={isPremiumUser}
-            userPlan={userPlan || 'free'}
-            onUpgrade={() => setPremiumViewOpen(true)}
-            onOpenLogin={() => {
-              setPreviousTab(activeTab)
-              setActiveTab('login')
-            }}
-          />
+          settingsSubView === 'you' ? (
+            <YouView onBack={() => setSettingsSubView(null)} />
+          ) : (
+            <SettingsView
+              currentEnergyLevel={currentEnergyLevel}
+              onEnergyLevelChange={setEnergyLevel}
+              onRestartDay={handleRestartDay}
+              soundsEnabled={soundsConfig.enabled}
+              onSoundsEnabledChange={setSoundsEnabled}
+              isPremium={isPremiumUser}
+              userPlan={userPlan || 'free'}
+              onUpgrade={() => setPremiumViewOpen(true)}
+              onOpenLogin={() => {
+                setPreviousTab(activeTab)
+                setActiveTab('login')
+              }}
+              onOpenYouView={() => setSettingsSubView('you')}
+            />
+          )
         ) : (
           <Loader isLoading={true} />
         )}
