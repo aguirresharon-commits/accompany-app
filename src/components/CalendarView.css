@@ -139,12 +139,15 @@
 }
 
 .calendar-view__day--completed {
-  border-color: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: var(--btn-glass-shadow), 0 0 12px rgba(255, 255, 255, 0.08);
 }
 
 .calendar-view__day--completed:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.18);
+  border-color: var(--color-neon-soft);
+  box-shadow: var(--btn-glass-shadow), 0 0 16px var(--color-neon-glow-hover);
 }
 
 /* Días pasados: estado visual sutil */
@@ -154,6 +157,15 @@
 
 .calendar-view__day--past:hover {
   opacity: 0.5;
+}
+
+/* Días pasados pero marcados: más visibles que el resto de pasados */
+.calendar-view__day--past.calendar-view__day--completed {
+  opacity: 0.75;
+}
+
+.calendar-view__day--past.calendar-view__day--completed:hover {
+  opacity: 0.9;
 }
 
 .calendar-view__day-number {
@@ -179,16 +191,18 @@
 
 .calendar-view__day-mark {
   position: absolute;
-  bottom: 4px;
-  width: 4px;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.6);
+  bottom: 5px;
+  width: 6px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.95);
   border-radius: 50%;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.4);
 }
 
 /* Marca en días pasados: más apagada */
 .calendar-view__day--past .calendar-view__day-mark {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.5);
+  box-shadow: none;
 }
 
 /* Responsive */
@@ -207,8 +221,8 @@
   }
 
   .calendar-view__day-mark {
-    width: 3px;
-    height: 3px;
-    bottom: 3px;
+    width: 5px;
+    height: 5px;
+    bottom: 4px;
   }
 }

@@ -3,8 +3,6 @@ import { useEffect } from 'react'
 import BackButton from './BackButton'
 import './TimerEndModal.css'
 
-const CLOSE_MESSAGES = ['Listo.', 'Terminaste.', 'Bien.', 'Listo por ahora.', 'Podés seguir cuando quieras.']
-
 const TimerEndModal = ({
   action,
   onMarkComplete,
@@ -14,7 +12,7 @@ const TimerEndModal = ({
   isPremium = false,
   onRequestPremium,
 }) => {
-  const msg = CLOSE_MESSAGES[Math.floor(Math.random() * CLOSE_MESSAGES.length)]
+  const msg = 'Acción completada'
 
   useEffect(() => {
     const onKeyDown = (e) => {

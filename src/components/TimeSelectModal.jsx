@@ -1,8 +1,6 @@
 // Modal: elegir cuántos minutos dedicar a la tarea
 // FREE: presets cortos (1, 3, 5, 10 min). PREMIUM: 5, 10, 15, 20 + duración libre
 import { useState, useRef, useEffect } from 'react'
-import { getTaskIcon } from '../data/iconMap'
-import TaskIcon from './TaskIcon'
 import BackButton from './BackButton'
 import './TimeSelectModal.css'
 
@@ -104,9 +102,6 @@ const TimeSelectModal = ({ action, onSelect, onClose, isPremium = false, onReque
       <div className="time-select__sheet">
         <BackButton onClick={onClose} />
         <p className="time-select__title">¿Cuánto tiempo?</p>
-        {action?.id && getTaskIcon(action.id) && (
-          <TaskIcon iconName={getTaskIcon(action.id)} className="time-select__icon" size={32} />
-        )}
         <p className="time-select__task">{action?.text}</p>
         <div className="time-select__presets">
           {PRESETS.map((m) => (

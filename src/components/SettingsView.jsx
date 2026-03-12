@@ -1,9 +1,26 @@
 // Ajustes: ritmo, reiniciar día, sonidos, Premium, ayuda
 import { useState, useEffect } from 'react'
 import { ENERGY_LEVELS, ENERGY_LEVEL_KEYS } from '../data/actions'
+import * as ambientSound from '../utils/ambientSound'
 import { EnergyLevelIcon } from './TaskIcon'
 import BackButton from './BackButton'
 import './SettingsView.css'
+
+const AmbientSoundToggle = () => {
+  const [enabled, setEnabled] = useState(() => ambientSound.getEnabled())
+  return (
+    <button
+      className={`settings-view__toggle ${enabled ? 'settings-view__toggle--active' : ''}`}
+      onClick={() => {
+        ambientSound.setEnabled(!enabled)
+        setEnabled(ambientSound.getEnabled())
+      }}
+      type="button"
+    >
+      {enabled ? 'Activado' : 'Desactivado'}
+    </button>
+  )
+}
 
 const SettingsView = ({
   currentEnergyLevel,
@@ -177,7 +194,7 @@ const SettingsView = ({
 
       <section className="settings-view__section">
         <h2 className="settings-view__title">Sonidos</h2>
-        <p className="settings-view__desc">Feedback sutil al completar tareas y acciones.</p>
+        <p className="settings-view__desc">Sonido de botones.</p>
         <button
           className={`settings-view__toggle ${soundsEnabled ? 'settings-view__toggle--active' : ''}`}
           onClick={() => onSoundsEnabledChange(!soundsEnabled)}
@@ -185,6 +202,8 @@ const SettingsView = ({
         >
           {soundsEnabled ? 'Activados' : 'Desactivados'}
         </button>
+        <p className="settings-view__desc" style={{ marginTop: '0.75rem' }}>Sonido ambiental de fondo.</p>
+        <AmbientSoundToggle />
       </section>
 
       <section className="settings-view__section">

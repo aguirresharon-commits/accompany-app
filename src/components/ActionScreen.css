@@ -516,6 +516,11 @@
   color: var(--color-neon-soft);
 }
 
+.action-screen__toast--daily-limit {
+  color: var(--color-neon-soft);
+  font-weight: 500;
+}
+
 /* Overlay de recordatorio: mismo estilo que barra, más blur */
 .action-screen__overlay--reminder {
   background: var(--msg-bg);

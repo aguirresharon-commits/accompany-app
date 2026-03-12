@@ -5,8 +5,6 @@ import { getRandomAction, getReducedAction, isInstantTask, getSectionLabel, getE
 import { getTodayDate, formatTime } from '../utils/storage'
 import { getDisplayName, setDisplayName } from '../utils/displayName'
 import { playStartSound, initAudioContext } from '../utils/sounds'
-import { getTaskIcon } from '../data/iconMap'
-import TaskIcon from './TaskIcon'
 import Loader from './Loader'
 import BottomMenu from './BottomMenu'
 import ListPanel from './ListPanel'
@@ -27,7 +25,8 @@ import { apiFetch } from '../api/client'
 import { getCurrentUser } from '../services/authService'
 import { updateReminder } from '../services/remindersService'
 import { useRemindersScheduler } from '../hooks/useRemindersScheduler'
-import { FREE_TASKS_LIMIT } from '../constants/limits'
+import { setReminderOverlayVisible } from '../state/reminderOverlayState'
+import { FREE_TASKS_LIMIT, DAILY_TASKS_SUFFICIENT_LIMIT } from '../constants/limits'
 import './ActionScreen.css'
 
 const LoginScreen = lazy(() => import('./LoginScreen'))
@@ -92,6 +91,8 @@ const ActionScreen = () => {
   const [reminderPostponeOpen, setReminderPostponeOpen] = useState(false)
   const [listBlockedToast, setListBlockedToast] = useState(false)
   const [postponedFeedbackToast, setPostponedFeedbackToast] = useState(null) // "✓ Tarea pospuesta para DD/MM · HH:mm" | null
+  const [dailyLimitReachedToast, setDailyLimitReachedToast] = useState(null)
+  const dailyLimitShownRef = useRef(false)
 
   // Flujo Empezar: timeSelect → timer → timerEnd
   const [empezarFlow, setEmpezarFlow] = useState(null)
@@ -213,11 +214,17 @@ const ActionScreen = () => {
   // Scheduler de recordatorios (notificaciones locales mientras la app está abierta)
   useRemindersScheduler()
 
+  function closeReminderOverlayAndNotify() {
+    setReminderOverlayVisible(false)
+    window.dispatchEvent(new CustomEvent('reminder-overlay-closed'))
+  }
+
   // Escuchar eventos de recordatorios y mostrar overlay en pantalla (siempre funciona)
   useEffect(() => {
     const handleReminderDue = (e) => {
       const { reminder } = e.detail
       if (!reminder || !reminder.text) return
+      setReminderOverlayVisible(true)
       setReminderOverlay({
         text: reminder.text,
         id: reminder.id,
@@ -271,6 +278,7 @@ const ActionScreen = () => {
           if (!cancelled && !u?.uid) {
             setDisplayedAction(null)
             setReminderOverlay(null)
+            setReminderOverlayVisible(false)
             setReminderPostponeOpen(false)
             setTaskClearedByUser(false)
             setDisplayedActionCompleted(false)
@@ -368,6 +376,22 @@ const ActionScreen = () => {
       .filter((c) => c.date === today)
       .sort((a, b) => (b.completedAt || '').localeCompare(a.completedAt || ''))
   }, [completedActions])
+
+  const todayRef = useRef(getTodayDate())
+  useEffect(() => {
+    const today = getTodayDate()
+    if (todayRef.current !== today) {
+      todayRef.current = today
+      dailyLimitShownRef.current = false
+    }
+    const count = completedActionsToday.length
+    if (count >= DAILY_TASKS_SUFFICIENT_LIMIT && !dailyLimitShownRef.current) {
+      dailyLimitShownRef.current = true
+      setDailyLimitReachedToast(`Llegaste a ${DAILY_TASKS_SUFFICIENT_LIMIT} tareas hoy. Ya es suficiente con las tareas realizadas.`)
+      const t = setTimeout(() => setDailyLimitReachedToast(null), 6000)
+      return () => clearTimeout(t)
+    }
+  }, [completedActionsToday.length])
 
   // Auto-cierre solo para “no todavía” (sin pregunta). El completado se cierra cuando el usuario elige opción o escribe.
   useEffect(() => {
@@ -640,22 +664,25 @@ const ActionScreen = () => {
             </Suspense>
           </LoginErrorBoundary>
         ) : activeTab === 'progress' ? (
-          displayedAction ? (
+          <>
+            {dailyLimitReachedToast && (
+              <div className="action-screen__toast action-screen__toast--daily-limit" role="status" aria-live="polite">
+                {dailyLimitReachedToast}
+              </div>
+            )}
+            {displayedAction ? (
           <div className="action-screen__progress">
             <div className="action-screen__card">
               <div className="action-screen__task">
                 {(displayedAction?.section || displayedAction?.level) && (
                   <p className="action-screen__task-meta" aria-label="Sección y nivel">
-                    {[getSectionLabel(displayedAction.section), getEnergyLevelInfo(displayedAction.level)?.label].filter(Boolean).join(' · ')}
+                    {[getSectionLabel(displayedAction.section), getEnergyLevelInfo(displayedAction.level)?.label].filter(Boolean).join(' ')}
                   </p>
-                )}
-                {displayedAction?.id && getTaskIcon(displayedAction.id) && (
-                  <TaskIcon iconName={getTaskIcon(displayedAction.id)} className="action-screen__icon" size={32} />
                 )}
                 <p className="action-screen__action-text">{displayedAction?.text}</p>
               </div>
               {displayedActionCompleted ? (
-                <p className="action-screen__completed-badge" aria-live="polite">✓ Completada</p>
+                <p className="action-screen__completed-badge" aria-live="polite">Completada</p>
               ) : isInstant ? (
                 // UI para tareas instantáneas: pregunta y dos opciones
                 <div className="action-screen__instant">
@@ -703,14 +730,10 @@ const ActionScreen = () => {
                 <ul className="action-screen__today-list">
                   {completedActionsToday.map((c) => (
                     <li key={`${c.actionId}-${c.completedAt}`} className="action-screen__today-item">
-                      <span className="action-screen__today-check" aria-hidden="true">✓</span>
-                      {c.actionId && getTaskIcon(c.actionId) && (
-                        <TaskIcon iconName={getTaskIcon(c.actionId)} className="action-screen__today-icon" size={20} />
-                      )}
                       <div className="action-screen__today-content">
                         {(c.actionId || c.level) && (
                           <span className="action-screen__today-meta">
-                            {[getSectionLabel((c.actionId || '').split('-')[0]), getEnergyLevelInfo(c.level)?.label].filter(Boolean).join(' · ')}
+                            {[getSectionLabel((c.actionId || '').split('-')[0]), getEnergyLevelInfo(c.level)?.label].filter(Boolean).join(' ')}
                           </span>
                         )}
                         <span className="action-screen__today-text">{c.actionText}</span>
@@ -724,8 +747,8 @@ const ActionScreen = () => {
                 </ul>
               </section>
             )}
-          </div>
-          ) : taskClearedByUser ? (
+            </div>
+          ) : (
             <div className="action-screen__progress action-screen__progress--empty">
               <p className="action-screen__empty-label">Elegí una tarea del menú inferior</p>
               {completedActionsToday.length > 0 && (
@@ -734,14 +757,10 @@ const ActionScreen = () => {
                   <ul className="action-screen__today-list">
                     {completedActionsToday.map((c) => (
                       <li key={`${c.actionId}-${c.completedAt}`} className="action-screen__today-item">
-                        <span className="action-screen__today-check" aria-hidden="true">✓</span>
-                        {c.actionId && getTaskIcon(c.actionId) && (
-                          <TaskIcon iconName={getTaskIcon(c.actionId)} className="action-screen__today-icon" size={20} />
-                        )}
                         <div className="action-screen__today-content">
                           {(c.actionId || c.level) && (
                             <span className="action-screen__today-meta">
-                              {[getSectionLabel((c.actionId || '').split('-')[0]), getEnergyLevelInfo(c.level)?.label].filter(Boolean).join(' · ')}
+                              {[getSectionLabel((c.actionId || '').split('-')[0]), getEnergyLevelInfo(c.level)?.label].filter(Boolean).join(' ')}
                             </span>
                           )}
                           <span className="action-screen__today-text">{c.actionText}</span>
@@ -756,9 +775,8 @@ const ActionScreen = () => {
                 </section>
               )}
             </div>
-          ) : (
-            <Loader isLoading={true} />
-          )
+          )}
+          </>
         ) : activeTab === 'today' ? (
           <CalendarView
             isPremium={isPremiumUser}
@@ -995,6 +1013,7 @@ const ActionScreen = () => {
             setReminderOverlay(null)
             setCurrentAction(null)
             setDisplayedAction(null)
+            closeReminderOverlayAndNotify()
           }} />
           <div className="action-screen__reminder-inner">
             <p className="action-screen__reminder-text">{reminderOverlay.text}</p>
@@ -1027,6 +1046,7 @@ const ActionScreen = () => {
                   setCurrentAction(null)
                   setDisplayedAction(null)
                   setActiveTab('reminders')
+                  closeReminderOverlayAndNotify()
                 }}
               >
                 Hecho
@@ -1081,11 +1101,12 @@ const ActionScreen = () => {
             setCurrentAction(null)
             setDisplayedAction(null)
             setActiveTab('reminders')
+            closeReminderOverlayAndNotify()
             const time = data.time || '09:00'
             try {
               const dt = new Date(y, (m || 1) - 1, d || 1)
               const ddmm = dt.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' })
-              setPostponedFeedbackToast(`✓ Tarea pospuesta para ${ddmm} · ${time}`)
+              setPostponedFeedbackToast(`✓ Tarea pospuesta para ${ddmm} ${time}`)
             } catch {
               setPostponedFeedbackToast('✓ Tarea pospuesta')
             }

@@ -112,21 +112,20 @@ const AmbientSoundButton = ({ fixed = false }) => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        fontSize: '1.1rem',
         opacity: 0.85,
-        transition: 'opacity 0.2s, color 0.2s',
+        transition: 'opacity 0.2s',
         zIndex: 1000
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.opacity = '1'
-        e.currentTarget.style.color = '#aaa'
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.opacity = '0.85'
-        e.currentTarget.style.color = '#888'
       }}
     >
-      {enabled ? '🔊' : '🔇'}
+      <span style={{ fontSize: '1.25rem', lineHeight: 1, color: 'inherit' }}>
+        {enabled ? '▸' : '×'}
+      </span>
     </button>
   )
 }
@@ -292,8 +291,8 @@ const AppWithWelcome = () => {
 
   return (
     <>
-      {/* Botón de sonido ambiental visible desde la primera pantalla (posición fija) */}
-      <AmbientSoundButton fixed />
+      {/* Botón de sonido ambiental solo al inicio (intro); después se controla desde Configuración */}
+      {showIntro && <AmbientSoundButton fixed />}
       {showIntro && (
         <IntroScreen onContinue={() => setShowIntro(false)} />
       )}

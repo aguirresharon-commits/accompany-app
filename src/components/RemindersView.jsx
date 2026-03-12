@@ -134,10 +134,10 @@ const RemindersView = ({ isPremium = false, onRequestPremium }) => {
         const dt = new Date(r.postponedUntil)
         const ddmm = dt.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' })
         const hhmm = dt.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })
-        return `${ddmm} · ${hhmm}`
+        return `${ddmm} ${hhmm}`
       } catch {}
     }
-    return formatDate(r.date) + ' · ' + r.time
+    return formatDate(r.date) + ' ' + r.time
   }
 
   return (
@@ -154,12 +154,11 @@ const RemindersView = ({ isPremium = false, onRequestPremium }) => {
       <div className="reminders-view__header">
         <h2 className="reminders-view__title">Recordatorios</h2>
         <div className="reminders-view__actions">
-          {isPremium && (
+          {selectedIds.size > 0 && (
             <button
               type="button"
               className="reminders-view__btn reminders-view__btn--trash"
               onClick={async () => {
-                if (selectedIds.size === 0) return
                 const ids = [...selectedIds]
                 const user = getCurrentUser()
                 if (user?.uid) {
@@ -178,7 +177,6 @@ const RemindersView = ({ isPremium = false, onRequestPremium }) => {
                   refreshList()
                 }
               }}
-              disabled={selectedIds.size === 0}
               aria-label="Borrar seleccionados"
               title="Borrar seleccionados"
             >
@@ -241,9 +239,8 @@ const RemindersView = ({ isPremium = false, onRequestPremium }) => {
                     )}
                     <div className="reminders-view__main">
                       <p className="reminders-view__text">{r.text}</p>
-                      <p className="reminders-view__meta">{formatDate(r.date)} · {r.time}</p>
+                      <p className="reminders-view__meta">{formatDate(r.date)} {r.time}</p>
                     </div>
-                    {r.alarmEnabled && <span className="reminders-view__alarm" aria-hidden="true" />}
                     {isPremium && <button type="button" className="reminders-view__edit" onClick={() => { setEditingReminder(r); setAddOpen(true) }} aria-label="Editar recordatorio"><svg className="reminders-view__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" /></svg></button>}
                   </li>
                 ))}
@@ -257,19 +254,16 @@ const RemindersView = ({ isPremium = false, onRequestPremium }) => {
                 {postponed.map((r) => (
                   <li
                     key={r.id}
-                    className={`reminders-view__item reminders-view__item--pospuesto ${isPremium && selectedIds.has(r.id) ? 'reminders-view__item--selected' : ''}`}
+                    className={`reminders-view__item reminders-view__item--pospuesto ${selectedIds.has(r.id) ? 'reminders-view__item--selected' : ''}`}
                   >
-                    {isPremium && (
-                      <button type="button" className="reminders-view__check" onClick={() => { setSelectedIds((prev) => { const n = new Set(prev); n.has(r.id) ? n.delete(r.id) : n.add(r.id); return n }) }} aria-label={selectedIds.has(r.id) ? 'Quitar de selección' : 'Seleccionar'}>
-                        {selectedIds.has(r.id) ? <span className="reminders-view__check-mark" aria-hidden="true">✓</span> : <span className="reminders-view__check-empty" aria-hidden="true" />}
-                      </button>
-                    )}
-                    <span className="reminders-view__clock" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg></span>
+                    <button type="button" className="reminders-view__check" onClick={() => { setSelectedIds((prev) => { const n = new Set(prev); n.has(r.id) ? n.delete(r.id) : n.add(r.id); return n }) }} aria-label={selectedIds.has(r.id) ? 'Quitar de selección' : 'Seleccionar'}>
+                      {selectedIds.has(r.id) ? <span className="reminders-view__check-mark" aria-hidden="true">✓</span> : <span className="reminders-view__check-empty" aria-hidden="true" />}
+                    </button>
                     <div className="reminders-view__main">
                       <p className="reminders-view__text">{r.text}</p>
-                      <p className="reminders-view__meta reminders-view__meta--postponed">⏰ Pospuesta para {formatPostponedUntil(r)}</p>
+                      <p className="reminders-view__meta reminders-view__meta--postponed">Pospuesta para {formatPostponedUntil(r)}</p>
                     </div>
-                    {isPremium && <button type="button" className="reminders-view__edit" onClick={() => { setEditingReminder(r); setAddOpen(true) }} aria-label="Editar recordatorio"><svg className="reminders-view__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" /></svg></button>}
+                    <button type="button" className="reminders-view__edit" onClick={() => { setEditingReminder(r); setAddOpen(true) }} aria-label="Editar recordatorio"><svg className="reminders-view__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" /></svg></button>
                   </li>
                 ))}
               </ul>
@@ -282,17 +276,15 @@ const RemindersView = ({ isPremium = false, onRequestPremium }) => {
                 {done.map((r) => (
                   <li
                     key={r.id}
-                    className={`reminders-view__item reminders-view__item--hecho ${isPremium && selectedIds.has(r.id) ? 'reminders-view__item--selected' : ''}`}
+                    className={`reminders-view__item reminders-view__item--hecho ${selectedIds.has(r.id) ? 'reminders-view__item--selected' : ''}`}
                   >
-                    {isPremium && (
-                      <button type="button" className="reminders-view__check" onClick={() => { setSelectedIds((prev) => { const n = new Set(prev); n.has(r.id) ? n.delete(r.id) : n.add(r.id); return n }) }} aria-label={selectedIds.has(r.id) ? 'Quitar de selección' : 'Seleccionar'}>
-                        {selectedIds.has(r.id) ? <span className="reminders-view__check-mark" aria-hidden="true">✓</span> : <span className="reminders-view__check-empty" aria-hidden="true" />}
-                      </button>
-                    )}
+                    <button type="button" className="reminders-view__check" onClick={() => { setSelectedIds((prev) => { const n = new Set(prev); n.has(r.id) ? n.delete(r.id) : n.add(r.id); return n }) }} aria-label={selectedIds.has(r.id) ? 'Quitar de selección' : 'Seleccionar'}>
+                      {selectedIds.has(r.id) ? <span className="reminders-view__check-mark" aria-hidden="true">✓</span> : <span className="reminders-view__check-empty" aria-hidden="true" />}
+                    </button>
                     <span className="reminders-view__done-icon" aria-hidden="true">✓</span>
                     <div className="reminders-view__main">
                       <p className="reminders-view__text">{r.text}</p>
-                      <p className="reminders-view__meta">{formatDate(r.date)} · {r.time}</p>
+                      <p className="reminders-view__meta">{formatDate(r.date)} {r.time}</p>
                     </div>
                   </li>
                 ))}
