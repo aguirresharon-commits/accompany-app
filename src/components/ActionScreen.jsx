@@ -52,9 +52,9 @@ const getRandomCompletionMessage = () =>
   COMPLETION_MESSAGES[Math.floor(Math.random() * COMPLETION_MESSAGES.length)]
 
 const FEELING_RESPONSES = {
-  Bien: 'Qué bueno que te sentís bien. Disfrutá el paso que diste.',
-  Regular: 'Aunque hoy te sientas a medias, lo que hiciste cuenta.',
-  'Me cuesta hoy': 'Hoy te costó y aun así diste un paso. Está bien parar acá.',
+  Bien: 'Qué lindo que hoy se sintió bien. Tomate un segundo para disfrutar eso que acabás de hacer.',
+  Regular: 'Capaz esta tarea no te cambió el día, pero fue un ratito que elegiste dedicarte. Eso vale.',
+  'Me cuesta hoy': 'Cuando el día pesa, hasta lo chiquito puede costar. Lo que hiciste ya es suficiente por ahora.',
 }
 
 const ActionScreen = () => {
@@ -85,6 +85,11 @@ const ActionScreen = () => {
   const [notePromptAction, setNotePromptAction] = useState(null)
   const [completionOverlay, setCompletionOverlay] = useState(null) // { message: string, showQuestion?: boolean } | null
   const [completionFeeling, setCompletionFeeling] = useState(null)
+  const feelingMessageRef = useRef(null)
+
+  useEffect(() => {
+    if (completionFeeling) feelingMessageRef.current?.focus()
+  }, [completionFeeling])
   const [noteSavedOverlay, setNoteSavedOverlay] = useState(null)
   const [reminderOverlay, setReminderOverlay] = useState(null) // { text, id, date, time, status?: 'pending'|'pospuesto'|'hecho' } | null
   const [reminderPostponeOpen, setReminderPostponeOpen] = useState(false)
@@ -409,6 +414,7 @@ const ActionScreen = () => {
 
   // "Volver al inicio" → pantalla de inicio mostrando la tarea que acaba de completar
   const closeCompletionAndStay = useCallback(() => {
+    setActiveTab('progress')
     setCompletionOverlay(null)
     setCompletionFeeling(null)
     const lastAction = lastCompletedActionRef.current
@@ -845,6 +851,16 @@ const ActionScreen = () => {
           <div className="action-screen__completion-inner">
             {completionOverlay?.showQuestion === false ? (
               <p className="action-screen__overlay-text">{completionOverlay.message}</p>
+            ) : completionFeeling ? (
+              <>
+                <ControlSpark state="done" />
+                <h2 id="completion-decision-title" className="action-screen__completion-response"
+                  ref={feelingMessageRef} tabIndex={-1}>
+                  {FEELING_RESPONSES[completionFeeling]}
+                </h2>
+                <button type="button" className="action-screen__completion-feeling-btn action-screen__completion-feeling-btn--primary"
+                  onClick={closeCompletionAndStay}>Continuar</button>
+              </>
             ) : (
               <>
                 <ControlSpark state="done" />
@@ -855,15 +871,11 @@ const ActionScreen = () => {
                   <div className="action-screen__completion-feelings">
                     {Object.keys(FEELING_RESPONSES).map(option => (
                       <button key={option} type="button" className="action-screen__completion-feeling-btn"
-                        aria-pressed={completionFeeling === option}
                         onClick={() => { setCompletionFeeling(option); scheduleEnergyForNextDay(option) }}>
                         {option}
                       </button>
                     ))}
                   </div>
-                  <p className="action-screen__completion-response" role="status">
-                    {FEELING_RESPONSES[completionFeeling]}
-                  </p>
                 </details>
                 <div className="action-screen__completion-decision-btns">
                   <button type="button" className="action-screen__completion-feeling-btn action-screen__completion-feeling-btn--primary"
