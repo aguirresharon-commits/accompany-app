@@ -27,7 +27,7 @@ const getMotivationalPhrase = (streakCurrent, completedCount, daysPresentThisMon
   return MOTIVATIONAL_PHRASES[i]
 }
 
-const YouView = ({ onBack }) => {
+const YouView = ({ onBack, embedded = false }) => {
   const { streak, completedActions } = useAppState()
   const streakCurrent = streak?.current ?? 0
   const completedCount = Array.isArray(completedActions) ? completedActions.length : 0
@@ -54,10 +54,10 @@ const YouView = ({ onBack }) => {
   )
 
   return (
-    <div className="you-view">
-      <BackButton onClick={onBack} />
+    <div className={embedded ? "you-view you-view--embedded" : "you-view"}>
+      {!embedded && <BackButton onClick={onBack} />}
       <div className="you-view__content">
-        <h1 className="you-view__title">Tu progreso</h1>
+        {embedded ? <h3 className="you-view__title">Tus estadísticas</h3> : <h1 className="you-view__title">Tu progreso</h1>}
         <div className="you-view__stats">
           <div className="you-view__row">
             <span className="you-view__cell">

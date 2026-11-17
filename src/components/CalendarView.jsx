@@ -1,169 +1,198 @@
-// Vista Calendario: calendario mensual, días marcados con tareas, detalle al tocar
-import { useState, useMemo } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useAppState } from '../hooks/useAppState'
-import DayDetailModal from './DayDetailModal'
+import { CALENDAR_TASK_LIMIT, PRIORITIES, useCalendarTasks } from '../hooks/useCalendarTasks'
+import { formatTime, getTodayDate } from '../utils/storage'
 import './CalendarView.css'
 
-const DAYS_OF_WEEK = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
-const MONTHS = [
-  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-]
+const weekdays = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
+const monthLabel = new Intl.DateTimeFormat('es-AR', { month: 'long', year: 'numeric' })
+const dayLabel = new Intl.DateTimeFormat('es-AR', { dateStyle: 'full' })
 
-const CalendarView = ({ isPremium: isPremiumProp, onRequestPremium }) => {
-  const { completedActions } = useAppState()
-  const isPremium = isPremiumProp === true
-  const [currentDate, setCurrentDate] = useState(new Date())
-  const [selectedDate, setSelectedDate] = useState(null)
+function entryClass(task) {
+  return task.completed ? 'calendar-entry--done' : `calendar-priority--${task.priority}`
+}
 
-  const year = currentDate.getFullYear()
-  const month = currentDate.getMonth()
+function CalendarDay({ date, tasks, onClose, onAdd, onToggle }) {
+  const dialog = useRef(null)
+  const [editing, setEditing] = useState(false)
+  const [error, setError] = useState('')
+  const atLimit = tasks.filter(task => !task.fromHistory).length >= CALENDAR_TASK_LIMIT
 
-  // Obtener días del mes con tareas completadas
-  const daysWithTasks = useMemo(() => {
-    const days = new Set()
-    completedActions.forEach((action) => {
-      if (action.date) {
-        // Parsear fecha directamente desde string YYYY-MM-DD para evitar problemas de zona horaria
-        const [actionYear, actionMonth, actionDay] = action.date.split('-').map(Number)
-        if (actionYear === year && actionMonth === month + 1) {
-          days.add(actionDay)
-        }
+  useEffect(() => {
+    const element = dialog.current
+    element.showModal()
+    return () => element.close()
+  }, [])
+
+  function save(event) {
+    event.preventDefault()
+    const fields = new FormData(event.currentTarget)
+    const name = fields.get('name').trim()
+    const time = fields.get('time')
+    const priority = fields.get('priority')
+    if (!name || !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) {
+      setError('Ingresá un nombre y una hora.')
+      return
+    }
+    try {
+      if (!onAdd({ name, time, priority })) {
+        setError(`Podés agendar hasta ${CALENDAR_TASK_LIMIT} tareas por día.`)
+        return
       }
-    })
-    return days
-  }, [completedActions, year, month])
-
-  // Contar días presentes este mes
-  const daysPresent = daysWithTasks.size
-
-  // Obtener primer día del mes y cantidad de días
-  const firstDay = new Date(year, month, 1)
-  const lastDay = new Date(year, month + 1, 0)
-  const daysInMonth = lastDay.getDate()
-  const startingDayOfWeek = firstDay.getDay()
-
-  // Generar array de días del mes
-  const days = []
-  // Días vacíos al inicio
-  for (let i = 0; i < startingDayOfWeek; i++) {
-    days.push(null)
-  }
-  // Días del mes
-  for (let day = 1; day <= daysInMonth; day++) {
-    days.push(day)
-  }
-
-  const today = new Date()
-  const todayYear = today.getFullYear()
-  const todayMonth = today.getMonth()
-  const todayDay = today.getDate()
-  const isPastDay = (day) => {
-    if (year < todayYear) return true
-    if (year === todayYear && month < todayMonth) return true
-    if (year === todayYear && month === todayMonth && day < todayDay) return true
-    return false
-  }
-  const isToday = (day) =>
-    year === todayYear && month === todayMonth && day === todayDay
-
-  const handleDayClick = (day) => {
-    if (!day) return
-    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-    // Premium: acceso normal. No premium: temporalmente permitido (early version).
-    const canAccessDayDetail = isPremium || true
-    if (!canAccessDayDetail) {
-      onRequestPremium?.()
-      return
+      setEditing(false)
+      setError('')
+    } catch {
+      setError('No se pudo guardar la tarea en este navegador.')
     }
-    setSelectedDate(dateStr)
-  }
-
-  const handlePrevMonth = () => {
-    const canAccessDayDetail = isPremium || true
-    if (!canAccessDayDetail) {
-      onRequestPremium?.()
-      return
-    }
-    setCurrentDate(new Date(year, month - 1, 1))
-  }
-
-  const handleNextMonth = () => {
-    setCurrentDate(new Date(year, month + 1, 1))
-  }
-
-  const handleCloseModal = () => {
-    setSelectedDate(null)
   }
 
   return (
-    <div className="calendar-view">
-      <div className="calendar-view__header">
-        <h2 className="calendar-view__title">{MONTHS[month]} {year}</h2>
-        <p className="calendar-view__presence">
-          Estuviste presente {daysPresent} {daysPresent === 1 ? 'día' : 'días'} este mes.
-        </p>
-      </div>
-
-      <div className="calendar-view__controls">
-        <button
-          type="button"
-          className="calendar-view__nav"
-          onClick={handlePrevMonth}
-          aria-label="Mes anterior"
-        >
-          ←
-        </button>
-        <button
-          type="button"
-          className="calendar-view__nav"
-          onClick={handleNextMonth}
-          aria-label="Mes siguiente"
-        >
-          →
-        </button>
-      </div>
-
-      <div className="calendar-view__calendar">
-        <div className="calendar-view__weekdays">
-          {DAYS_OF_WEEK.map((day) => (
-            <div key={day} className="calendar-view__weekday">
-              {day}
+    <dialog ref={dialog} className="day-detail" aria-labelledby="calendar-day-title"
+      onCancel={event => { event.preventDefault(); onClose() }}
+      onClick={event => { if (event.target === event.currentTarget) onClose() }}>
+      <div className="day-detail__content">
+        <header className="day-detail__header">
+          <h3 id="calendar-day-title">{dayLabel.format(new Date(`${date}T00:00:00`))}</h3>
+          <button type="button" className="day-detail__button" onClick={onClose}>Cerrar</button>
+        </header>
+        {tasks.length === 0 && <p>Todavía no hay tareas para este día.</p>}
+        {tasks.length > 0 && (
+          <ul className="day-detail__list">
+            {tasks.map(task => (
+              <li key={task.id} className={`day-detail__task ${entryClass(task)}`}>
+                {!task.fromHistory && (
+                  <input type="checkbox" checked={task.completed} aria-label={task.name}
+                    onChange={() => {
+                      try { onToggle(task.id); setError('') }
+                      catch { setError('No se pudo actualizar la tarea.') }
+                    }} />
+                )}
+                <div>
+                  <strong>{task.name}</strong>
+                  <span>{[task.time, task.priority && `Prioridad ${PRIORITIES[task.priority]}`, task.completed && 'Completada'].filter(Boolean).join(' · ')}</span>
+                  {task.note && <p>{task.note}</p>}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+        {editing ? (
+          <form className="day-detail__fields" onSubmit={save}>
+            <label htmlFor="calendar-task-name">Nombre</label>
+            <input id="calendar-task-name" name="name" maxLength={100} required autoFocus />
+            <div className="day-detail__row">
+              <label>Hora<input name="time" type="time" defaultValue="09:00" required /></label>
+              <label>Prioridad
+                <select name="priority" defaultValue="media">
+                  {Object.entries(PRIORITIES).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                </select>
+              </label>
             </div>
-          ))}
-        </div>
-        <div className="calendar-view__days">
-          {days.map((day, idx) => {
-            if (day === null) {
-              return <div key={`empty-${idx}`} className="calendar-view__day calendar-view__day--empty" />
-            }
-            const hasTasks = daysWithTasks.has(day)
-            const isPast = isPastDay(day)
-            const isCurrentDay = isToday(day)
-            return (
-              <button
-                key={day}
-                type="button"
-                className={`calendar-view__day ${hasTasks ? 'calendar-view__day--completed' : ''} ${isPast ? 'calendar-view__day--past' : ''} ${isCurrentDay ? 'calendar-view__day--today' : ''}`}
-                onClick={() => handleDayClick(day)}
-                aria-label={`Día ${day}${hasTasks ? ' con tareas completadas' : ''}${isPast ? ' pasado' : ''}`}
-              >
-                <span className="calendar-view__day-number">{day}</span>
-                {hasTasks && <span className="calendar-view__day-mark" aria-hidden="true" />}
-              </button>
-            )
-          })}
-        </div>
+            <div className="day-detail__actions">
+              <button type="button" className="day-detail__button" onClick={() => { setEditing(false); setError('') }}>Cancelar</button>
+              <button className="day-detail__button day-detail__button--primary">Guardar tarea</button>
+            </div>
+          </form>
+        ) : atLimit ? (
+          <p>Ya agendaste {CALENDAR_TASK_LIMIT} tareas para este día.</p>
+        ) : (
+          <button type="button" className="day-detail__button day-detail__button--primary" onClick={() => setEditing(true)}>Agregar tarea</button>
+        )}
+        {error && <p role="alert">{error}</p>}
       </div>
-
-      {selectedDate && (
-        <DayDetailModal
-          date={selectedDate}
-          onClose={handleCloseModal}
-        />
-      )}
-    </div>
+    </dialog>
   )
 }
 
-export default CalendarView
+export default function CalendarView({ userId }) {
+  const { completedActions } = useAppState()
+  const { tasks, error, addTask, toggleTask } = useCalendarTasks(userId)
+  const [month, setMonth] = useState(() => new Date())
+  const [selectedDate, setSelectedDate] = useState(null)
+  const [clock, setClock] = useState(() => new Date())
+  const today = getTodayDate()
+  const year = month.getFullYear()
+  const monthIndex = month.getMonth()
+  const offset = new Date(year, monthIndex, 1).getDay()
+  const days = new Date(year, monthIndex + 1, 0).getDate()
+  const prefix = `${year}-${String(monthIndex + 1).padStart(2, '0')}-`
+
+  useEffect(() => {
+    const timer = setInterval(() => setClock(new Date()), 15000)
+    return () => clearInterval(timer)
+  }, [])
+
+  const entries = new Map()
+  for (const task of [...tasks].sort((a, b) => a.time.localeCompare(b.time))) {
+    if (!entries.has(task.date)) entries.set(task.date, [])
+    entries.get(task.date).push(task)
+  }
+  for (const action of completedActions) {
+    if (!action.date) continue
+    if (!entries.has(action.date)) entries.set(action.date, [])
+    entries.get(action.date).push({
+      id: `history-${action.actionId}-${action.completedAt}`,
+      name: action.actionText, time: formatTime(action.completedAt), note: action.note,
+      completed: true, fromHistory: true,
+    })
+  }
+  const todaysEntries = entries.get(today) ?? []
+  const pending = todaysEntries.filter(task => !task.completed)
+  const next = pending.find(task => task.time >= clock.toTimeString().slice(0, 5))
+
+  function openToday() {
+    setMonth(new Date(`${today}T00:00:00`))
+    setSelectedDate(today)
+  }
+
+  return (
+    <section className="calendar-view" aria-label="Calendario de tareas">
+      <header className="calendar-view__header">
+        <h2>{monthLabel.format(month)}</h2>
+        <div className="calendar-view__controls">
+          <button type="button" aria-label="Mes anterior" onClick={() => setMonth(new Date(year, monthIndex - 1, 1))}>‹</button>
+          <button type="button" onClick={openToday}>Hoy</button>
+          <button type="button" aria-label="Mes siguiente" onClick={() => setMonth(new Date(year, monthIndex + 1, 1))}>›</button>
+        </div>
+      </header>
+      <button type="button" className={`calendar-view__next ${next ? entryClass(next) : ''}`} onClick={openToday}>
+        <span>Hoy · {next ? `${next.time} · Prioridad ${PRIORITIES[next.priority]}` : 'Agenda del día'}</span>
+        <strong>{next?.name || (pending.length ? 'Tenés tareas pendientes' : todaysEntries.length ? 'Todo listo por hoy' : 'Sin tareas programadas')}</strong>
+      </button>
+      {error && <p role="status">No se pudo leer la agenda guardada en este navegador.</p>}
+      <div className="calendar-view__grid">
+        {weekdays.map(day => <span key={day} className="calendar-view__weekday">{day}</span>)}
+        {Array.from({ length: offset }, (_, index) => <span key={`blank-${index}`} aria-hidden="true" />)}
+        {Array.from({ length: days }, (_, index) => {
+          const date = prefix + String(index + 1).padStart(2, '0')
+          const items = entries.get(date) ?? []
+          const openTasks = items.filter(task => !task.completed)
+          const done = items.length > 0 && openTasks.length === 0
+          const display = [...openTasks, ...items.filter(task => task.completed)]
+          return (
+            <button key={date} type="button"
+              className={`calendar-view__day ${done ? 'calendar-view__day--completed' : ''} ${date < today && !items.length ? 'calendar-view__day--past-empty' : ''}`}
+              aria-current={date === today ? 'date' : undefined} onClick={() => setSelectedDate(date)}>
+              <span className="calendar-view__date">
+                <span className="calendar-view__sr">{dayLabel.format(new Date(`${date}T00:00:00`))}</span>
+                <span aria-hidden="true">{index + 1}</span>
+                {done && <span className="calendar-view__check calendar-entry--done" aria-label="Día completado">✓</span>}
+              </span>
+              {display.slice(0, 2).map(task => (
+                <span key={task.id} className={`calendar-view__entry ${entryClass(task)}`} title={task.name}>{task.name}</span>
+              ))}
+              {display.length > 2 && <span className="calendar-view__extra">+{display.length - 2} más</span>}
+            </button>
+          )
+        })}
+      </div>
+      <ul className="calendar-view__legend" aria-label="Colores del calendario">
+        {Object.entries(PRIORITIES).map(([value, label]) => <li key={value} className={`calendar-priority--${value}`}>{label}</li>)}
+        <li className="calendar-entry--done">Día completado</li>
+      </ul>
+      {selectedDate && <CalendarDay key={`${userId}:${selectedDate}`} date={selectedDate}
+        tasks={entries.get(selectedDate) ?? []} onClose={() => setSelectedDate(null)}
+        onAdd={task => addTask(selectedDate, task)} onToggle={toggleTask} />}
+    </section>
+  )
+}

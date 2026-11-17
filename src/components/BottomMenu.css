@@ -129,3 +129,29 @@
     height: 22px;
   }
 }
+
+.bottom-menu {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px;
+  padding-inline: 8px;
+}
+
+.bottom-menu .bottom-menu__btn {
+  width: 44px;
+  max-width: 100%;
+  min-width: 0;
+  height: 44px;
+  min-height: 44px;
+  justify-self: center;
+}
+
+.bottom-menu .bottom-menu__icon {
+  width: 18px;
+  height: 18px;
+}
+
+.bottom-menu .bottom-menu__btn--active {
+  outline: 1px solid #ffffff60;
+  outline-offset: -1px;
+}
