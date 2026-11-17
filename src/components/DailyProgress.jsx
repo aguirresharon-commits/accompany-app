@@ -7,6 +7,9 @@ import { getTodayDate } from '../utils/storage'
 import YouView from './YouView'
 import './DailyProgress.css'
 
+const mountainWidth = 1122
+const mountainTop = 380
+const mountainHeight = 690
 const route = 'M112 963 C133 957 150 949 166 943 C244 936 296 887 360 868 C455 846 485 801 571 772 C660 746 684 690 750 662 C813 633 828 580 895 566'
 const stars = [[166, 943], [360, 868], [571, 772], [750, 662], [895, 566]]
 const starShape = 'M0 -20Q3 -4 20 0Q3 4 0 20Q-3 4 -20 0Q-3 -4 0 -20Z'
@@ -33,7 +36,9 @@ function Constellation({ date, completed, count }) {
     function move(position) {
       const point = path.getPointAtLength(position * length)
       trail.current.setAttribute('stroke-dasharray', `${position * 100} 100`)
-      marker.current.setAttribute('transform', `translate(${point.x} ${point.y})`)
+      marker.current.style.left = `${point.x / mountainWidth * 100}%`
+      marker.current.style.top = `${(point.y - mountainTop) / mountainHeight * 100}%`
+      marker.current.style.visibility = 'visible'
       previous.current = { date, position }
     }
 
@@ -57,29 +62,29 @@ function Constellation({ date, completed, count }) {
   }, [date, completed, count])
 
   return (
-    <svg className="daily-progress__mountain" viewBox="0 380 1122 690" aria-hidden="true">
-      <defs>
-        <mask id={mask} maskUnits="userSpaceOnUse" x="0" y="380" width="1122" height="690">
-          <rect x="0" y="380" width="1122" height="690" fill="white" />
-          <path d={route} fill="none" stroke="black" strokeWidth="24" />
-          {stars.map(([x, y]) => <circle key={x} cx={x} cy={y} r="39" fill="black" />)}
-          <ellipse cx="438" cy="814" rx="46" ry="60" fill="black" />
-        </mask>
-      </defs>
-      <image href={terrain} width="1122" height="1402" mask={`url(#${mask})`} />
-      <path ref={pathRef} d={route} fill="none" stroke="#585858" strokeWidth="2.5" />
-      <path ref={trail} d={route} pathLength="100" fill="none" stroke="#fff8e8" strokeWidth="3" strokeDasharray="0 100" />
-      {waypoints.map(([x, y], index) => (
-        <path key={x} d={starShape} transform={`translate(${x} ${y})`}
-          fill={index < completed ? '#fff9ee' : '#767676'} />
-      ))}
-      {summit && <circle cx="895" cy="566" r="35" fill="none" stroke="#fff4d3" strokeOpacity=".4" />}
-      <g ref={marker} transform="translate(112 963)">
-        <foreignObject x="-43" y="-89" width="86" height="92">
-          <ControlSpark state={summit ? 'done' : 'idle'} className="daily-progress__climber daily-progress__constellation-climber" />
-        </foreignObject>
-      </g>
-    </svg>
+    <div className="daily-progress__mountain-scene" aria-hidden="true">
+      <svg className="daily-progress__mountain" viewBox={`0 ${mountainTop} ${mountainWidth} ${mountainHeight}`}>
+        <defs>
+          <mask id={mask} maskUnits="userSpaceOnUse" x="0" y="380" width="1122" height="690">
+            <rect x="0" y="380" width="1122" height="690" fill="white" />
+            <path d={route} fill="none" stroke="black" strokeWidth="24" />
+            {stars.map(([x, y]) => <circle key={x} cx={x} cy={y} r="39" fill="black" />)}
+            <ellipse cx="438" cy="814" rx="46" ry="60" fill="black" />
+          </mask>
+        </defs>
+        <image href={terrain} width="1122" height="1402" mask={`url(#${mask})`} />
+        <path ref={pathRef} d={route} fill="none" stroke="#585858" strokeWidth="2.5" />
+        <path ref={trail} d={route} pathLength="100" fill="none" stroke="#fff8e8" strokeWidth="3" strokeDasharray="0 100" />
+        {waypoints.map(([x, y], index) => (
+          <path key={x} d={starShape} transform={`translate(${x} ${y})`}
+            fill={index < completed ? '#fff9ee' : '#767676'} />
+        ))}
+        {summit && <circle cx="895" cy="566" r="35" fill="none" stroke="#fff4d3" strokeOpacity=".4" />}
+      </svg>
+      <div className="daily-progress__marker" ref={marker}>
+        <ControlSpark state={summit ? 'done' : 'idle'} />
+      </div>
+    </div>
   )
 }
 
