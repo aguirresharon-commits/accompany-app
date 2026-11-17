@@ -997,11 +997,12 @@
 }
 
 .action-screen__completion-response {
-  margin: var(--spacing-sm) 0 0;
-  color: var(--color-text-secondary);
+  margin: 0;
+  font-size: var(--font-size-lg);
+  line-height: 1.5;
   text-align: center;
 }
 
-.action-screen__completion-response:empty {
-  margin: 0;
+.action-screen__completion-response:focus {
+  outline: none;
 }
