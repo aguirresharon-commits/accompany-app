@@ -995,3 +995,13 @@
 .action-screen__completion-feeling-btn[aria-pressed=true] {
   border-color: var(--color-neon-soft);
 }
+
+.action-screen__completion-response {
+  margin: var(--spacing-sm) 0 0;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.action-screen__completion-response:empty {
+  margin: 0;
+}

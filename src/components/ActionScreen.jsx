@@ -51,7 +51,11 @@ const COMPLETION_MESSAGES = ['Hecho.', 'Avanzaste.', 'Eso ya está.', 'Suficient
 const getRandomCompletionMessage = () =>
   COMPLETION_MESSAGES[Math.floor(Math.random() * COMPLETION_MESSAGES.length)]
 
-const FEELING_OPTIONS = ['Bien', 'Regular', 'Me cuesta hoy']
+const FEELING_RESPONSES = {
+  Bien: 'Qué bueno que te sentís bien. Disfrutá el paso que diste.',
+  Regular: 'Aunque hoy te sientas a medias, lo que hiciste cuenta.',
+  'Me cuesta hoy': 'Hoy te costó y aun así diste un paso. Está bien parar acá.',
+}
 
 const ActionScreen = () => {
   const {
@@ -849,7 +853,7 @@ const ActionScreen = () => {
                 <details className="action-screen__next-step">
                   <summary>¿Cómo te sentís?</summary>
                   <div className="action-screen__completion-feelings">
-                    {FEELING_OPTIONS.map(option => (
+                    {Object.keys(FEELING_RESPONSES).map(option => (
                       <button key={option} type="button" className="action-screen__completion-feeling-btn"
                         aria-pressed={completionFeeling === option}
                         onClick={() => { setCompletionFeeling(option); scheduleEnergyForNextDay(option) }}>
@@ -857,6 +861,9 @@ const ActionScreen = () => {
                       </button>
                     ))}
                   </div>
+                  <p className="action-screen__completion-response" role="status">
+                    {FEELING_RESPONSES[completionFeeling]}
+                  </p>
                 </details>
                 <div className="action-screen__completion-decision-btns">
                   <button type="button" className="action-screen__completion-feeling-btn action-screen__completion-feeling-btn--primary"
