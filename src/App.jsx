@@ -144,7 +144,13 @@ const MainAppLayout = () => {
 }
 
 const AppContent = () => {
-  const { currentEnergyLevel, isInitialLoading, syncError, clearSyncError, refreshPremium } = useAppState()
+  const { currentEnergyLevel, setEnergyLevel, isInitialLoading, syncError, clearSyncError, refreshPremium } = useAppState()
+  const [energyConfirmed, setEnergyConfirmed] = useState(false)
+
+  const handleEnergySelect = useCallback((level) => {
+    setEnergyLevel(level)
+    setEnergyConfirmed(true)
+  }, [setEnergyLevel])
   const [onboardingDone, setOnboardingDone] = useState(() => {
     try {
       return typeof window !== 'undefined' && window.localStorage?.getItem(ONBOARDING_SEEN_KEY) === '1'
@@ -202,7 +208,7 @@ const AppContent = () => {
     </div>
   ) : null
 
-  if (!currentEnergyLevel) {
+  if (!energyConfirmed || !currentEnergyLevel) {
     const showOnboarding = !isInitialLoading && !onboardingDone
     return (
       <>
@@ -244,7 +250,7 @@ const AppContent = () => {
             </button>
           </div>
         )}
-        {!isInitialLoading && onboardingDone && <EnergyLevelSelector />}
+        {!isInitialLoading && onboardingDone && <EnergyLevelSelector onSelect={handleEnergySelect} />}
       </>
     )
   }
