@@ -69,8 +69,9 @@ const BottomMenu = ({
       <button
         className={`bottom-menu__btn ${activeTab === 'progress' ? 'bottom-menu__btn--active' : ''}`}
         onClick={handleProgressClick}
-        aria-label="Progreso"
-        title="Progreso"
+        aria-label="Inicio"
+        title="Inicio"
+        aria-current={activeTab === 'progress' ? 'page' : undefined}
       >
         <svg className="bottom-menu__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M12 4L4 12v8h16v-8L12 4z" />
@@ -80,7 +81,8 @@ const BottomMenu = ({
         className={`bottom-menu__btn ${listPanelOpen ? 'bottom-menu__btn--active' : ''}`}
         onClick={handleListClick}
         aria-label="Lista: elegir tarea"
-        title="Lista"
+        title="Tareas"
+        aria-expanded={listPanelOpen}
       >
         <svg className="bottom-menu__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M4 6h16M4 12h16M4 18h16" />
@@ -89,8 +91,9 @@ const BottomMenu = ({
       <button
         className={`bottom-menu__btn ${activeTab === 'today' ? 'bottom-menu__btn--active' : ''}`}
         onClick={handleTodayClick}
-        aria-label="Completadas hoy"
-        title="Completadas hoy"
+        aria-label="Calendario"
+        title="Calendario"
+        aria-current={activeTab === 'today' ? 'page' : undefined}
       >
         <svg className="bottom-menu__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
@@ -104,6 +107,7 @@ const BottomMenu = ({
         onClick={handleRemindersClick}
         aria-label="Recordatorios"
         title="Recordatorios"
+        aria-current={activeTab === 'reminders' ? 'page' : undefined}
       >
         <svg className="bottom-menu__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M18 8a6 6 0 10-12 0c0 7-3 7-3 7h18s-3 0-3-7" />
@@ -115,6 +119,7 @@ const BottomMenu = ({
         onClick={handleSettingsClick}
         aria-label="Ajustes"
         title="Ajustes"
+        aria-current={activeTab === 'settings' ? 'page' : undefined}
       >
         <svg className="bottom-menu__icon bottom-menu__icon--dots" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <circle cx="12" cy="6" r="1.5" fill="currentColor" />
