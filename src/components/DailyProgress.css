@@ -1,0 +1,318 @@
+.control-spark {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 112px;
+  height: 120px;
+  isolation: isolate;
+  pointer-events: none;
+}
+
+.control-spark__portrait {
+  width: 100%;
+  height: 100%;
+  -webkit-mask-image: radial-gradient(ellipse 62% 67% at 50% 49%,black 48%,transparent 83%);
+  mask-image: radial-gradient(ellipse 62% 67% at 50% 49%,black 48%,transparent 83%);
+  overflow: hidden;
+}
+
+.control-spark[data-state=baja] .control-spark__portrait {
+  animation: spark-settle .4s ease-out both;
+}
+
+.control-spark[data-state=media] .control-spark__portrait {
+  animation: spark-nod .42s ease-in-out both;
+}
+
+.control-spark[data-state=alta] .control-spark__portrait {
+  animation: spark-jump .42s ease-out both;
+}
+
+.control-spark[data-state=stopped] .control-spark__portrait {
+  transform: translateY(5px) scale(.88);
+  opacity: .65;
+}
+
+.control-spark__ring {
+  position: absolute;
+  top: 4%;
+  right: 4%;
+  bottom: 4%;
+  left: 4%;
+  border: 1px solid rgba(255,255,255,.16);
+  border-top-color: #ffffffd9;
+  border-radius: 50%;
+  opacity: 0;
+}
+
+.control-spark[data-state=running] .control-spark__ring {
+  opacity: 1;
+  animation: spark-orbit 6s linear infinite;
+}
+
+.control-spark[data-state=done] .control-spark__portrait {
+  animation: spark-celebrate .65s ease-out both;
+}
+
+.control-spark__particles {
+  position: absolute;
+  top: 20%;
+  right: 20%;
+  bottom: 20%;
+  left: 20%;
+  animation: spark-particles .9s ease-out both;
+}
+
+.control-spark__particles i {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  top: 8%;
+  left: 17%;
+  border-radius: 50%;
+  background: #eee;
+  box-shadow: 0 0 7px #fffa;
+}
+
+.control-spark__particles i:nth-child(2) {
+  top: 20%;
+  left: 85%;
+}
+
+.control-spark__particles i:nth-child(3) {
+  top: 65%;
+  left: 95%;
+}@media (prefers-reduced-motion: reduce){
+
+.control-spark * {
+  animation: none!important;
+}}@media (prefers-reduced-motion: reduce){
+
+.control-spark[data-state=baja] .control-spark__portrait {
+  opacity: .68;
+}}@media (prefers-reduced-motion: reduce){
+
+.control-spark[data-state=alta] .control-spark__portrait {
+  transform: translateY(-8px);
+}}
+
+.control-spark__gaze {
+  transform: translate(var(--spark-gaze-x, 0px),var(--spark-gaze-y, 0px));
+  transition: transform .18s ease-out;
+}
+
+.control-spark__eye {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: spark-blink 5.4s ease-in-out infinite;
+}
+
+.control-spark__smile {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: spark-smile .34s ease-out both;
+}@media (prefers-reduced-motion: reduce){
+
+.control-spark__gaze {
+  transition: none;
+}}
+
+.daily-progress {
+  width: min(100%,28rem);
+  padding: 0 var(--spacing-sm) var(--spacing-lg);
+  color: var(--color-white);
+}
+
+.daily-progress h2,.daily-progress__status,.daily-progress__empty,.daily-progress__limit {
+  text-align: center;
+}
+
+.daily-progress__dates,.daily-progress__actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+  margin-top: var(--spacing-md);
+}
+
+.daily-progress__dates span {
+  min-width: 8rem;
+  text-align: center;
+  text-transform: capitalize;
+}
+
+.daily-progress button {
+  min-height: 44px;
+  min-width: 44px;
+  padding: .55rem .85rem;
+  font: inherit;
+  cursor: pointer;
+}
+
+.daily-progress button:disabled {
+  cursor: default;
+}
+
+.daily-progress__mountain {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: var(--spacing-sm);
+}
+
+.daily-progress__status {
+  margin: var(--spacing-sm) 0 var(--spacing-md);
+}
+
+.daily-progress__status p+p,.daily-progress__empty,.daily-progress__limit,.daily-progress__tasks time {
+  color: var(--color-text-secondary);
+}
+
+.daily-progress__tasks {
+  padding: 0;
+  list-style: none;
+}
+
+.daily-progress__tasks label {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  min-height: 48px;
+  padding: .4rem 0;
+  border-bottom: 1px solid var(--btn-glass-border-visible);
+  overflow-wrap: anywhere;
+}
+
+.daily-progress__tasks input {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  accent-color: #ddd;
+}
+
+.daily-progress__tasks small {
+  display: block;
+  color: var(--calendar-accent, var(--color-text-secondary));
+}
+
+.daily-progress__tasks time {
+  margin-inline-start: auto;
+  font-variant-numeric: tabular-nums;
+}
+
+.daily-progress__limit {
+  margin-top: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+}
+
+.daily-progress h2 {
+  color: #e4e4e4;
+  font-size: clamp(1.55rem,6vw,2.25rem);
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.daily-progress__motto {
+  margin: .45rem 0 0;
+  text-align: center;
+  color: #bdbdbd;
+}
+
+.daily-progress .daily-progress__climber {
+  width: 66px;
+  height: 72px;
+}
+
+.daily-progress__flower {
+  mix-blend-mode: screen;
+  animation: daily-flower-open .76s ease-out both;
+}@media (prefers-reduced-motion: reduce){
+
+.daily-progress__flower {
+  animation: none;
+}}
+
+.daily-progress .daily-progress__constellation-climber {
+  width: 86px;
+  height: 92px;
+}
+
+.daily-progress__constellation-climber svg {
+  overflow: hidden;
+}
+
+.daily-progress .you-view--embedded {
+  width: 100%;
+  min-height: 0;
+  padding: 0;
+  margin: 12px 0 20px;
+}
+
+.you-view--embedded .you-view__content {
+  width: 100%;
+  padding: 0;
+}
+
+.you-view--embedded :is(.you-view__title,.you-view__label,.you-view__motivation) {
+  color: #ddd;
+}@keyframes spark-settle{
+
+to {
+  transform: translateY(10px) scale(.82) rotate(9deg);
+  opacity: .68;
+}}@keyframes spark-nod{
+
+35% {
+  transform: translateY(2px) rotate(12deg);
+}
+
+70% {
+  transform: rotate(-7deg);
+}}@keyframes spark-jump{
+
+40% {
+  transform: translateY(-23px) scale(1.08);
+}
+
+to {
+  transform: translateY(-8px);
+}}@keyframes spark-orbit{
+
+to {
+  transform: rotate(1turn);
+}}@keyframes spark-celebrate{
+
+40% {
+  transform: translateY(-8px) scale(1.13);
+}}@keyframes spark-particles{
+
+0% {
+  opacity: 0;
+  transform: scale(.4);
+}
+
+40% {
+  opacity: 1;
+}
+
+to {
+  opacity: 0;
+  transform: scale(1.25);
+}}@keyframes spark-blink{
+
+0%,46%,50%,to {
+  transform: scaleY(1);
+}
+
+48% {
+  transform: scaleY(.12);
+}}@keyframes spark-smile{
+
+0% {
+  transform: scaleY(.2);
+}
+
+to {
+  transform: scaleY(1);
+}}

@@ -56,13 +56,15 @@ const BottomMenu = ({
     })
   }
 
-  const handleRemindersClick = () => {
+  const handleDailyProgressClick = () => {
     vibrate()
     handleWithSound(() => {
       onCloseListPanel?.()
-      onTabChange('reminders')
+      onTabChange('dailyProgress')
     })
   }
+
+  const progressActive = activeTab === 'dailyProgress' || activeTab === 'reminders'
 
   return (
     <nav className="bottom-menu" role="navigation" aria-label="Menú principal">
@@ -103,15 +105,14 @@ const BottomMenu = ({
         </svg>
       </button>
       <button
-        className={`bottom-menu__btn ${activeTab === 'reminders' ? 'bottom-menu__btn--active' : ''}`}
-        onClick={handleRemindersClick}
-        aria-label="Recordatorios"
-        title="Recordatorios"
-        aria-current={activeTab === 'reminders' ? 'page' : undefined}
+        className={`bottom-menu__btn ${progressActive ? 'bottom-menu__btn--active' : ''}`}
+        onClick={handleDailyProgressClick}
+        aria-label="Progreso"
+        title="Progreso"
+        aria-current={progressActive ? 'page' : undefined}
       >
         <svg className="bottom-menu__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <path d="M18 8a6 6 0 10-12 0c0 7-3 7-3 7h18s-3 0-3-7" />
-          <path d="M13.73 21a2 2 0 01-3.46 0" />
+          <path d="M5 19v-5m7 5V9m7 10V4" />
         </svg>
       </button>
       <button

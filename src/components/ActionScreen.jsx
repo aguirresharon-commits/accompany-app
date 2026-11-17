@@ -11,6 +11,7 @@ import ListPanel from './ListPanel'
 import SettingsView from './SettingsView'
 import YouView from './YouView'
 import CalendarView from './CalendarView'
+import DailyProgress from './DailyProgress'
 import RemindersView from './RemindersView'
 import NotePrompt from './NotePrompt'
 import TimeSelectModal from './TimeSelectModal'
@@ -778,10 +779,12 @@ const ActionScreen = () => {
           )}
           </>
         ) : activeTab === 'today' ? (
-          <CalendarView
-            isPremium={isPremiumUser}
-            onRequestPremium={() => setPremiumViewOpen(true)}
-          />
+          <CalendarView userId={user?.uid} />
+        ) : activeTab === 'dailyProgress' ? (
+          <DailyProgress userId={user?.uid}
+            onOpenCalendar={() => setActiveTab('today')}
+            onOpenAlarms={() => setActiveTab('reminders')}
+            soundsEnabled={soundsConfig.enabled} soundsVolume={soundsConfig.volume} />
         ) : activeTab === 'reminders' ? (
           <>
             {postponedFeedbackToast && (
