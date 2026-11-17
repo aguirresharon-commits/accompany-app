@@ -113,3 +113,8 @@
     max-width: none;
   }
 }
+.welcome .welcome__logo {
+  width: 144px;
+  height: 154px;
+  margin: 0 auto;
+}

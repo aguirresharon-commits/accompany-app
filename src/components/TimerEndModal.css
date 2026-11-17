@@ -28,23 +28,6 @@
   to { opacity: 1; }
 }
 
-.timer-end__sheet {
-  position: relative;
-  width: 100%;
-  max-width: 480px;
-  background: var(--msg-bg);
-  backdrop-filter: blur(var(--msg-blur));
-  -webkit-backdrop-filter: blur(var(--msg-blur));
-  border-radius: var(--msg-radius-sheet);
-  border-top: var(--msg-border);
-  box-shadow: var(--msg-shadow);
-  padding: var(--spacing-lg);
-  padding-top: 56px;
-  padding-bottom: max(env(safe-area-inset-bottom), var(--spacing-xl));
-  pointer-events: auto;
-  animation: timer-end-slide 0.3s ease forwards;
-}
-
 @keyframes timer-end-slide {
   from {
     opacity: 0;
@@ -89,13 +72,6 @@
   box-shadow: var(--btn-glass-shadow), 0 0 28px var(--color-neon-glow-active);
 }
 
-.timer-end__btn--primary {
-  background: var(--btn-glass-bg);
-  color: var(--color-white);
-  border: 1px solid var(--btn-glass-border);
-  box-shadow: var(--btn-glass-shadow);
-}
-
 .timer-end__btn--primary:hover {
   border-color: var(--color-neon-soft);
   box-shadow: var(--btn-glass-shadow), 0 0 28px var(--color-neon-glow-hover);
@@ -111,13 +87,6 @@
   border-color: var(--color-neon-soft);
   color: var(--color-white);
   box-shadow: var(--btn-glass-shadow), 0 0 24px var(--color-neon-glow-hover);
-}
-
-.timer-end__btn--ghost {
-  background: var(--btn-glass-bg);
-  color: rgba(255, 255, 255, 0.75);
-  border: 1px solid var(--btn-glass-border);
-  margin-top: var(--spacing-xs);
 }
 
 .timer-end__btn--ghost:hover {
@@ -161,4 +130,37 @@
 .timer-end__spark {
   display: grid;
   justify-items: center;
+}
+
+.timer-end__sheet {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  max-height: 100%;
+  overflow-y: auto;
+  background: var(--msg-bg);
+  backdrop-filter: blur(var(--msg-blur));
+  -webkit-backdrop-filter: blur(var(--msg-blur));
+  border-radius: var(--msg-radius-sheet);
+  border-top: var(--msg-border);
+  box-shadow: var(--msg-shadow);
+  padding: var(--spacing-lg);
+  padding-bottom: max(env(safe-area-inset-bottom),var(--spacing-xl));
+  pointer-events: auto;
+  animation: timer-end-slide .3s ease forwards;
+}
+
+.timer-end__btn--primary {
+  background: #dbe5ff;
+  color: #111827;
+  border: 1px solid transparent;
+  box-shadow: var(--btn-glass-shadow);
+}
+
+.timer-end__btn--ghost {
+  background: transparent;
+  color: #ffffffbf;
+  border: 1px solid var(--btn-glass-border);
+  margin-top: var(--spacing-xs);
+  box-shadow: none;
 }

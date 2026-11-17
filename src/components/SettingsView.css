@@ -496,3 +496,14 @@
   border-color: #f1a3a34d;
   margin-top: 20px;
 }
+
+.settings-view__levels {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.settings-view__levels .settings-view__level-btn {
+  min-width: 0;
+  padding-inline: 4px;
+  justify-content: center;
+}

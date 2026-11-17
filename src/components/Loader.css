@@ -50,3 +50,7 @@
     height: 280px;
   }
 }
+.loader-inner .loader-logo {
+  width: 120px;
+  height: 128px;
+}
