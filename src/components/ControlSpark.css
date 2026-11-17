@@ -9,12 +9,73 @@
 }
 
 .control-spark__portrait {
+  position: relative;
   width: 100%;
   height: 100%;
-  -webkit-mask-image: radial-gradient(ellipse 62% 67% at 50% 49%,black 48%,transparent 83%);
-  mask-image: radial-gradient(ellipse 62% 67% at 50% 49%,black 48%,transparent 83%);
-  overflow: hidden;
+  overflow: visible;
 }
+
+.control-spark__head,
+.control-spark__body,
+.control-spark__arm,
+.control-spark__leg,
+.control-spark__shadow {
+  position: absolute;
+}
+
+.control-spark__head {
+  inset: 12% auto auto 32%;
+  width: 36%;
+  height: 32%;
+  border-radius: 45% 45% 44% 44%;
+  background: radial-gradient(ellipse at 38% 25%, #fcf7ec 0%, #d2c9b8 55%, #978e82 100%);
+  box-shadow: inset 0 1px 2px #fff, 0 0 14px #fff7df42;
+}
+
+.control-spark__body {
+  inset: 43% auto auto 35%;
+  width: 30%;
+  height: 29%;
+  border-radius: 38% 38% 29% 29%;
+  background: linear-gradient(140deg, #858790, #3b3e47 58%, #22242b);
+  box-shadow: inset 0 0 0 1px #e5e6f04d;
+}
+
+.control-spark__arm,
+.control-spark__leg {
+  width: 10%;
+  border-radius: 999px;
+  background: linear-gradient(160deg, #b1b2bb, #454852 72%);
+}
+
+.control-spark__arm {
+  top: 46%;
+  height: 25%;
+  transform-origin: 50% 15%;
+}
+
+.control-spark__arm--left { left: 32%; transform: rotate(24deg); }
+.control-spark__arm--right { right: 32%; transform: rotate(-24deg); }
+
+.control-spark__leg {
+  top: 65%;
+  height: 23%;
+  background: linear-gradient(#676974, #292b33);
+}
+
+.control-spark__leg--left { left: 39%; transform: rotate(7deg); }
+.control-spark__leg--right { right: 39%; transform: rotate(-7deg); }
+
+.control-spark__shadow {
+  inset: auto 26% 10%;
+  height: 6%;
+  border-radius: 50%;
+  background: #d9dce022;
+  filter: blur(3px);
+}
+
+.control-spark[data-state=done] .control-spark__arm--left { transform: rotate(142deg); }
+.control-spark[data-state=done] .control-spark__arm--right { transform: rotate(-142deg); }
 
 .control-spark[data-state=baja] .control-spark__portrait {
   animation: spark-settle .4s ease-out both;
@@ -103,27 +164,42 @@
 }}
 
 .control-spark__gaze {
-  transform: translate(var(--spark-gaze-x, 0px),var(--spark-gaze-y, 0px));
+  position: absolute;
+  inset: 43% 22% auto;
+  display: flex;
+  justify-content: space-between;
+  transform: translate(var(--spark-gaze-x, 0px), var(--spark-gaze-y, 0px));
   transition: transform .18s ease-out;
 }
 
 .control-spark__eye {
-  transform-box: fill-box;
-  transform-origin: center;
+  width: 18%;
+  aspect-ratio: .72;
+  border-radius: 50%;
+  background: #29272a;
   animation: spark-blink 5.4s ease-in-out infinite;
 }
 
 .control-spark__smile {
-  transform-box: fill-box;
-  transform-origin: center;
+  position: absolute;
+  inset: 63% 40% auto;
+  height: 12%;
+  border-bottom: 1px solid #625950;
+  border-radius: 50%;
+}
+
+.control-spark[data-state=done] .control-spark__smile {
+  inset-inline: 34%;
+  height: 16%;
+  border-bottom-width: 2px;
   animation: spark-smile .34s ease-out both;
 }
 
-@media (prefers-reduced-motion: reduce){
-
-.control-spark__gaze {
-  transition: none;
-}}
+@media (prefers-reduced-motion: reduce) {
+  .control-spark__gaze {
+    transition: none;
+  }
+}
 
 @keyframes spark-settle{
 

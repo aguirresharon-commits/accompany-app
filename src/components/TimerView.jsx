@@ -58,8 +58,7 @@ const TimerView = ({ action, seconds, onEnd, onStop, soundsEnabled, soundsVolume
   return (
     <div className="timer-view" role="timer" aria-label={`Temporizador: ${display} restantes`}>
       <div className="timer-view__inner">
-        <ControlSpark state="running" /> className="timer-view__icon" size={32} />
-        )}
+        <ControlSpark state="running" />
         <p className="timer-view__task">{action?.text}</p>
         <div className="timer-view__countdown" aria-live="polite">
           {display}
