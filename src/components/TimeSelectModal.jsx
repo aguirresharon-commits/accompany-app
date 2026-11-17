@@ -1,17 +1,20 @@
 // Modal: elegir cuántos minutos dedicar a la tarea
 // FREE: presets cortos (1, 3, 5, 10 min). PREMIUM: 5, 10, 15, 20 + duración libre
 import { useState, useRef, useEffect } from 'react'
-import BackButton from './BackButton'
 import './TimeSelectModal.css'
 
 const PRESETS_FREE = [1, 3, 5, 10]   // minutos
 const PRESETS_PREMIUM = [5, 10, 15, 20]
 
 const TimeSelectModal = ({ action, onSelect, onClose, isPremium = false, onRequestPremium }) => {
-  const PRESETS = isPremium ? PRESETS_PREMIUM : PRESETS_FREE
+  const defaults = isPremium ? PRESETS_PREMIUM : PRESETS_FREE
+  const duration = action?.duration
+  const presets = Number.isInteger(duration) && duration > 1 && duration <= 20
+    ? [...new Set([...defaults, duration])].sort((a, b) => a - b)
+    : defaults
   const [customMode, setCustomMode] = useState(false)
   const [customSeconds, setCustomSeconds] = useState(isPremium ? 600 : 60)
-  const [selected, setSelected] = useState(null)
+  const [selected, setSelected] = useState(() => (presets.includes(duration) ? duration : defaults[0]) * 60)
   const inputRef = useRef(null)
 
   useEffect(() => {
@@ -97,94 +100,84 @@ const TimeSelectModal = ({ action, onSelect, onClose, isPremium = false, onReque
         type="button"
         className="time-select__backdrop"
         onClick={onClose}
-        aria-label="Cerrar"
+        tabIndex={-1}
+        aria-hidden="true"
       />
       <div className="time-select__sheet">
-        <BackButton onClick={onClose} />
         <p className="time-select__title">¿Cuánto tiempo?</p>
         <p className="time-select__task">{action?.text}</p>
-        <div className="time-select__presets">
-          {PRESETS.map((m) => (
-            <button
-              key={m}
-              type="button"
-              className={`time-select__btn ${selected === m * 60 && !customMode ? 'time-select__btn--active' : ''}`}
-              onClick={() => handlePreset(m)}
-            >
-              {m} min
-            </button>
-          ))}
-          {isPremium ? (
-            <button
-              type="button"
-              className={`time-select__btn ${customMode ? 'time-select__btn--active' : ''}`}
-              onClick={handleOtro}
-            >
-              Otro
-            </button>
-          ) : (
-            <button
-              type="button"
-              className="time-select__btn time-select__btn--disabled"
-              disabled
-              aria-label="Función Premium"
-            >
-              Función Premium
-            </button>
-          )}
-        </div>
-        {!isPremium && onRequestPremium && (
-          <div className="time-select__premium-hint-wrap">
-            <p className="time-select__premium-label">Función Premium</p>
-            <button
-              type="button"
-              className="time-select__premium-hint-btn"
-              onClick={onRequestPremium}
-            >
-              Ver Premium
-            </button>
-          </div>
-        )}
-        {customMode && (
-          <div className="time-select__custom">
-            <label className="time-select__label" htmlFor="time-select-input">
-              Tiempo (desde 10 segundos)
-            </label>
-            <div className="time-select__input-wrapper">
+        <details className="time-select__options">
+          <summary>Cambiar duración · {formatTime(selected)}</summary>
+          <div className="time-select__presets">
+            {presets.map((m) => (
               <button
+                key={m}
                 type="button"
-                className="time-select__adjust-btn"
-                onClick={handleDecrement}
-                aria-label="Reducir tiempo"
+                className={`time-select__btn ${selected === m * 60 && !customMode ? 'time-select__btn--active' : ''}`}
+                aria-pressed={selected === m * 60 && !customMode}
+                onClick={() => handlePreset(m)}
               >
-                −
+                {m} min
               </button>
-              <div className="time-select__input-container">
-                <input
-                  ref={inputRef}
-                  id="time-select-input"
-                  type="number"
-                  min={10}
-                  max={1200}
-                  step={10}
-                  value={customSeconds}
-                  onChange={handleCustomChange}
-                  className="time-select__input"
-                  aria-label="Tiempo personalizado en segundos"
-                />
-                <span className="time-select__input-display">{formatTime(customSeconds)}</span>
-              </div>
+            ))}
+            {isPremium ? (
               <button
                 type="button"
-                className="time-select__adjust-btn"
-                onClick={handleIncrement}
-                aria-label="Aumentar tiempo"
+                className={`time-select__btn ${customMode ? 'time-select__btn--active' : ''}`}
+                onClick={handleOtro}
               >
-                +
+                Otro
+              </button>
+            ) : null}
+          </div>
+          {!isPremium && onRequestPremium && (
+            <div className="time-select__premium-hint-wrap">
+              <button type="button" className="time-select__premium-hint-btn" onClick={onRequestPremium}>
+                Duración personalizada · Premium
               </button>
             </div>
-          </div>
-        )}
+          )}
+          {customMode && (
+            <div className="time-select__custom">
+              <label className="time-select__label" htmlFor="time-select-input">
+                Tiempo (desde 10 segundos)
+              </label>
+              <div className="time-select__input-wrapper">
+                <button
+                  type="button"
+                  className="time-select__adjust-btn"
+                  onClick={handleDecrement}
+                  aria-label="Reducir tiempo"
+                >
+                  −
+                </button>
+                <div className="time-select__input-container">
+                  <input
+                    ref={inputRef}
+                    id="time-select-input"
+                    type="number"
+                    min={10}
+                    max={1200}
+                    step={10}
+                    value={customSeconds}
+                    onChange={handleCustomChange}
+                    className="time-select__input"
+                    aria-label="Tiempo personalizado en segundos"
+                  />
+                  <span className="time-select__input-display">{formatTime(customSeconds)}</span>
+                </div>
+                <button
+                  type="button"
+                  className="time-select__adjust-btn"
+                  onClick={handleIncrement}
+                  aria-label="Aumentar tiempo"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          )}
+        </details>
         <div className="time-select__actions">
           <button
             type="button"
