@@ -1,5 +1,5 @@
 // Componente de carga con logo minimalista
-import logoImage from '../assets/logo.png'
+import ControlSpark from './ControlSpark'
 import './Loader.css'
 
 const Loader = ({ isLoading }) => {
@@ -8,13 +8,9 @@ const Loader = ({ isLoading }) => {
   }
 
   return (
-    <div className="loader-container">
+    <div className="loader-container" role="status" aria-label="Cargando Control">
       <div className="loader-inner">
-        <img
-          src={logoImage}
-          alt="Control"
-          className="loader-logo"
-        />
+        <ControlSpark className="loader-logo" />
         <span className="loader-spinner" aria-hidden="true" />
       </div>
     </div>

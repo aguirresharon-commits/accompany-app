@@ -6,10 +6,10 @@ import { getTodayDate, formatTime } from '../utils/storage'
 import { getDisplayName, setDisplayName } from '../utils/displayName'
 import { playStartSound, initAudioContext } from '../utils/sounds'
 import Loader from './Loader'
+import ControlSpark from './ControlSpark'
 import BottomMenu from './BottomMenu'
 import ListPanel from './ListPanel'
 import SettingsView from './SettingsView'
-import YouView from './YouView'
 import CalendarView from './CalendarView'
 import DailyProgress from './DailyProgress'
 import RemindersView from './RemindersView'
@@ -53,10 +53,6 @@ const getRandomCompletionMessage = () =>
 
 const FEELING_OPTIONS = ['Bien', 'Regular', 'Me cuesta hoy']
 
-const CONFIRM_MESSAGES = ['Eso es todo por hoy.', 'Listo.', 'Listo por ahora.']
-const getRandomConfirmMessage = () =>
-  CONFIRM_MESSAGES[Math.floor(Math.random() * CONFIRM_MESSAGES.length)]
-
 const ActionScreen = () => {
   const {
     currentEnergyLevel,
@@ -84,9 +80,7 @@ const ActionScreen = () => {
   const [listPanelOpen, setListPanelOpen] = useState(false)
   const [notePromptAction, setNotePromptAction] = useState(null)
   const [completionOverlay, setCompletionOverlay] = useState(null) // { message: string, showQuestion?: boolean } | null
-  const [completionFeelingWriting, setCompletionFeelingWriting] = useState(false)
-  const [completionFeelingText, setCompletionFeelingText] = useState('')
-  const [completionConfirmMessage, setCompletionConfirmMessage] = useState(null) // "Eso es todo por hoy." etc. después de elegir cómo se sintió
+  const [completionFeeling, setCompletionFeeling] = useState(null)
   const [noteSavedOverlay, setNoteSavedOverlay] = useState(null)
   const [reminderOverlay, setReminderOverlay] = useState(null) // { text, id, date, time, status?: 'pending'|'pospuesto'|'hecho' } | null
   const [reminderPostponeOpen, setReminderPostponeOpen] = useState(false)
@@ -108,7 +102,6 @@ const ActionScreen = () => {
   const [namePromptUid, setNamePromptUid] = useState(null)
   const [namePromptValue, setNamePromptValue] = useState('')
   const [loginSubView, setLoginSubView] = useState('login') // 'login' | 'forgot' | 'reset'
-  const [showContinueDecision, setShowContinueDecision] = useState(false) // Pantalla "¿Continuar con otra?" tras completar
   const [taskClearedByUser, setTaskClearedByUser] = useState(false) // "Continuar con otra" → pantalla "Elegí una tarea del menú inferior"
   const [displayedActionCompleted, setDisplayedActionCompleted] = useState(false) // "Volver al inicio" → mostrar la tarea recién completada en la card
   const lastCompletedActionRef = useRef(null) // Tarea recién completada, para mostrar en inicio
@@ -118,7 +111,6 @@ const ActionScreen = () => {
   const [setPasswordLoading, setSetPasswordLoading] = useState(false)
   const [setPasswordError, setSetPasswordError] = useState('')
   const [setPasswordSuccess, setSetPasswordSuccess] = useState(false)
-  const [settingsSubView, setSettingsSubView] = useState(null) // null | 'you'
 
   // Si la app se abre con ?token= (link del email), ir a login y mostrar pantalla restablecer
   useEffect(() => {
@@ -139,11 +131,6 @@ const ActionScreen = () => {
     }
     window.addEventListener('session-expired', onSessionExpired)
     return () => window.removeEventListener('session-expired', onSessionExpired)
-  }, [activeTab])
-
-  // Al salir de configuración, volver a la vista principal de settings
-  useEffect(() => {
-    if (activeTab !== 'settings') setSettingsSubView(null)
   }, [activeTab])
 
   // Tras volver de Google con intención de crear contraseña, mostrar modal
@@ -284,7 +271,7 @@ const ActionScreen = () => {
             setTaskClearedByUser(false)
             setDisplayedActionCompleted(false)
             setCompletionOverlay(null)
-            setShowContinueDecision(false)
+            setCompletionFeeling(null)
             setNotePromptAction(null)
             setEmpezarFlow(null)
             setEmpezarAction(null)
@@ -399,31 +386,16 @@ const ActionScreen = () => {
     if (!completionOverlay || !completionOverlay.message || completionOverlay.showQuestion !== false) return
     const t = setTimeout(() => {
       setCompletionOverlay(null)
+      setCompletionFeeling(null)
       setInstantTaskResponse(null)
     }, 2000)
     return () => clearTimeout(t)
   }, [completionOverlay])
 
-  // Al mostrar el overlay con “¿Cómo te sentís?” reseteamos modo escribir y texto
-  useEffect(() => {
-    if (completionOverlay?.message && completionOverlay.showQuestion !== false) {
-      setCompletionFeelingWriting(false)
-      setCompletionFeelingText('')
-    }
-  }, [completionOverlay?.message, completionOverlay?.showQuestion])
-
-  const closeCompletionAndShowDecision = useCallback(() => {
-    setCompletionConfirmMessage(null)
-    setShowContinueDecision(true)
-  }, [])
-
   // "Continuar con otra" → abrir directamente el panel de tareas (solo tareas no completadas hoy)
   const closeCompletionAndNext = useCallback(() => {
     setCompletionOverlay(null)
-    setCompletionFeelingWriting(false)
-    setCompletionFeelingText('')
-    setCompletionConfirmMessage(null)
-    setShowContinueDecision(false)
+    setCompletionFeeling(null)
     setDisplayedAction(null)
     setCurrentAction(null)
     setTaskClearedByUser(true)
@@ -434,10 +406,7 @@ const ActionScreen = () => {
   // "Volver al inicio" → pantalla de inicio mostrando la tarea que acaba de completar
   const closeCompletionAndStay = useCallback(() => {
     setCompletionOverlay(null)
-    setCompletionFeelingWriting(false)
-    setCompletionFeelingText('')
-    setCompletionConfirmMessage(null)
-    setShowContinueDecision(false)
+    setCompletionFeeling(null)
     const lastAction = lastCompletedActionRef.current
     if (lastAction) {
       setDisplayedAction(lastAction)
@@ -449,15 +418,6 @@ const ActionScreen = () => {
     }
     setTaskClearedByUser(false)
   }, [setCurrentAction])
-
-  const showConfirmAndClose = useCallback(
-    (feelingOption = null) => {
-      if (feelingOption) scheduleEnergyForNextDay(feelingOption)
-      setCompletionConfirmMessage('Gracias por contarlo. Seguimos de a poco.')
-      setTimeout(() => closeCompletionAndShowDecision(), 1800)
-    },
-    [scheduleEnergyForNextDay, closeCompletionAndShowDecision]
-  )
 
   const handleEmpezar = async () => {
     if (!displayedAction) return
@@ -484,7 +444,7 @@ const ActionScreen = () => {
   }
 
   const handleTimerStop = () => {
-    setEmpezarFlow('timerEnd')
+    setEmpezarFlow('timerStopped')
   }
 
   const handleTimerEndMarkComplete = () => {
@@ -675,6 +635,7 @@ const ActionScreen = () => {
           <div className="action-screen__progress">
             <div className="action-screen__card">
               <div className="action-screen__task">
+                <ControlSpark state={displayedActionCompleted ? 'done' : currentEnergyLevel} />
                 {(displayedAction?.section || displayedAction?.level) && (
                   <p className="action-screen__task-meta" aria-label="Sección y nivel">
                     {[getSectionLabel(displayedAction.section), getEnergyLevelInfo(displayedAction.level)?.label].filter(Boolean).join(' ')}
@@ -798,25 +759,20 @@ const ActionScreen = () => {
             />
           </>
         ) : activeTab === 'settings' ? (
-          settingsSubView === 'you' ? (
-            <YouView onBack={() => setSettingsSubView(null)} />
-          ) : (
-            <SettingsView
-              currentEnergyLevel={currentEnergyLevel}
-              onEnergyLevelChange={setEnergyLevel}
-              onRestartDay={handleRestartDay}
-              soundsEnabled={soundsConfig.enabled}
-              onSoundsEnabledChange={setSoundsEnabled}
-              isPremium={isPremiumUser}
-              userPlan={userPlan || 'free'}
-              onUpgrade={() => setPremiumViewOpen(true)}
-              onOpenLogin={() => {
-                setPreviousTab(activeTab)
-                setActiveTab('login')
-              }}
-              onOpenYouView={() => setSettingsSubView('you')}
-            />
-          )
+          <SettingsView
+            currentEnergyLevel={currentEnergyLevel}
+            onEnergyLevelChange={setEnergyLevel}
+            onRestartDay={handleRestartDay}
+            soundsEnabled={soundsConfig.enabled}
+            onSoundsEnabledChange={setSoundsEnabled}
+            isPremium={isPremiumUser}
+            userPlan={userPlan || 'free'}
+            onUpgrade={() => setPremiumViewOpen(true)}
+            onOpenLogin={() => {
+              setPreviousTab(activeTab)
+              setActiveTab('login')
+            }}
+          />
         ) : (
           <Loader isLoading={true} />
         )}
@@ -855,9 +811,9 @@ const ActionScreen = () => {
         />
       )}
 
-      {empezarFlow === 'timerEnd' && (
+      {(empezarFlow === 'timerEnd' || empezarFlow === 'timerStopped') && (
         <TimerEndModal
-          action={empezarAction}
+          stopped={empezarFlow === 'timerStopped'}
           onMarkComplete={handleTimerEndMarkComplete}
           onContinueMore={handleTimerEndContinue}
           onAddNote={handleTimerEndAddNote}
@@ -878,98 +834,36 @@ const ActionScreen = () => {
         />
       )}
 
-      {(completionOverlay?.message || showContinueDecision) && (
-        <div
-          className="action-screen__overlay action-screen__overlay--completion"
-          role="dialog"
-          aria-labelledby={showContinueDecision ? 'completion-decision-title' : (completionConfirmMessage ? undefined : 'completion-feeling-title')}
-          aria-live="polite"
-        >
-          {!showContinueDecision && <BackButton onClick={closeCompletionAndStay} />}
+      {completionOverlay?.message && (
+        <div className="action-screen__overlay action-screen__overlay--completion"
+          role={completionOverlay?.showQuestion === false ? 'status' : 'dialog'}
+          aria-labelledby={completionOverlay?.showQuestion === false ? undefined : 'completion-decision-title'}>
           <div className="action-screen__completion-inner">
-            {showContinueDecision ? (
-              <>
-                <p id="completion-decision-title" className="action-screen__completion-decision-label">
-                  ¿Querés continuar con las demás?
-                </p>
-                <div className="action-screen__completion-decision-btns">
-                  <button
-                    type="button"
-                    className="action-screen__completion-feeling-btn"
-                    onClick={closeCompletionAndStay}
-                    aria-label="Volver al inicio"
-                  >
-                    Volver al inicio
-                  </button>
-                  <button
-                    type="button"
-                    className="action-screen__completion-feeling-btn action-screen__completion-feeling-btn--secondary"
-                    onClick={closeCompletionAndNext}
-                    aria-label="Continuar con otra tarea"
-                  >
-                    Continuar con otra
-                  </button>
-                </div>
-              </>
-            ) : completionConfirmMessage ? (
-              <p className="action-screen__overlay-text action-screen__overlay-text--completion">
-                {completionConfirmMessage}
-              </p>
+            {completionOverlay?.showQuestion === false ? (
+              <p className="action-screen__overlay-text">{completionOverlay.message}</p>
             ) : (
               <>
-                <p className="action-screen__overlay-text action-screen__overlay-text--completion">
-                  {completionOverlay?.message}
-                </p>
-                {completionOverlay?.showQuestion !== false && (
-                  <>
-                    <p id="completion-feeling-title" className="action-screen__completion-feeling-label">
-                      ¿Cómo te sentís?
-                    </p>
-                    {!completionFeelingWriting ? (
-                      <div className="action-screen__completion-feelings">
-                        {FEELING_OPTIONS.map((opt) => (
-                          <button
-                            key={opt}
-                            type="button"
-                            className="action-screen__completion-feeling-btn"
-                            onClick={() => showConfirmAndClose(opt)}
-                            aria-label={`Me siento ${opt}`}
-                          >
-                            {opt}
-                          </button>
-                        ))}
-                        <button
-                          type="button"
-                          className="action-screen__completion-question"
-                          onClick={() => setCompletionFeelingWriting(true)}
-                          aria-label="Escribir cómo me siento"
-                        >
-                          Escribir cómo me siento
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="action-screen__completion-write">
-                        <textarea
-                          className="action-screen__completion-textarea"
-                          value={completionFeelingText}
-                          onChange={(e) => setCompletionFeelingText(e.target.value)}
-                          placeholder="Ej: tranquilo, con energía, agotado..."
-                          rows={3}
-                          aria-label="Escribir cómo te sentís"
-                          autoFocus
-                        />
-                        <button
-                          type="button"
-                          className="action-screen__completion-done-btn"
-                          onClick={() => showConfirmAndClose()}
-                          aria-label="Listo"
-                        >
-                          Listo
-                        </button>
-                      </div>
-                    )}
-                  </>
-                )}
+                <ControlSpark state="done" />
+                <h2 id="completion-decision-title" className="action-screen__completion-decision-label">Tarea completada</h2>
+                <p className="action-screen__completion-task">{lastCompletedActionRef.current?.text}</p>
+                <details className="action-screen__next-step">
+                  <summary>¿Cómo te sentís?</summary>
+                  <div className="action-screen__completion-feelings">
+                    {FEELING_OPTIONS.map(option => (
+                      <button key={option} type="button" className="action-screen__completion-feeling-btn"
+                        aria-pressed={completionFeeling === option}
+                        onClick={() => { setCompletionFeeling(option); scheduleEnergyForNextDay(option) }}>
+                        {option}
+                      </button>
+                    ))}
+                  </div>
+                </details>
+                <div className="action-screen__completion-decision-btns">
+                  <button type="button" className="action-screen__completion-feeling-btn action-screen__completion-feeling-btn--primary"
+                    onClick={closeCompletionAndStay}>Volver al inicio</button>
+                  <button type="button" className="action-screen__completion-feeling-btn action-screen__completion-feeling-btn--secondary"
+                    onClick={closeCompletionAndNext}>Elegir otra tarea</button>
+                </div>
               </>
             )}
           </div>

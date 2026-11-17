@@ -1,0 +1,201 @@
+.control-spark {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 112px;
+  height: 120px;
+  isolation: isolate;
+  pointer-events: none;
+}
+
+.control-spark__portrait {
+  width: 100%;
+  height: 100%;
+  -webkit-mask-image: radial-gradient(ellipse 62% 67% at 50% 49%,black 48%,transparent 83%);
+  mask-image: radial-gradient(ellipse 62% 67% at 50% 49%,black 48%,transparent 83%);
+  overflow: hidden;
+}
+
+.control-spark[data-state=baja] .control-spark__portrait {
+  animation: spark-settle .4s ease-out both;
+}
+
+.control-spark[data-state=media] .control-spark__portrait {
+  animation: spark-nod .42s ease-in-out both;
+}
+
+.control-spark[data-state=alta] .control-spark__portrait {
+  animation: spark-jump .42s ease-out both;
+}
+
+.control-spark[data-state=stopped] .control-spark__portrait {
+  transform: translateY(5px) scale(.88);
+  opacity: .65;
+}
+
+.control-spark__ring {
+  position: absolute;
+  top: 4%;
+  right: 4%;
+  bottom: 4%;
+  left: 4%;
+  border: 1px solid rgba(255,255,255,.16);
+  border-top-color: #ffffffd9;
+  border-radius: 50%;
+  opacity: 0;
+}
+
+.control-spark[data-state=running] .control-spark__ring {
+  opacity: 1;
+  animation: spark-orbit 6s linear infinite;
+}
+
+.control-spark[data-state=done] .control-spark__portrait {
+  animation: spark-celebrate .65s ease-out both;
+}
+
+.control-spark__particles {
+  position: absolute;
+  top: 20%;
+  right: 20%;
+  bottom: 20%;
+  left: 20%;
+  animation: spark-particles .9s ease-out both;
+}
+
+.control-spark__particles i {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  top: 8%;
+  left: 17%;
+  border-radius: 50%;
+  background: #eee;
+  box-shadow: 0 0 7px #fffa;
+}
+
+.control-spark__particles i:nth-child(2) {
+  top: 20%;
+  left: 85%;
+}
+
+.control-spark__particles i:nth-child(3) {
+  top: 65%;
+  left: 95%;
+}
+
+@media (prefers-reduced-motion: reduce){
+
+.control-spark * {
+  animation: none!important;
+}}
+
+@media (prefers-reduced-motion: reduce){
+
+.control-spark[data-state=baja] .control-spark__portrait {
+  opacity: .68;
+}}
+
+@media (prefers-reduced-motion: reduce){
+
+.control-spark[data-state=alta] .control-spark__portrait {
+  transform: translateY(-8px);
+}}
+
+.control-spark__gaze {
+  transform: translate(var(--spark-gaze-x, 0px),var(--spark-gaze-y, 0px));
+  transition: transform .18s ease-out;
+}
+
+.control-spark__eye {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: spark-blink 5.4s ease-in-out infinite;
+}
+
+.control-spark__smile {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: spark-smile .34s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce){
+
+.control-spark__gaze {
+  transition: none;
+}}
+
+@keyframes spark-settle{
+
+to {
+  transform: translateY(10px) scale(.82) rotate(9deg);
+  opacity: .68;
+}}
+
+@keyframes spark-nod{
+
+35% {
+  transform: translateY(2px) rotate(12deg);
+}
+
+70% {
+  transform: rotate(-7deg);
+}}
+
+@keyframes spark-jump{
+
+40% {
+  transform: translateY(-23px) scale(1.08);
+}
+
+to {
+  transform: translateY(-8px);
+}}
+
+@keyframes spark-orbit{
+
+to {
+  transform: rotate(1turn);
+}}
+
+@keyframes spark-celebrate{
+
+40% {
+  transform: translateY(-8px) scale(1.13);
+}}
+
+@keyframes spark-particles{
+
+0% {
+  opacity: 0;
+  transform: scale(.4);
+}
+
+40% {
+  opacity: 1;
+}
+
+to {
+  opacity: 0;
+  transform: scale(1.25);
+}}
+
+@keyframes spark-blink{
+
+0%,46%,50%,to {
+  transform: scaleY(1);
+}
+
+48% {
+  transform: scaleY(.12);
+}}
+
+@keyframes spark-smile{
+
+0% {
+  transform: scaleY(.2);
+}
+
+to {
+  transform: scaleY(1);
+}}

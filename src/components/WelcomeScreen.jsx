@@ -1,6 +1,6 @@
 // Pantalla de inicio / bienvenida: logo, CONTROL, tagline, "Tomar el control"
 import { useCallback } from 'react'
-import logoHead from '../assets/logo-head.png'
+import ControlSpark from './ControlSpark'
 import StarryBackground from './StarryBackground'
 import './WelcomeScreen.css'
 
@@ -27,12 +27,7 @@ const WelcomeScreen = ({ onEnter, isLeaving, onLeaveComplete }) => {
     >
       <StarryBackground />
       <div className="welcome__inner">
-        <img
-          src={logoHead}
-          alt=""
-          className="welcome__logo"
-          aria-hidden="true"
-        />
+        <ControlSpark className="welcome__logo" />
         <h1 className="welcome__brand">CONTROL</h1>
         <p className="welcome__tagline">Menos ruido. Más claridad.</p>
         <button

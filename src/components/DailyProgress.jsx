@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import terrain from '../assets/control-constellation.webp'
-import mascot from '../assets/control-spark.webp'
+import ControlSpark from './ControlSpark'
 import { CALENDAR_TASK_LIMIT, PRIORITIES, useCalendarTasks } from '../hooks/useCalendarTasks'
 import { playCompleteSound } from '../utils/sounds'
 import { getTodayDate } from '../utils/storage'
@@ -76,9 +76,7 @@ function Constellation({ date, completed, count }) {
       {summit && <circle cx="895" cy="566" r="35" fill="none" stroke="#fff4d3" strokeOpacity=".4" />}
       <g ref={marker} transform="translate(112 963)">
         <foreignObject x="-43" y="-89" width="86" height="92">
-          <span className="control-spark daily-progress__climber daily-progress__constellation-climber" data-state={summit ? 'done' : 'idle'}>
-            <img src={mascot} className="control-spark__portrait" alt="" />
-          </span>
+          <ControlSpark state={summit ? 'done' : 'idle'} className="daily-progress__climber daily-progress__constellation-climber" />
         </foreignObject>
       </g>
     </svg>

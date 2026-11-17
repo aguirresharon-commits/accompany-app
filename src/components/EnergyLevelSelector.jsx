@@ -1,43 +1,41 @@
-// Componente de selección de nivel de energía
-// Pantalla inicial empática y minimalista
+import { useEffect, useRef, useState } from 'react'
 import { useAppState } from '../hooks/useAppState'
 import { ENERGY_LEVELS, ENERGY_LEVEL_KEYS } from '../data/actions'
-import { EnergyLevelIcon } from './TaskIcon'
 import { initAudioContext } from '../utils/sounds'
+import ControlSpark from './ControlSpark'
+import StarryBackground from './StarryBackground'
 import './EnergyLevelSelector.css'
 
-const EnergyLevelSelector = () => {
+export default function EnergyLevelSelector() {
   const { setEnergyLevel } = useAppState()
+  const [selected, setSelected] = useState(null)
+  const timer = useRef(null)
+  useEffect(() => () => clearTimeout(timer.current), [])
 
-  const handleSelectLevel = (levelKey) => {
+  function select(level) {
+    if (timer.current !== null) return
     initAudioContext().catch(() => {})
-    setEnergyLevel(levelKey)
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setEnergyLevel(level)
+      return
+    }
+    setSelected(level)
+    timer.current = setTimeout(() => setEnergyLevel(level), 430)
   }
 
   return (
     <div className="energy-selector">
-      <div className="energy-selector__header">
-        <h1 className="energy-selector__title">¿Cómo te sentís hoy?</h1>
-        <p className="energy-selector__subtitle">
-          Elegí el nivel que mejor te represente. Está bien elegir cualquier opción.
-        </p>
-      </div>
-
+      <StarryBackground />
+      <h1 className="energy-selector__title">¿Cómo te sentís hoy?</h1>
+      <ControlSpark state={selected ?? 'idle'} className="energy-selector__spark" />
       <div className="energy-selector__levels">
-        {ENERGY_LEVEL_KEYS.map((levelKey) => {
-          const level = ENERGY_LEVELS[levelKey]
+        {ENERGY_LEVEL_KEYS.map(key => {
+          const level = ENERGY_LEVELS[key]
           return (
-            <button
-              key={levelKey}
-              className="energy-selector__level-button"
-              onClick={() => handleSelectLevel(levelKey)}
-              aria-label={`Seleccionar nivel: ${level.label}`}
-            >
-              <EnergyLevelIcon level={levelKey} className="energy-selector__icon" size={32} />
-              <div className="energy-selector__level-info">
-                <span className="energy-selector__level-label">{level.label}</span>
-                <span className="energy-selector__level-description">{level.description}</span>
-              </div>
+            <button key={key} type="button" className="energy-selector__level-button"
+              aria-label={`Seleccionar nivel: ${level.label}`} aria-description={level.description}
+              aria-pressed={selected === key} onClick={() => select(key)}>
+              <span>{level.label}</span>
             </button>
           )
         })}
@@ -45,5 +43,3 @@ const EnergyLevelSelector = () => {
     </div>
   )
 }
-
-export default EnergyLevelSelector
