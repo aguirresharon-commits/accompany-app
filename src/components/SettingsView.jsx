@@ -6,19 +6,33 @@ import { EnergyLevelIcon } from './TaskIcon'
 import BackButton from './BackButton'
 import './SettingsView.css'
 
+const SoundToggle = ({ label, enabled, onToggle }) => (
+  <div className="settings-view__sound-row">
+    <span>{label}</span>
+    <button
+      className="settings-view__switch"
+      type="button"
+      role="switch"
+      aria-label={label}
+      aria-checked={enabled}
+      onClick={onToggle}
+    >
+      <span className="settings-view__switch-knob" aria-hidden="true" />
+    </button>
+  </div>
+)
+
 const AmbientSoundToggle = () => {
   const [enabled, setEnabled] = useState(() => ambientSound.getEnabled())
   return (
-    <button
-      className={`settings-view__toggle ${enabled ? 'settings-view__toggle--active' : ''}`}
-      onClick={() => {
+    <SoundToggle
+      label="Sonido ambiental"
+      enabled={enabled}
+      onToggle={() => {
         ambientSound.setEnabled(!enabled)
         setEnabled(ambientSound.getEnabled())
       }}
-      type="button"
-    >
-      {enabled ? 'Activado' : 'Desactivado'}
-    </button>
+    />
   )
 }
 
@@ -60,6 +74,49 @@ const SettingsView = ({
 
   return (
     <div className="settings-view">
+      <h1 className="settings-view__heading">Ajustes</h1>
+      <section className="settings-view__section">
+        <h2 className="settings-view__title">Ritmo</h2>
+        <p className="settings-view__desc">Nivel de exigencia de las acciones.</p>
+        {energyFeedback && (
+          <p className="settings-view__feedback" role="status" aria-live="polite">
+            ✓ {energyFeedback}
+          </p>
+        )}
+        <div className="settings-view__levels">
+          {ENERGY_LEVEL_KEYS.map((key) => {
+            const level = ENERGY_LEVELS[key]
+            const isActive = currentEnergyLevel === key
+            return (
+              <button
+                key={key}
+                className={`settings-view__level-btn ${isActive ? 'settings-view__level-btn--active' : ''}`}
+                onClick={() => {
+                  onEnergyLevelChange(key)
+                  setEnergyFeedback('Ritmo guardado')
+                  setTimeout(() => setEnergyFeedback(''), 2000)
+                }}
+                type="button"
+                aria-pressed={isActive}
+              >
+                <EnergyLevelIcon level={key} className="settings-view__level-icon" size={24} />
+                <span className="settings-view__level-label">{level.label}</span>
+              </button>
+            )
+          })}
+        </div>
+      </section>
+
+      <section className="settings-view__section">
+        <h2 className="settings-view__title">Sonidos</h2>
+        <SoundToggle
+          label="Sonido de botones"
+          enabled={soundsEnabled}
+          onToggle={() => onSoundsEnabledChange(!soundsEnabled)}
+        />
+        <AmbientSoundToggle />
+      </section>
+
       <section className="settings-view__section">
         <h2 className="settings-view__title">Cuenta</h2>
         {currentUser ? (
@@ -116,6 +173,7 @@ const SettingsView = ({
           </>
         )}
       </section>
+
       <section className="settings-view__section">
         <h2 className="settings-view__title">Premium</h2>
         <p className="settings-view__desc">
@@ -161,52 +219,15 @@ const SettingsView = ({
         )}
       </section>
 
-      <section className="settings-view__section">
-        <h2 className="settings-view__title">Ritmo</h2>
-        <p className="settings-view__desc">Nivel de exigencia de las acciones.</p>
-        {energyFeedback && (
-          <p className="settings-view__feedback" role="status" aria-live="polite">
-            ✓ {energyFeedback}
-          </p>
-        )}
-        <div className="settings-view__levels">
-          {ENERGY_LEVEL_KEYS.map((key) => {
-            const level = ENERGY_LEVELS[key]
-            const isActive = currentEnergyLevel === key
-            return (
-              <button
-                key={key}
-                className={`settings-view__level-btn ${isActive ? 'settings-view__level-btn--active' : ''}`}
-                onClick={() => {
-                  onEnergyLevelChange(key)
-                  setEnergyFeedback('Ritmo guardado')
-                  setTimeout(() => setEnergyFeedback(''), 2000)
-                }}
-                type="button"
-              >
-                <EnergyLevelIcon level={key} className="settings-view__level-icon" size={24} />
-                <span className="settings-view__level-label">{level.label}</span>
-              </button>
-            )
-          })}
-        </div>
+      <section className="settings-view__section settings-view__section--help">
+        <h2 className="settings-view__title">Sobre Control</h2>
+        <p className="settings-view__philosophy">
+          Una acción a la vez. Sin presión, sin evasión. Elegí una acción mínima, hacela, y avanzá.
+          Si cuesta, reducila. El objetivo es mantener el control y la calma.
+        </p>
       </section>
 
-      <section className="settings-view__section">
-        <h2 className="settings-view__title">Sonidos</h2>
-        <p className="settings-view__desc">Sonido de botones.</p>
-        <button
-          className={`settings-view__toggle ${soundsEnabled ? 'settings-view__toggle--active' : ''}`}
-          onClick={() => onSoundsEnabledChange(!soundsEnabled)}
-          type="button"
-        >
-          {soundsEnabled ? 'Activados' : 'Desactivados'}
-        </button>
-        <p className="settings-view__desc" style={{ marginTop: '0.75rem' }}>Sonido ambiental de fondo.</p>
-        <AmbientSoundToggle />
-      </section>
-
-      <section className="settings-view__section">
+      <section className="settings-view__section settings-view__section--reset">
         <h2 className="settings-view__title">Reiniciar día</h2>
         <p className="settings-view__desc">Marcar todas las tareas como no completadas.</p>
         <button
@@ -256,14 +277,6 @@ const SettingsView = ({
           </div>
         </div>
       )}
-
-      <section className="settings-view__section settings-view__section--help">
-        <h2 className="settings-view__title">Sobre Control</h2>
-        <p className="settings-view__philosophy">
-          Una acción a la vez. Sin presión, sin evasión. Elegí una acción mínima, hacela, y avanzá. 
-          Si cuesta, reducila. El objetivo es mantener el control y la calma.
-        </p>
-      </section>
     </div>
   )
 }

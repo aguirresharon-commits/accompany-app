@@ -434,3 +434,65 @@
   justify-content: center;
   margin-top: var(--spacing-xs);
 }
+
+.settings-view__heading {
+  color: #f3f3f3;
+  font-size: 1.55rem;
+  margin: 0 0 1rem;
+}
+
+.settings-view .settings-view__section {
+  border: 1px solid #ffffff26;
+  border-radius: 15px;
+  padding: 14px;
+  margin-bottom: 12px;
+  background: #ffffff05;
+}
+
+.settings-view :is(.settings-view__desc, .settings-view__hint, .settings-view__philosophy) {
+  color: #c2c2c2;
+}
+
+.settings-view__sound-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 50px;
+  color: #eee;
+}
+
+.settings-view__sound-row + .settings-view__sound-row {
+  border-top: 1px solid #ffffff19;
+}
+
+.settings-view__switch {
+  display: flex;
+  align-items: center;
+  flex: none;
+  width: 52px;
+  height: 44px;
+  padding: 3px 6px;
+  border: 1px solid var(--btn-glass-border);
+  border-radius: 999px;
+  background: var(--btn-glass-bg);
+  cursor: pointer;
+}
+
+.settings-view__switch-knob {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #8d8d8d;
+  transition: transform 160ms ease, background 160ms ease;
+}
+
+.settings-view__switch[aria-checked="true"] .settings-view__switch-knob {
+  transform: translateX(19px);
+  background: #eee;
+}
+
+.settings-view .settings-view__section--reset {
+  border-color: #f1a3a34d;
+  margin-top: 20px;
+}
