@@ -1,13 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { useAppState } from '../hooks/useAppState'
 import { ENERGY_LEVELS, ENERGY_LEVEL_KEYS } from '../data/actions'
 import { initAudioContext } from '../utils/sounds'
 import ControlSpark from './ControlSpark'
 import StarryBackground from './StarryBackground'
 import './EnergyLevelSelector.css'
 
-export default function EnergyLevelSelector() {
-  const { setEnergyLevel } = useAppState()
+export default function EnergyLevelSelector({ onSelect }) {
   const [selected, setSelected] = useState(null)
   const timer = useRef(null)
   useEffect(() => () => clearTimeout(timer.current), [])
@@ -16,11 +14,11 @@ export default function EnergyLevelSelector() {
     if (timer.current !== null) return
     initAudioContext().catch(() => {})
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setEnergyLevel(level)
+      onSelect(level)
       return
     }
     setSelected(level)
-    timer.current = setTimeout(() => setEnergyLevel(level), 430)
+    timer.current = setTimeout(() => onSelect(level), 430)
   }
 
   return (
