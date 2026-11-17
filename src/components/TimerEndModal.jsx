@@ -1,10 +1,10 @@
 // Al finalizar tiempo (o parar): mensaje humano + Marcar completada | Continuar más | Agregar nota (Premium) | Cerrar
 import { useEffect } from 'react'
-import BackButton from './BackButton'
+import ControlSpark from './ControlSpark'
 import './TimerEndModal.css'
 
 const TimerEndModal = ({
-  action,
+  stopped = false,
   onMarkComplete,
   onContinueMore,
   onAddNote,
@@ -12,7 +12,7 @@ const TimerEndModal = ({
   isPremium = false,
   onRequestPremium,
 }) => {
-  const msg = 'Acción completada'
+  const msg = stopped ? 'Temporizador detenido' : 'Tiempo finalizado'
 
   useEffect(() => {
     const onKeyDown = (e) => {
@@ -23,7 +23,7 @@ const TimerEndModal = ({
   }, [onClose])
 
   return (
-    <div className="timer-end" role="dialog" aria-label="Tiempo finalizado" aria-modal="true">
+    <div className="timer-end" role="dialog" aria-labelledby="timer-end-title" aria-modal="true">
       <button
         type="button"
         className="timer-end__backdrop"
@@ -31,8 +31,8 @@ const TimerEndModal = ({
         aria-label="Cerrar"
       />
       <div className="timer-end__sheet">
-        <BackButton onClick={onClose} />
-        <p className="timer-end__message">{msg}</p>
+        {stopped && <div className="timer-end__spark"><ControlSpark state="stopped" /></div>}
+        <h2 id="timer-end-title" className="timer-end__message">{msg}</h2>
         <div className="timer-end__actions">
           <button
             type="button"
@@ -40,7 +40,7 @@ const TimerEndModal = ({
             onClick={onMarkComplete}
             aria-label="Marcar tarea como completada"
           >
-            Marcar completada
+            Marcar como completada
           </button>
           <button
             type="button"
@@ -79,7 +79,7 @@ const TimerEndModal = ({
             onClick={onClose}
             aria-label="Cerrar sin hacer nada"
           >
-            Cerrar
+            Volver a la tarea
           </button>
         </div>
       </div>

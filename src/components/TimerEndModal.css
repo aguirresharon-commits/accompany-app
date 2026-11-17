@@ -157,3 +157,8 @@
 .timer-end__premium-hint-btn:hover {
   color: rgba(255, 255, 255, 0.85);
 }
+
+.timer-end__spark {
+  display: grid;
+  justify-items: center;
+}
