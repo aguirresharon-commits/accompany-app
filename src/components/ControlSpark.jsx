@@ -1,9 +1,7 @@
-import { useEffect, useId, useRef } from 'react'
-import portrait from '../assets/control-spark.webp'
+import { useEffect, useRef } from 'react'
 import './ControlSpark.css'
 
 export default function ControlSpark({ state = 'idle', className = '' }) {
-  const gradient = useId()
   const image = useRef(null)
   const gaze = useRef(null)
 
@@ -40,28 +38,21 @@ export default function ControlSpark({ state = 'idle', className = '' }) {
   return (
     <span className={`control-spark ${className}`} data-state={state} aria-hidden="true">
       <span className="control-spark__ring" />
-      <svg ref={image} className="control-spark__portrait" viewBox="398 365 113 121">
-        <defs>
-          <radialGradient id={gradient}>
-            <stop offset=".62" stopColor="#202020" />
-            <stop offset="1" stopColor="#202020" stopOpacity="0" />
-          </radialGradient>
-        </defs>
-        <image href={portrait} x="398" y="365" width="113" height="121" />
-        <g fill={`url(#${gradient})`}>
-          <ellipse cx="464" cy="446" rx="7" ry="8" />
-          <ellipse cx="478.5" cy="447" rx="6.5" ry="8" />
-        </g>
-        {state === 'done' ? (
-          <path className="control-spark__smile" d="M440 448 Q445 440 450 448 M455 448 Q460 440 465 448"
-            fill="none" stroke="#fff8eb" strokeWidth="2.6" strokeLinecap="round" />
-        ) : (
-          <g ref={gaze} className="control-spark__gaze" fill="#fff8eb">
-            <ellipse className="control-spark__eye" cx="445" cy="446" rx="2.5" ry="4.6" />
-            <ellipse className="control-spark__eye" cx="460" cy="446" rx="2.5" ry="4.6" />
-          </g>
-        )}
-      </svg>
+      <span ref={image} className="control-spark__portrait">
+        <span className="control-spark__shadow" />
+        <span className="control-spark__leg control-spark__leg--left" />
+        <span className="control-spark__leg control-spark__leg--right" />
+        <span className="control-spark__arm control-spark__arm--left" />
+        <span className="control-spark__arm control-spark__arm--right" />
+        <span className="control-spark__body" />
+        <span className="control-spark__head">
+          <span ref={gaze} className="control-spark__gaze">
+            <i className="control-spark__eye" />
+            <i className="control-spark__eye" />
+          </span>
+          <span className="control-spark__smile" />
+        </span>
+      </span>
       {state === 'done' && <span className="control-spark__particles"><i /><i /><i /></span>}
     </span>
   )
