@@ -779,9 +779,9 @@ const ActionScreen = () => {
           )}
           </>
         ) : activeTab === 'today' ? (
-          <CalendarView userId={user?.uid} />
+          <CalendarView userId={currentUser?.uid} />
         ) : activeTab === 'dailyProgress' ? (
-          <DailyProgress userId={user?.uid}
+          <DailyProgress userId={currentUser?.uid}
             onOpenCalendar={() => setActiveTab('today')}
             onOpenAlarms={() => setActiveTab('reminders')}
             soundsEnabled={soundsConfig.enabled} soundsVolume={soundsConfig.volume} />
